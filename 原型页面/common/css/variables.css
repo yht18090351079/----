@@ -1,0 +1,234 @@
+/* 地质灾害预警系统 - CSS变量定义 */
+
+:root {
+  /* ========== 大屏专用色彩系统 ========== */
+  
+  /* 主色调 - 科技蓝 */
+  --primary-color: #00D4FF;
+  --primary-light: #33E0FF;
+  --primary-dark: #0099CC;
+  --primary-glow: rgba(0, 212, 255, 0.5);
+  
+  /* 辅助色 */
+  --secondary-color: #00FF88;
+  --accent-color: #FF6B35;
+  --warning-color: #FFD700;
+  --danger-color: #FF4757;
+  --success-color: #2ED573;
+  
+  /* 预警等级色彩 */
+  --warning-blue: #1E90FF;
+  --warning-yellow: #FFD700;
+  --warning-orange: #FF8C00;
+  --warning-red: #FF4757;
+  
+  /* 大屏背景色 */
+  --bg-primary: #0A0E1A;
+  --bg-secondary: #1A1F2E;
+  --bg-tertiary: #252A3A;
+  --bg-card: rgba(26, 31, 46, 0.8);
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  
+  /* 文字颜色 */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B8C5D6;
+  --text-muted: #7A8BA0;
+  --text-glow: #00D4FF;
+  
+  /* 边框和分割线 */
+  --border-primary: #2A3441;
+  --border-glow: rgba(0, 212, 255, 0.3);
+  --border-gradient: linear-gradient(90deg, transparent, #00D4FF, transparent);
+  
+  /* ========== 字体系统 ========== */
+  
+  /* 中文字体 */
+  --font-family: "PingFang SC", "Microsoft YaHei", "Source Han Sans CN", sans-serif;
+  
+  /* 数字字体 */
+  --font-mono: "SF Mono", "Fira Code", "JetBrains Mono", "Consolas", monospace;
+  
+  /* 字体大小 */
+  --font-xs: 10px;
+  --font-sm: 12px;
+  --font-base: 14px;
+  --font-lg: 16px;
+  --font-xl: 18px;
+  --font-2xl: 24px;
+  --font-3xl: 32px;
+  --font-4xl: 48px;
+  --font-5xl: 64px;
+  
+  /* ========== 间距系统 ========== */
+  
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  
+  /* ========== 阴影和发光效果 ========== */
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.6);
+  
+  --glow-sm: 0 0 10px var(--primary-glow);
+  --glow-md: 0 0 20px var(--primary-glow);
+  --glow-lg: 0 0 30px var(--primary-glow);
+  --glow-xl: 0 0 40px var(--primary-glow);
+  
+  /* ========== 渐变效果 ========== */
+  
+  --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  --gradient-secondary: linear-gradient(135deg, var(--secondary-color), #00CC77);
+  --gradient-warning: linear-gradient(135deg, var(--warning-color), #FFB000);
+  --gradient-danger: linear-gradient(135deg, var(--danger-color), #E63946);
+  
+  --gradient-bg: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+  --gradient-card: linear-gradient(135deg, var(--bg-card), rgba(37, 42, 58, 0.6));
+  
+  /* ========== 动画时间 ========== */
+  
+  --transition-fast: 0.15s;
+  --transition-normal: 0.3s;
+  --transition-slow: 0.5s;
+  
+  --animation-pulse: 2s;
+  --animation-glow: 3s;
+  --animation-float: 4s;
+  
+  /* ========== 响应式断点 ========== */
+  
+  --breakpoint-sm: 768px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1366px;
+  --breakpoint-xl: 1920px;
+  --breakpoint-2xl: 2560px;
+  --breakpoint-4k: 3840px;
+  
+  /* ========== Z-index层级 ========== */
+  
+  --z-background: -1;
+  --z-base: 0;
+  --z-content: 10;
+  --z-header: 100;
+  --z-overlay: 1000;
+  --z-modal: 10000;
+  --z-tooltip: 100000;
+  
+  /* ========== 大屏专用尺寸 ========== */
+  
+  /* 卡片尺寸 */
+  --card-border-radius: 8px;
+  --card-padding: var(--spacing-lg);
+  
+  /* 按钮尺寸 */
+  --btn-height-sm: 32px;
+  --btn-height-md: 40px;
+  --btn-height-lg: 48px;
+  
+  /* 图表高度 */
+  --chart-height-sm: 200px;
+  --chart-height-md: 300px;
+  --chart-height-lg: 400px;
+  --chart-height-xl: 500px;
+  
+  /* ========== 大屏网格系统 ========== */
+  
+  --grid-gap: var(--spacing-md);
+  --grid-columns: 24;
+  
+  /* ========== 特效参数 ========== */
+  
+  /* 扫描线效果 */
+  --scan-line-color: rgba(0, 212, 255, 0.3);
+  --scan-line-width: 2px;
+  
+  /* 呼吸灯效果 */
+  --breath-light-duration: 2s;
+  --breath-light-color: var(--primary-color);
+  
+  /* 流光效果 */
+  --flow-light-duration: 3s;
+  --flow-light-color: var(--primary-color);
+  
+  /* 粒子效果 */
+  --particle-color: var(--primary-color);
+  --particle-size: 2px;
+  
+  /* ========== 数据可视化色彩 ========== */
+  
+  /* 图表色彩序列 */
+  --chart-color-1: #00D4FF;
+  --chart-color-2: #00FF88;
+  --chart-color-3: #FFD700;
+  --chart-color-4: #FF6B35;
+  --chart-color-5: #8B5CF6;
+  --chart-color-6: #F59E0B;
+  --chart-color-7: #EF4444;
+  --chart-color-8: #10B981;
+  
+  /* 状态指示色 */
+  --status-online: var(--success-color);
+  --status-offline: #6B7280;
+  --status-warning: var(--warning-color);
+  --status-error: var(--danger-color);
+  --status-maintenance: #F59E0B;
+  
+  /* ========== 地图相关色彩 ========== */
+  
+  /* 监测点颜色 */
+  --monitor-normal: var(--success-color);
+  --monitor-warning: var(--warning-color);
+  --monitor-danger: var(--danger-color);
+  --monitor-offline: #6B7280;
+  
+  /* 预警区域颜色 */
+  --warning-area-blue: rgba(30, 144, 255, 0.3);
+  --warning-area-yellow: rgba(255, 215, 0, 0.3);
+  --warning-area-orange: rgba(255, 140, 0, 0.3);
+  --warning-area-red: rgba(255, 71, 87, 0.3);
+}
+
+/* ========== 深色主题变量 ========== */
+[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1A1A1A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #CCCCCC;
+  --border-primary: #333333;
+}
+
+/* ========== 高对比度主题 ========== */
+[data-theme="high-contrast"] {
+  --primary-color: #FFFFFF;
+  --bg-primary: #000000;
+  --text-primary: #FFFFFF;
+  --border-primary: #FFFFFF;
+}
+
+/* ========== 4K大屏适配 ========== */
+@media (min-width: 3840px) {
+  :root {
+    --font-base: 18px;
+    --font-lg: 20px;
+    --font-xl: 24px;
+    --font-2xl: 32px;
+    --font-3xl: 48px;
+    --font-4xl: 64px;
+    --font-5xl: 96px;
+    
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 64px;
+    
+    --card-padding: var(--spacing-xl);
+    --grid-gap: var(--spacing-lg);
+  }
+}

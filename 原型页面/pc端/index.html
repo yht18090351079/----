@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地质灾害预警系统 - PC端</title>
+
+    <!-- 引入公共样式 -->
+    <link rel="stylesheet" href="../common/css/variables.css">
+    <link rel="stylesheet" href="../common/css/reset.css">
+
+    <style>
+        body {
+            background: var(--gradient-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+        }
+
+        .welcome-container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .system-logo {
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .logo-icon {
+            width: 120px;
+            height: 120px;
+            background: var(--gradient-primary);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--glow-lg);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .system-title {
+            font-size: var(--font-5xl);
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-md);
+            text-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .system-subtitle {
+            font-size: var(--font-xl);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .page-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--card-border-radius);
+            padding: var(--spacing-xl);
+            text-decoration: none;
+            color: inherit;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .page-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform var(--transition-normal);
+        }
+
+        .page-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--glow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .page-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .page-icon {
+            font-size: 48px;
+            margin-bottom: var(--spacing-lg);
+            display: block;
+        }
+
+        .page-title {
+            font-size: var(--font-2xl);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .page-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .page-features {
+            list-style: none;
+            text-align: left;
+        }
+
+        .page-features li {
+            color: var(--text-muted);
+            font-size: var(--font-sm);
+            margin-bottom: var(--spacing-sm);
+            position: relative;
+            padding-left: var(--spacing-lg);
+        }
+
+        .page-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .quick-access {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--card-border-radius);
+            padding: var(--spacing-xl);
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-access-title {
+            font-size: var(--font-xl);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: var(--spacing-lg);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: var(--gradient-primary);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all var(--transition-normal);
+            border: none;
+            cursor: pointer;
+            font-size: var(--font-base);
+        }
+
+        .quick-btn:hover {
+            background: var(--gradient-secondary);
+            box-shadow: var(--glow-md);
+            transform: translateY(-2px);
+        }
+
+        .quick-btn.secondary {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-primary);
+        }
+
+        .quick-btn.secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--primary-color);
+        }
+
+        .footer-info {
+            margin-top: var(--spacing-3xl);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: var(--font-sm);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .system-title {
+                font-size: var(--font-3xl);
+            }
+
+            .page-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .quick-btn {
+                width: 200px;
+            }
+        }
+
+        /* 特殊效果 */
+        .highlight {
+            position: relative;
+        }
+
+        .highlight::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, var(--primary-glow), transparent);
+            opacity: 0;
+            animation: highlight 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes highlight {
+            0%, 100% { opacity: 0; transform: translateX(-100%); }
+            50% { opacity: 0.3; transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <!-- 系统标题 -->
+        <div class="system-logo">
+            <div class="logo-icon">🌍</div>
+            <h1 class="system-title">地质灾害预警系统</h1>
+            <p class="system-subtitle">Geological Disaster Warning System - PC端</p>
+        </div>
+
+        <!-- 页面导航 -->
+        <div class="page-grid">
+            <!-- 监控大屏 -->
+            <a href="pages/monitor/dashboard.html" class="page-card highlight">
+                <span class="page-icon">📊</span>
+                <h2 class="page-title">实时监控大屏</h2>
+                <p class="page-description">
+                    专业的大屏监控界面，实时展示全域地质灾害态势，支持多维度数据可视化和智能预警。
+                </p>
+                <ul class="page-features">
+                    <li>全域态势地图展示</li>
+                    <li>实时数据监控</li>
+                    <li>智能预警推送</li>
+                    <li>设备状态监控</li>
+                    <li>科技感大屏界面</li>
+                </ul>
+            </a>
+
+            <!-- 3D可视化 -->
+            <a href="pages/monitor/3d-view.html" class="page-card">
+                <span class="page-icon">🌐</span>
+                <h2 class="page-title">3D可视化场景</h2>
+                <p class="page-description">
+                    沉浸式3D地质环境展示，支持历史灾情回放、预警情景模拟和多角度场景观察。
+                </p>
+                <ul class="page-features">
+                    <li>3D地形模型</li>
+                    <li>灾情动画回放</li>
+                    <li>多视角观察</li>
+                    <li>时间轴控制</li>
+                    <li>交互式操作</li>
+                </ul>
+            </a>
+
+            <!-- 预警管理 -->
+            <a href="pages/warning/publish.html" class="page-card">
+                <span class="page-icon">⚠️</span>
+                <h2 class="page-title">预警管理</h2>
+                <p class="page-description">
+                    完整的预警发布和管理流程，支持多渠道发布、智能内容生成和效果跟踪。
+                </p>
+                <ul class="page-features">
+                    <li>预警信息发布</li>
+                    <li>多渠道推送</li>
+                    <li>AI内容生成</li>
+                    <li>发布效果跟踪</li>
+                    <li>历史预警查询</li>
+                </ul>
+            </a>
+
+            <!-- 数据分析 -->
+            <a href="pages/data/analysis.html" class="page-card">
+                <span class="page-icon">📈</span>
+                <h2 class="page-title">数据分析</h2>
+                <p class="page-description">
+                    专业的数据分析工具，支持多维度统计分析、趋势预测和智能报表生成。
+                </p>
+                <ul class="page-features">
+                    <li>多维数据分析</li>
+                    <li>趋势预测模型</li>
+                    <li>智能报表生成</li>
+                    <li>数据质量监控</li>
+                    <li>可视化图表</li>
+                </ul>
+            </a>
+
+            <!-- 应急指挥 -->
+            <a href="pages/emergency/command.html" class="page-card">
+                <span class="page-icon">🚨</span>
+                <h2 class="page-title">应急指挥</h2>
+                <p class="page-description">
+                    应急指挥调度平台，支持资源调配、人员协调和实时通信指挥。
+                </p>
+                <ul class="page-features">
+                    <li>应急资源调配</li>
+                    <li>人员调度管理</li>
+                    <li>实时通信协调</li>
+                    <li>救援进度跟踪</li>
+                    <li>指挥决策支持</li>
+                </ul>
+            </a>
+
+            <!-- 系统设置 -->
+            <a href="pages/system/settings.html" class="page-card">
+                <span class="page-icon">⚙️</span>
+                <h2 class="page-title">系统设置</h2>
+                <p class="page-description">
+                    系统配置和管理功能，支持参数调整、用户管理和系统维护。
+                </p>
+                <ul class="page-features">
+                    <li>系统参数配置</li>
+                    <li>用户权限管理</li>
+                    <li>设备管理维护</li>
+                    <li>日志查看分析</li>
+                    <li>系统监控诊断</li>
+                </ul>
+            </a>
+        </div>
+
+        <!-- 快速访问 -->
+        <div class="quick-access">
+            <h3 class="quick-access-title">快速访问</h3>
+            <div class="quick-buttons">
+                <a href="pages/monitor/dashboard.html" class="quick-btn">
+                    🖥️ 进入监控大屏
+                </a>
+                <a href="pages/warning/publish.html" class="quick-btn secondary">
+                    📢 发布预警
+                </a>
+                <a href="pages/data/realtime.html" class="quick-btn secondary">
+                    📊 查看数据
+                </a>
+                <button class="quick-btn secondary" onclick="showSystemInfo()">
+                    ℹ️ 系统信息
+                </button>
+            </div>
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="footer-info">
+            <p>© 2024 地质灾害预警系统 | 版本 v1.0.0 | 最后更新: <span id="lastUpdate"></span></p>
+            <p>支持浏览器: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+</p>
+        </div>
+    </div>
+
+    <!-- 引入公共脚本 -->
+    <script src="../common/js/utils.js"></script>
+    <script src="../common/js/mock-data.js"></script>
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 更新时间显示
+            function updateTime() {
+                const now = new Date();
+                const timeEl = document.getElementById('lastUpdate');
+                if (timeEl) {
+                    timeEl.textContent = Utils.formatTime(now, 'YYYY-MM-DD HH:mm:ss');
+                }
+            }
+
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            console.log('🌍 地质灾害预警系统PC端已加载');
+        });
+
+        // 显示系统信息
+        function showSystemInfo() {
+            alert('系统信息功能开发中...');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地质灾害预警系统 - 监控大屏</title>
+    
+    <!-- 引入公共样式 -->
+    <link rel="stylesheet" href="../../../common/css/variables.css">
+    <link rel="stylesheet" href="../../../common/css/reset.css">
+    
+    <!-- 引入大屏专用样式 -->
+    <link rel="stylesheet" href="../../css/dashboard.css">
+    
+    <!-- 引入图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+
+</head>
+<body class="dashboard-body">
+    <!-- 大屏主容器 -->
+    <div class="dashboard-container">
+        
+        <!-- 顶部标题栏 -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <div class="system-logo">
+                    <div class="logo-icon">🌍</div>
+                    <h1 class="system-title">地质灾害预警系统</h1>
+                </div>
+                <div class="location-info">
+                    <span class="location-text">四川省成都市</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="current-time" id="currentTime">
+                    2024年07月16日 14:30:25
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="weather-info">
+                    <span class="weather-icon">🌧️</span>
+                    <span class="weather-text">中雨 24°C</span>
+                </div>
+                <div class="system-status">
+                    <div class="status-indicator online"></div>
+                    <span class="status-text">系统正常</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="dashboard-main">
+            
+            <!-- 左侧数据面板 -->
+            <section class="left-panel">
+                
+                <!-- 关键指标卡片 -->
+                <div class="kpi-section">
+                    <h2 class="section-title">
+                        <span class="title-icon">📊</span>
+                        关键指标
+                    </h2>
+                    <div class="kpi-grid">
+                        <div class="kpi-card primary">
+                            <div class="kpi-icon">📡</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="onlineDevices">156</div>
+                                <div class="kpi-label">在线设备</div>
+                                <div class="kpi-trend up">↗ 98.5%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card success">
+                            <div class="kpi-icon">✅</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="dataIntegrity">95.2</div>
+                                <div class="kpi-label">数据完整性(%)</div>
+                                <div class="kpi-trend up">↗ +2.1%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card warning">
+                            <div class="kpi-icon">⚠️</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="warningCount">3</div>
+                                <div class="kpi-label">当日预警</div>
+                                <div class="kpi-trend down">↘ -1</div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card danger">
+                            <div class="kpi-icon">🚨</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="emergencyEvents">1</div>
+                                <div class="kpi-label">紧急事件</div>
+                                <div class="kpi-trend stable">→ 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 预警信息列表 -->
+                <div class="warning-section">
+                    <h2 class="section-title">
+                        <span class="title-icon">⚠️</span>
+                        最新预警
+                        <span class="auto-refresh">自动刷新</span>
+                    </h2>
+                    <div class="warning-list" id="warningList">
+                        <div class="warning-item red">
+                            <div class="warning-level">红色</div>
+                            <div class="warning-content">
+                                <div class="warning-title">XX村滑坡红色预警</div>
+                                <div class="warning-desc">受持续强降雨影响，发生滑坡风险极高</div>
+                                <div class="warning-time">14:30</div>
+                            </div>
+                            <div class="warning-status">处理中</div>
+                        </div>
+                        
+                        <div class="warning-item orange">
+                            <div class="warning-level">橙色</div>
+                            <div class="warning-content">
+                                <div class="warning-title">XX镇泥石流橙色预警</div>
+                                <div class="warning-desc">降雨量达到预警阈值，请密切关注</div>
+                                <div class="warning-time">13:45</div>
+                            </div>
+                            <div class="warning-status">已发布</div>
+                        </div>
+                        
+                        <div class="warning-item yellow">
+                            <div class="warning-level">黄色</div>
+                            <div class="warning-content">
+                                <div class="warning-title">XX县地质灾害黄色预警</div>
+                                <div class="warning-desc">气象条件不利，注意防范</div>
+                                <div class="warning-time">12:20</div>
+                            </div>
+                            <div class="warning-status">已解除</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实时数据图表 -->
+                <div class="chart-section">
+                    <h2 class="section-title">
+                        <span class="title-icon">📈</span>
+                        实时监测数据
+                    </h2>
+                    <div class="chart-container">
+                        <div id="realtimeChart" class="chart"></div>
+                    </div>
+                </div>
+                
+            </section>
+
+            <!-- 中央数据展示区域 -->
+            <section class="center-panel">
+                <div class="data-container">
+                    <div class="data-header">
+                        <h2 class="data-title">
+                            <span class="title-icon">📊</span>
+                            数据总览
+                        </h2>
+                    </div>
+
+                    <div class="data-content">
+                        <!-- 数据统计卡片 -->
+                        <div class="data-grid">
+                            <div class="data-card">
+                                <div class="data-icon">🏭</div>
+                                <div class="data-info">
+                                    <div class="data-title">监测设备</div>
+                                    <div class="data-value">50台</div>
+                                    <div class="data-status online">在线率: 96%</div>
+                                </div>
+                            </div>
+
+                            <div class="data-card">
+                                <div class="data-icon">⚠️</div>
+                                <div class="data-info">
+                                    <div class="data-title">预警信息</div>
+                                    <div class="data-value">18条</div>
+                                    <div class="data-status warning">待处理: 3条</div>
+                                </div>
+                            </div>
+
+                            <div class="data-card">
+                                <div class="data-icon">📈</div>
+                                <div class="data-info">
+                                    <div class="data-title">数据完整性</div>
+                                    <div class="data-value">98.5%</div>
+                                    <div class="data-status normal">状态良好</div>
+                                </div>
+                            </div>
+
+                            <div class="data-card">
+                                <div class="data-icon">🔄</div>
+                                <div class="data-info">
+                                    <div class="data-title">系统状态</div>
+                                    <div class="data-value">正常</div>
+                                    <div class="data-status normal">运行稳定</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 实时数据流 -->
+                        <div class="data-stream">
+                            <div class="stream-header">
+                                <h4>实时数据流</h4>
+                                <div class="stream-status">
+                                    <div class="status-dot online"></div>
+                                    <span>数据流正常</span>
+                                </div>
+                            </div>
+                            <div class="stream-content">
+                                <div class="stream-item">
+                                    <span class="stream-time">14:32:15</span>
+                                    <span class="stream-device">DEV001</span>
+                                    <span class="stream-data">位移: 2.3mm</span>
+                                    <span class="stream-status normal">正常</span>
+                                </div>
+                                <div class="stream-item">
+                                    <span class="stream-time">14:32:10</span>
+                                    <span class="stream-device">DEV002</span>
+                                    <span class="stream-data">降雨: 15mm/h</span>
+                                    <span class="stream-status warning">预警</span>
+                                </div>
+                                <div class="stream-item">
+                                    <span class="stream-time">14:32:05</span>
+                                    <span class="stream-device">DEV003</span>
+                                    <span class="stream-data">倾斜: 5.2°</span>
+                                    <span class="stream-status danger">危险</span>
+                                </div>
+                                <div class="stream-item">
+                                    <span class="stream-time">14:32:00</span>
+                                    <span class="stream-device">DEV004</span>
+                                    <span class="stream-data">含水: 35%</span>
+                                    <span class="stream-status normal">正常</span>
+                                </div>
+                                <div class="stream-item">
+                                    <span class="stream-time">14:31:55</span>
+                                    <span class="stream-device">DEV005</span>
+                                    <span class="stream-data">温度: 18°C</span>
+                                    <span class="stream-status normal">正常</span>
+                                </div>
+                                <div class="stream-item">
+                                    <span class="stream-time">14:31:50</span>
+                                    <span class="stream-device">DEV006</span>
+                                    <span class="stream-data">湿度: 65%</span>
+                                    <span class="stream-status normal">正常</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧统计面板 -->
+            <section class="right-panel">
+                
+                <!-- 设备状态统计 -->
+                <div class="device-section">
+                    <h2 class="section-title">
+                        <span class="title-icon">📱</span>
+                        设备状态
+                    </h2>
+                    <div class="device-stats">
+                        <div class="stat-item">
+                            <div class="stat-circle" style="--percent: 85;">
+                                <div class="stat-value">85%</div>
+                                <div class="stat-label">正常</div>
+                            </div>
+                        </div>
+                        <div class="device-list">
+                            <div class="device-item normal">
+                                <div class="device-icon">📡</div>
+                                <div class="device-info">
+                                    <div class="device-name">位移监测仪</div>
+                                    <div class="device-count">45台在线</div>
+                                </div>
+                            </div>
+                            <div class="device-item warning">
+                                <div class="device-icon">🌧️</div>
+                                <div class="device-info">
+                                    <div class="device-name">雨量计</div>
+                                    <div class="device-count">2台异常</div>
+                                </div>
+                            </div>
+                            <div class="device-item normal">
+                                <div class="device-icon">📊</div>
+                                <div class="device-info">
+                                    <div class="device-name">倾斜仪</div>
+                                    <div class="device-count">38台在线</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 预警统计图表 -->
+                <div class="chart-section">
+                    <h2 class="section-title">
+                        <span class="title-icon">📊</span>
+                        预警统计
+                    </h2>
+                    <div class="chart-container">
+                        <div id="warningChart" class="chart"></div>
+                    </div>
+                </div>
+
+                <!-- 天气信息 -->
+                <div class="weather-section">
+                    <h2 class="section-title">
+                        <span class="title-icon">🌤️</span>
+                        天气信息
+                    </h2>
+                    <div class="weather-grid">
+                        <div class="weather-item">
+                            <div class="weather-label">温度</div>
+                            <div class="weather-value">24°C</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-label">湿度</div>
+                            <div class="weather-value">78%</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-label">降雨量</div>
+                            <div class="weather-value">15mm/h</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-label">风速</div>
+                            <div class="weather-value">3.2m/s</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-label">气压</div>
+                            <div class="weather-value">1013hPa</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-label">能见度</div>
+                            <div class="weather-value">15km</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统信息 -->
+                <div class="system-section">
+                    <h2 class="section-title">
+                        <span class="title-icon">⚙️</span>
+                        系统信息
+                    </h2>
+                    <div class="system-info">
+                        <div class="info-item">
+                            <span class="info-label">CPU使用率</span>
+                            <div class="info-bar">
+                                <div class="bar-fill" style="width: 45%;"></div>
+                                <span class="bar-text">45%</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">内存使用率</span>
+                            <div class="info-bar">
+                                <div class="bar-fill" style="width: 67%;"></div>
+                                <span class="bar-text">67%</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">网络状态</span>
+                            <div class="info-status online">正常</div>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">数据库</span>
+                            <div class="info-status online">连接正常</div>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+            
+        </main>
+
+        <!-- 底部状态栏 -->
+        <footer class="dashboard-footer">
+            <div class="footer-left">
+                <span class="copyright">© 2024 地质灾害预警系统</span>
+            </div>
+            <div class="footer-center">
+                <div class="data-update">
+                    <span class="update-label">数据更新时间:</span>
+                    <span class="update-time" id="updateTime">2024-07-16 14:30:25</span>
+                </div>
+            </div>
+            <div class="footer-right">
+                <div class="connection-status">
+                    <div class="status-dot online"></div>
+                    <span>实时连接</span>
+                </div>
+                <div class="keyboard-shortcuts" style="margin-left: 20px; font-size: 10px; color: #666; line-height: 1.3;">
+                    <div>快捷键: F11(全屏) | Esc(退出全屏) | F5(刷新数据)</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入公共脚本 -->
+    <script src="../../../common/js/utils.js"></script>
+    <script src="../../../common/js/mock-data.js"></script>
+    
+    <!-- 引入页面脚本 -->
+    <script src="../../js/dashboard-clean.js"></script>
+</body>
+</html>

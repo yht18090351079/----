@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地质灾害预警系统 - 实时监控大屏</title>
+    <style>
+        /* CSS变量定义 - 基于UI设计规范 */
+        :root {
+            /* 主色调 */
+            --primary-color: #1890FF;
+            --primary-light: #40A9FF;
+            --primary-dark: #096DD9;
+            --primary-bg: #E6F7FF;
+            
+            /* 功能色彩 */
+            --success-color: #52C41A;
+            --warning-color: #FA8C16;
+            --danger-color: #FF4D4F;
+            
+            /* 预警等级色彩 */
+            --warning-blue: #1890FF;
+            --warning-yellow: #FADB14;
+            --warning-orange: #FA8C16;
+            --warning-red: #FF4D4F;
+            
+            /* 中性色 */
+            --text-primary: #262626;
+            --text-secondary: #595959;
+            --text-disabled: #BFBFBF;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #FAFAFA;
+            --bg-tertiary: #F5F5F5;
+            --bg-dark: #001529;
+            --border-light: #F0F0F0;
+            --border-base: #D9D9D9;
+            
+            /* 字体 */
+            --font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            --font-mono: "SF Mono", Monaco, Consolas, "Courier New", monospace;
+        }
+        
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+        
+        /* 主布局容器 */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: linear-gradient(90deg, var(--bg-dark) 0%, #002140 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .breadcrumb {
+            color: #8C8C8C;
+            font-size: 14px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .user-info:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* 左侧菜单 */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-dark);
+            color: white;
+            margin-top: 64px;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+            transition: width 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: 64px;
+        }
+        
+        .menu-toggle {
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid #002140;
+            cursor: pointer;
+        }
+        
+        .menu-item {
+            padding: 16px 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .menu-item.active {
+            background: rgba(24, 144, 255, 0.2);
+            border-left-color: var(--primary-color);
+        }
+        
+        .menu-item-icon {
+            display: inline-block;
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            margin-top: 64px;
+            height: calc(100vh - 64px);
+            display: flex;
+        }
+        
+        /* 中央地图区域 */
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: var(--bg-primary);
+            margin: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .map-header {
+            height: 48px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+        
+        .map-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .map-toolbar {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .toolbar-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-base);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .toolbar-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .map-content {
+            height: calc(100% - 48px);
+            position: relative;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            overflow: hidden;
+        }
+        
+        /* 模拟地图 */
+        .mock-map {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(76, 175, 80, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 152, 0, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 60% 20%, rgba(33, 150, 243, 0.3) 0%, transparent 50%);
+        }
+        
+        /* 监测点标记 */
+        .monitoring-point {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .monitoring-point:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+        
+        .monitoring-point.normal {
+            background: var(--success-color);
+        }
+        
+        .monitoring-point.warning {
+            background: var(--warning-color);
+            animation: blink 1s infinite;
+        }
+        
+        .monitoring-point.danger {
+            background: var(--danger-color);
+            animation: blink 0.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        /* 预警区域 */
+        .warning-area {
+            position: absolute;
+            border: 2px dashed var(--warning-orange);
+            background: rgba(250, 140, 22, 0.2);
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        
+        /* 右侧信息面板 */
+        .info-panel {
+            width: 350px;
+            background: var(--bg-primary);
+            margin: 16px 16px 16px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* KPI卡片组 */
+        .kpi-cards {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+        
+        .kpi-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        
+        /* 信息列表 */
+        .info-section {
+            flex: 1;
+            padding: 0 16px 16px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .info-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .info-item {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--border-base);
+            transition: all 0.3s;
+        }
+        
+        .info-item:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .info-item.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .info-item.danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .item-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .item-content {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .item-time {
+            font-size: 11px;
+            color: var(--text-disabled);
+            margin-top: 4px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1366px) {
+            .info-panel {
+                width: 300px;
+            }
+            
+            .kpi-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .sidebar.collapsed {
+                width: 0;
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">🌍</div>
+                <span>地质灾害预警系统</span>
+            </div>
+            <div class="breadcrumb">
+                实时监控 > 全域态势
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="system-status">
+                <div class="status-dot"></div>
+                <span>系统正常</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">管</div>
+                <span>管理员</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 左侧菜单 -->
+        <nav class="sidebar" id="sidebar">
+            <div class="menu-toggle" onclick="toggleSidebar()">
+                <span>☰</span>
+            </div>
+            <div class="menu-item active">
+                <span class="menu-item-icon">📊</span>
+                <span>实时监控</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-item-icon">⚠️</span>
+                <span>预警管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-item-icon">📈</span>
+                <span>数据分析</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-item-icon">🚨</span>
+                <span>应急指挥</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-item-icon">⚙️</span>
+                <span>系统设置</span>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <!-- 中央地图区域 -->
+            <div class="map-container">
+                <div class="map-header">
+                    <div class="map-title">全域态势地图</div>
+                    <div class="map-toolbar">
+                        <button class="toolbar-btn">图层</button>
+                        <button class="toolbar-btn">工具</button>
+                        <button class="toolbar-btn">全屏</button>
+                    </div>
+                </div>
+                <div class="map-content">
+                    <div class="mock-map" id="mockMap">
+                        <!-- 监测点标记 -->
+                        <div class="monitoring-point normal" style="top: 30%; left: 25%;" title="XX村监测点 - 正常">1</div>
+                        <div class="monitoring-point warning" style="top: 45%; left: 60%;" title="XX镇监测点 - 预警">2</div>
+                        <div class="monitoring-point danger" style="top: 70%; left: 40%;" title="XX县监测点 - 危险">3</div>
+                        <div class="monitoring-point normal" style="top: 20%; left: 70%;" title="XX乡监测点 - 正常">4</div>
+                        <div class="monitoring-point normal" style="top: 80%; left: 20%;" title="XX区监测点 - 正常">5</div>
+                        
+                        <!-- 预警区域 -->
+                        <div class="warning-area" style="top: 35%; left: 50%; width: 120px; height: 80px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧信息面板 -->
+            <div class="info-panel">
+                <!-- KPI指标卡片 -->
+                <div class="kpi-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="onlineDevices">98.5%</div>
+                        <div class="kpi-label">设备在线率</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="dataIntegrity">95.2%</div>
+                        <div class="kpi-label">数据完整性</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="warningCount">3</div>
+                        <div class="kpi-label">当日预警</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="processingEvents">1</div>
+                        <div class="kpi-label">处理中事件</div>
+                    </div>
+                </div>
+
+                <!-- 最新预警信息 -->
+                <div class="info-section">
+                    <div class="section-title">最新预警信息</div>
+                    <div class="info-list">
+                        <div class="info-item danger">
+                            <div class="item-title">XX村滑坡红色预警</div>
+                            <div class="item-content">受持续强降雨影响，发生滑坡风险极高，请立即撤离</div>
+                            <div class="item-time">14:30</div>
+                        </div>
+                        <div class="info-item warning">
+                            <div class="item-title">XX镇泥石流橙色预警</div>
+                            <div class="item-content">降雨量达到预警阈值，请密切关注</div>
+                            <div class="item-time">13:45</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="item-title">XX县地质监测正常</div>
+                            <div class="item-content">各项指标正常，无异常情况</div>
+                            <div class="item-time">13:20</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设备状态 -->
+                <div class="info-section">
+                    <div class="section-title">设备状态</div>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <div class="item-title">位移监测仪 DEV001</div>
+                            <div class="item-content">状态：正常 | 数据：2.3mm</div>
+                            <div class="item-time">最后更新：14:29</div>
+                        </div>
+                        <div class="info-item warning">
+                            <div class="item-title">雨量计 DEV002</div>
+                            <div class="item-content">状态：异常 | 通信中断</div>
+                            <div class="item-time">最后更新：13:15</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏折叠功能
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // 模拟实时数据更新
+        function updateRealTimeData() {
+            // 更新KPI数据
+            const onlineDevices = document.getElementById('onlineDevices');
+            const dataIntegrity = document.getElementById('dataIntegrity');
+            const warningCount = document.getElementById('warningCount');
+            const processingEvents = document.getElementById('processingEvents');
+
+            // 模拟数据变化
+            const newOnlineRate = (95 + Math.random() * 5).toFixed(1);
+            const newDataIntegrity = (90 + Math.random() * 10).toFixed(1);
+            
+            onlineDevices.textContent = newOnlineRate + '%';
+            dataIntegrity.textContent = newDataIntegrity + '%';
+            
+            // 随机更新预警数量
+            if (Math.random() > 0.8) {
+                const currentCount = parseInt(warningCount.textContent);
+                warningCount.textContent = Math.max(0, currentCount + (Math.random() > 0.5 ? 1 : -1));
+            }
+        }
+
+        // 监测点点击事件
+        document.querySelectorAll('.monitoring-point').forEach(point => {
+            point.addEventListener('click', function() {
+                const title = this.getAttribute('title');
+                alert('监测点详情：\n' + title + '\n\n点击确定查看详细信息...');
+            });
+        });
+
+        // 菜单项点击事件
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // 移除所有active类
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                // 添加active类到当前项
+                this.classList.add('active');
+            });
+        });
+
+        // 启动实时数据更新
+        setInterval(updateRealTimeData, 5000);
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('地质灾害预警系统 - 实时监控大屏已加载');
+            
+            // 模拟WebSocket连接
+            setTimeout(() => {
+                console.log('WebSocket连接已建立，开始接收实时数据...');
+            }, 1000);
+        });
+
+        // 响应式处理
+        window.addEventListener('resize', function() {
+            if (window.innerWidth < 1200) {
+                document.getElementById('sidebar').classList.add('collapsed');
+            }
+        });
+    </script>
+</body>
+</html>

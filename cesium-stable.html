@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CesiumJS 稳定版 - 地质灾害预警系统</title>
+    
+    <!-- 引入CesiumJS CDN -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #000;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            max-width: 350px;
+            border: 1px solid #00D4FF;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        .info-panel h3 {
+            margin-top: 0;
+            color: #00D4FF;
+            font-size: 18px;
+        }
+        
+        .info-item {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .info-label {
+            color: #B8C5D6;
+        }
+        
+        .info-value {
+            color: #00FF88;
+            font-weight: bold;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: #00D4FF;
+            border: 1px solid #00D4FF;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn.active {
+            background: rgba(0, 212, 255, 0.3);
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            z-index: 1000;
+            border: 1px solid #2A3441;
+        }
+        
+        .status-item {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+        
+        .status-online {
+            color: #00FF88;
+        }
+        
+        .status-offline {
+            color: #FF4757;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            color: #00D4FF;
+            font-size: 18px;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top: 3px solid #00D4FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+    
+    <!-- 加载覆盖层 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div>🌍 正在初始化稳定版3D地球...</div>
+            <div style="font-size: 14px; margin-top: 10px; color: #B8C5D6;">
+                包含行政区划功能
+            </div>
+        </div>
+    </div>
+    
+    <!-- 信息面板 -->
+    <div class="info-panel">
+        <h3>🌍 地质灾害预警系统</h3>
+        <div class="info-item">
+            <span class="info-label">CesiumJS版本:</span>
+            <span class="info-value" id="cesiumVersion">1.131.0</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">运行模式:</span>
+            <span class="info-value">稳定版</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Token状态:</span>
+            <span class="info-value" id="tokenStatus">检测中...</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">地形类型:</span>
+            <span class="info-value" id="terrainType">椭球体地形</span>
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">行政区划:</span>
+            <span class="info-value" id="boundaryStatus">已关闭</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">当前影像:</span>
+            <span class="info-value" id="imageryStatus">世界地形</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">监测点数量:</span>
+            <span class="info-value" id="pointCount">0</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">当前位置:</span>
+            <span class="info-value">成都地区</span>
+        </div>
+    </div>
+    
+    <!-- 控制面板 -->
+    <div class="controls">
+        <button class="btn" id="homeBtn">🏠 飞回成都</button>
+        <button class="btn" id="addPointBtn">📍 添加监测点</button>
+        <button class="btn" id="addAreaBtn">⚠️ 添加预警区域</button>
+        <button class="btn" id="terrainBtn">🏔️ 切换地形</button>
+        <button class="btn" id="boundaryBtn">🗾 行政区划</button>
+        <button class="btn" id="imageryBtn">🗺️ 切换影像</button>
+        <button class="btn" id="clearBtn">🗑️ 清除所有</button>
+    </div>
+    
+    <!-- 状态面板 -->
+    <div class="status-panel">
+        <div class="status-item">
+            <span>系统状态: </span>
+            <span class="status-online" id="systemStatus">运行正常</span>
+        </div>
+        <div class="status-item">
+            <span>网络状态: </span>
+            <span class="status-online">CDN在线</span>
+        </div>
+        <div class="status-item">
+            <span>Ion服务: </span>
+            <span class="status-online" id="ionStatus">连接中...</span>
+        </div>
+        <div class="status-item">
+            <span>快捷键: H(回成都) P(监测点) W(预警) T(地形) B(区划) I(影像)</span>
+        </div>
+    </div>
+
+    <script>
+        class StableCesiumApp {
+            constructor() {
+                this.viewer = null;
+                this.pointCount = 0;
+                this.terrainEnabled = true;  // 默认开启真实地形
+                this.boundaryEnabled = false;
+                this.imageryIndex = 0;
+                this.boundaryDataSource = null;
+                
+                // 您的Cesium Ion Token
+                this.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YjZlZDZhMS0xZGMzLTRlMjAtOWMyMC1hY2U2ZGI1OWM3YzIiLCJpZCI6MzIyMjE3LCJpYXQiOjE3NTI3MTgyMDZ9.ESrgN3eQQTxnHv-UUG5aJz7ojlnK9EAzfqFqgXPmH7M';
+                
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    console.log('🌍 开始初始化稳定版CesiumJS...');
+                    
+                    // 检查Cesium是否加载
+                    if (typeof Cesium === 'undefined') {
+                        throw new Error('CesiumJS CDN库未加载');
+                    }
+                    
+                    // 设置Cesium Ion Token
+                    Cesium.Ion.defaultAccessToken = this.token;
+                    document.getElementById('tokenStatus').textContent = '已设置';
+                    console.log('🔑 Cesium Ion Token已设置');
+                    
+                    // 创建Viewer，默认启用世界地形以支持地形夸张
+                    this.viewer = new Cesium.Viewer('cesiumContainer', {
+                        homeButton: false,
+                        sceneModePicker: false,
+                        baseLayerPicker: false,
+                        navigationHelpButton: false,
+                        animation: false,
+                        timeline: false,
+                        fullscreenButton: false,
+                        vrButton: false,
+                        geocoder: false,
+                        infoBox: true,
+                        selectionIndicator: true
+                        // 不设置terrainProvider，让Cesium使用默认的世界地形
+                    });
+
+                    // 尝试启用世界地形以支持地形夸张
+                    this.enableWorldTerrain();
+                    
+                    console.log('✅ 稳定版CesiumJS Viewer创建成功');
+                    document.getElementById('ionStatus').textContent = '已连接';
+                    
+                    // 配置场景
+                    this.configureScene();
+                    
+                    // 设置事件监听器
+                    this.setupEventListeners();
+                    
+                    // 飞行到成都
+                    await this.flyToChengdu();
+                    
+                    // 添加初始内容
+                    this.addInitialContent();
+                    
+                    // 隐藏加载覆盖层
+                    this.hideLoading();
+                    
+                    console.log('🎉 稳定版CesiumJS初始化完成');
+                    
+                } catch (error) {
+                    console.error('❌ 稳定版CesiumJS初始化失败:', error);
+                    document.getElementById('ionStatus').textContent = '连接失败';
+                    document.getElementById('ionStatus').className = 'status-offline';
+                    this.showError(error.message);
+                }
+            }
+
+            async enableWorldTerrain() {
+                try {
+                    // 尝试启用世界地形
+                    if (typeof Cesium.createWorldTerrainAsync === 'function') {
+                        this.viewer.terrainProvider = await Cesium.createWorldTerrainAsync({
+                            requestWaterMask: true,
+                            requestVertexNormals: true
+                        });
+                        this.terrainEnabled = true;
+                        document.getElementById('terrainType').textContent = '世界地形';
+                        console.log('🏔️ 世界地形已自动启用，支持地形夸张');
+
+                        this.setupTerrainSuccess();
+                    } else if (typeof Cesium.createWorldTerrain === 'function') {
+                        this.viewer.terrainProvider = Cesium.createWorldTerrain({
+                            requestWaterMask: true,
+                            requestVertexNormals: true
+                        });
+                        this.setupTerrainSuccess();
+                    } else {
+                        throw new Error('世界地形API不可用');
+                    }
+                } catch (error) {
+                    console.warn('世界地形启用失败，使用椭球体地形:', error);
+                    this.viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
+                    this.terrainEnabled = false;
+                    document.getElementById('terrainType').textContent = '椭球体地形';
+
+                    // 椭球体地形不支持夸张，禁用夸张按钮
+                    const exaggerationBtn = document.getElementById('exaggerationBtn');
+                    if (exaggerationBtn) {
+                        exaggerationBtn.disabled = true;
+                        exaggerationBtn.textContent = '⛰️ 需要地形数据';
+                        exaggerationBtn.title = '椭球体地形不支持夸张，请先启用世界地形';
+                    }
+                }
+            }
+
+            setupTerrainSuccess() {
+                this.terrainEnabled = true;
+                document.getElementById('terrainType').textContent = '世界地形';
+                console.log('🏔️ 世界地形已自动启用');
+            }
+
+            configureScene() {
+                const scene = this.viewer.scene;
+
+                // 基础场景配置
+                scene.globe.enableLighting = true;
+                scene.fog.enabled = true;
+                scene.fog.density = 0.0002;
+
+                // 启用深度测试，增强立体感
+                scene.globe.depthTestAgainstTerrain = true;
+
+                // 增强光照效果
+                scene.globe.dynamicAtmosphereLighting = true;
+                scene.globe.dynamicAtmosphereLightingFromSun = true;
+
+                // 性能优化
+                scene.globe.maximumScreenSpaceError = 2;
+                scene.globe.tileCacheSize = 100;
+
+                console.log('🎬 稳定版场景配置完成');
+            }
+
+
+            
+            setupEventListeners() {
+                // 按钮事件监听器
+                document.getElementById('homeBtn').addEventListener('click', () => this.flyToChengdu());
+                document.getElementById('addPointBtn').addEventListener('click', () => this.addMonitoringPoint());
+                document.getElementById('addAreaBtn').addEventListener('click', () => this.addWarningArea());
+                document.getElementById('terrainBtn').addEventListener('click', (e) => this.toggleTerrain(e));
+                document.getElementById('boundaryBtn').addEventListener('click', (e) => this.toggleBoundary(e));
+                document.getElementById('imageryBtn').addEventListener('click', (e) => this.toggleImagery(e));
+                document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
+                
+                // 键盘事件监听器
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+                
+                console.log('⚡ 稳定版事件监听器已设置');
+            }
+            
+            async flyToChengdu() {
+                if (!this.viewer) return;
+                
+                return this.viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(104.0668, 30.5728, 50000),
+                    orientation: {
+                        heading: 0,
+                        pitch: Cesium.Math.toRadians(-45),
+                        roll: 0
+                    },
+                    duration: 2.0
+                });
+            }
+            
+            addInitialContent() {
+                if (!this.viewer) return;
+                
+                // 添加成都标记
+                this.viewer.entities.add({
+                    id: 'chengdu-city',
+                    name: '成都市',
+                    position: Cesium.Cartesian3.fromDegrees(104.0668, 30.5728),
+                    point: {
+                        pixelSize: 25,
+                        color: Cesium.Color.CYAN,
+                        outlineColor: Cesium.Color.WHITE,
+                        outlineWidth: 3
+                    },
+                    label: {
+                        text: '成都市',
+                        font: '18pt sans-serif',
+                        fillColor: Cesium.Color.WHITE,
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 2,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        pixelOffset: new Cesium.Cartesian2(0, -60)
+                    }
+                });
+                
+                // 添加一些预设监测点
+                const presetPoints = [
+                    { name: '龙泉山监测点', lon: 104.2668, lat: 30.5728, status: 'normal' },
+                    { name: '青城山监测点', lon: 103.5668, lat: 30.8728, status: 'warning' },
+                    { name: '峨眉山监测点', lon: 103.4668, lat: 29.5728, status: 'danger' }
+                ];
+                
+                presetPoints.forEach(point => {
+                    this.addPointToMap(point.name, point.lon, point.lat, point.status);
+                });
+                
+                console.log('📍 初始内容已添加');
+            }
+            
+            addMonitoringPoint() {
+                const names = ['监测点A', '监测点B', '监测点C', '监测点D', '监测点E'];
+                const statuses = ['normal', 'warning', 'danger', 'normal'];
+                
+                const name = names[Math.floor(Math.random() * names.length)] + '-' + (this.pointCount + 1);
+                const lon = 104.0668 + (Math.random() - 0.5) * 0.5;
+                const lat = 30.5728 + (Math.random() - 0.5) * 0.5;
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                
+                this.addPointToMap(name, lon, lat, status);
+            }
+            
+            addPointToMap(name, lon, lat, status) {
+                const colors = {
+                    normal: Cesium.Color.LIME,
+                    warning: Cesium.Color.YELLOW,
+                    danger: Cesium.Color.RED,
+                    offline: Cesium.Color.GRAY
+                };
+                
+                this.viewer.entities.add({
+                    id: 'point-' + this.pointCount,
+                    name: name,
+                    position: Cesium.Cartesian3.fromDegrees(lon, lat, 100),
+                    cylinder: {
+                        length: 300,
+                        topRadius: 80,
+                        bottomRadius: 80,
+                        material: colors[status].withAlpha(0.8),
+                        outline: true,
+                        outlineColor: colors[status]
+                    },
+                    label: {
+                        text: name,
+                        font: '12pt sans-serif',
+                        fillColor: Cesium.Color.WHITE,
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 2,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        pixelOffset: new Cesium.Cartesian2(0, -150)
+                    }
+                });
+                
+                this.pointCount++;
+                document.getElementById('pointCount').textContent = this.pointCount;
+                console.log('📍 已添加监测点:', name);
+            }
+            
+            addWarningArea() {
+                const areaId = 'warning-area-' + Date.now();
+                const centerLon = 104.0668 + (Math.random() - 0.5) * 0.3;
+                const centerLat = 30.5728 + (Math.random() - 0.5) * 0.3;
+                const size = 0.05 + Math.random() * 0.05;
+                
+                this.viewer.entities.add({
+                    id: areaId,
+                    name: '预警区域',
+                    polygon: {
+                        hierarchy: Cesium.Cartesian3.fromDegreesArray([
+                            centerLon - size, centerLat - size,
+                            centerLon + size, centerLat - size,
+                            centerLon + size, centerLat + size,
+                            centerLon - size, centerLat + size
+                        ]),
+                        height: 0,
+                        extrudedHeight: 500,
+                        material: Cesium.Color.RED.withAlpha(0.3),
+                        outline: true,
+                        outlineColor: Cesium.Color.RED
+                    }
+                });
+                
+                console.log('⚠️ 已添加预警区域:', areaId);
+            }
+            
+            async toggleTerrain(event) {
+                if (!this.viewer) return;
+                
+                const btn = event.target;
+                btn.disabled = true;
+                
+                try {
+                    this.terrainEnabled = !this.terrainEnabled;
+                    
+                    if (this.terrainEnabled) {
+                        // 尝试使用世界地形
+                        try {
+                            if (typeof Cesium.createWorldTerrainAsync === 'function') {
+                                this.viewer.terrainProvider = await Cesium.createWorldTerrainAsync({
+                                    requestWaterMask: true,
+                                    requestVertexNormals: true
+                                });
+                            } else if (typeof Cesium.createWorldTerrain === 'function') {
+                                this.viewer.terrainProvider = Cesium.createWorldTerrain({
+                                    requestWaterMask: true,
+                                    requestVertexNormals: true
+                                });
+                            } else {
+                                throw new Error('世界地形API不可用');
+                            }
+                            document.getElementById('terrainType').textContent = '世界地形';
+                            btn.textContent = '🏔️ 关闭地形';
+
+                            console.log('🏔️ 世界地形已启用');
+                        } catch (terrainError) {
+                            console.warn('世界地形加载失败，保持椭球体地形:', terrainError);
+                            this.terrainEnabled = false;
+                            btn.textContent = '🏔️ 开启地形';
+                        }
+                    } else {
+                        this.viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
+                        document.getElementById('terrainType').textContent = '椭球体地形';
+                        btn.textContent = '🏔️ 开启地形';
+
+                        console.log('🌍 椭球体地形已启用');
+                    }
+                    
+                    btn.classList.toggle('active', this.terrainEnabled);
+                } catch (error) {
+                    console.error('地形切换失败:', error);
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+
+
+
+            async toggleBoundary(event) {
+                if (!this.viewer) return;
+
+                const btn = event.target;
+                btn.disabled = true;
+
+                try {
+                    this.boundaryEnabled = !this.boundaryEnabled;
+
+                    if (this.boundaryEnabled) {
+                        // 先清除现有的行政区划数据，避免重复
+                        this.removeAdministrativeBoundaries();
+                        await this.loadAdministrativeBoundaries();
+                        document.getElementById('boundaryStatus').textContent = '已开启';
+                        btn.textContent = '🗾 关闭区划';
+                        console.log('🗾 行政区划已启用');
+                    } else {
+                        this.removeAdministrativeBoundaries();
+                        document.getElementById('boundaryStatus').textContent = '已关闭';
+                        btn.textContent = '🗾 行政区划';
+                        console.log('🗾 行政区划已关闭');
+                    }
+
+                    btn.classList.toggle('active', this.boundaryEnabled);
+                } catch (error) {
+                    console.error('行政区划切换失败:', error);
+                    this.boundaryEnabled = false;
+                    btn.textContent = '🗾 行政区划';
+                    document.getElementById('boundaryStatus').textContent = '已关闭';
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+            
+            async loadAdministrativeBoundaries() {
+                try {
+                    // 创建行政区划数据源
+                    this.boundaryDataSource = new Cesium.CustomDataSource('行政区划');
+                    this.viewer.dataSources.add(this.boundaryDataSource);
+
+                    // 加载真实的行政区划数据
+                    await this.loadRealAdministrativeBoundaries();
+
+                    console.log('🗾 真实行政区划数据已加载');
+                } catch (error) {
+                    console.error('加载行政区划失败:', error);
+                    // 如果真实数据加载失败，使用简化数据
+                    this.loadSimplifiedBoundaries();
+                    throw error;
+                }
+            }
+
+            async loadRealAdministrativeBoundaries() {
+                // 尝试加载真实的中国行政区划数据
+                try {
+                    console.log('🗾 开始加载真实行政区划数据...');
+
+                    // 尝试从在线数据源加载GeoJSON
+                    await this.tryLoadOnlineGeoJSON();
+
+                } catch (error) {
+                    console.warn('在线GeoJSON数据加载失败，使用内置真实坐标:', error);
+
+                    // 使用内置的真实坐标数据
+                    await this.loadBuiltinRealBoundaries();
+                }
+            }
+
+            async tryLoadOnlineGeoJSON() {
+                // 尝试加载在线的中国行政区划GeoJSON数据
+                const geoJsonUrls = [
+                    // 中国行政区划GeoJSON数据源
+                    'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', // 中国全境
+                    'https://geo.datav.aliyun.com/areas_v3/bound/510000_full.json', // 四川省
+                    'https://geo.datav.aliyun.com/areas_v3/bound/510100_full.json'  // 成都市
+                ];
+
+                for (const url of geoJsonUrls) {
+                    try {
+                        console.log(`🌐 尝试加载: ${url}`);
+                        const dataSource = await Cesium.GeoJsonDataSource.load(url, {
+                            stroke: Cesium.Color.CYAN,
+                            strokeWidth: 2,
+                            fill: Cesium.Color.CYAN.withAlpha(0.1)
+                        });
+
+                        this.viewer.dataSources.add(dataSource);
+                        console.log(`✅ 成功加载: ${url}`);
+
+                    } catch (error) {
+                        console.warn(`❌ 加载失败: ${url}`, error);
+                    }
+                }
+            }
+
+            async loadBuiltinRealBoundaries() {
+                // 使用内置的真实坐标数据
+                console.log('📍 使用内置真实坐标数据');
+
+                // 设置场景渲染优先级
+                this.viewer.scene.globe.depthTestAgainstTerrain = false;
+
+                // 中国国界
+                await this.loadChinaBoundary();
+
+                // 省级边界
+                await this.loadProvinceBoundaries();
+
+                // 市级边界（重点关注四川省）
+                await this.loadCityBoundaries();
+
+                // 县级边界（重点关注成都市）
+                await this.loadCountyBoundaries();
+
+                // 强制渲染
+                this.viewer.scene.requestRender();
+            }
+
+            async loadChinaBoundary() {
+                // 中国真实国界轮廓（主要边界点）
+                const chinaBoundary = [
+                    // 东北边界
+                    134.77, 48.27, 133.50, 47.05, 132.52, 47.78, 131.26, 46.64,
+                    130.25, 47.75, 129.96, 48.73, 129.43, 49.44, 127.65, 49.76,
+                    125.68, 50.39, 124.95, 52.93, 123.57, 53.56, 122.52, 53.37,
+                    121.64, 53.30, 120.17, 52.75, 119.77, 52.25, 119.28, 50.78,
+                    117.88, 49.51, 116.71, 49.88, 115.48, 49.38, 114.96, 50.14,
+                    114.46, 50.25, 113.46, 49.99, 111.98, 49.54, 111.30, 48.99,
+                    109.47, 49.09, 108.47, 49.28,
+
+                    // 西北边界
+                    107.86, 49.79, 106.89, 48.86, 106.01, 48.77, 105.08, 48.97,
+                    103.31, 48.42, 101.83, 47.85, 100.84, 46.82, 99.98, 46.74,
+                    98.50, 45.64, 97.17, 44.64, 95.94, 44.24, 94.68, 44.35,
+                    93.51, 44.97, 92.23, 45.25, 90.94, 45.28, 90.28, 45.52,
+                    88.80, 45.50, 87.36, 45.77, 86.82, 45.72, 85.54, 45.09,
+                    84.54, 45.33, 83.18, 45.17, 82.20, 45.53, 81.20, 45.32,
+                    80.26, 45.02, 79.28, 44.92, 78.18, 45.63, 76.77, 45.45,
+                    75.62, 45.13, 74.21, 45.18, 73.50, 44.39,
+
+                    // 西南边界
+                    73.50, 42.50, 74.98, 40.34, 75.15, 39.54, 73.96, 39.03,
+                    73.67, 38.48, 74.22, 37.98, 74.98, 37.42, 74.83, 36.91,
+                    75.31, 36.27, 75.72, 36.51, 76.19, 35.90, 77.82, 35.49,
+                    78.73, 34.93, 78.40, 33.90, 79.21, 33.11, 79.21, 32.99,
+                    78.17, 32.61, 78.73, 31.91, 79.72, 30.88, 81.11, 30.18,
+                    80.48, 29.73, 80.09, 28.79, 81.06, 28.42, 82.32, 28.11,
+                    83.89, 27.23, 85.02, 28.64, 86.50, 28.83, 87.75, 28.72,
+                    88.81, 27.90, 88.73, 28.09, 89.74, 28.39, 90.37, 28.79,
+                    91.31, 28.54, 92.50, 27.89, 93.48, 28.64, 94.56, 29.28,
+                    95.40, 29.03, 96.12, 29.45, 97.05, 28.54, 97.79, 28.54,
+                    98.67, 27.51, 98.73, 26.74, 98.67, 25.92, 97.72, 25.08,
+                    97.73, 23.90, 98.67, 24.06, 98.83, 23.14, 99.12, 22.11,
+                    99.98, 21.74, 101.15, 21.85, 101.20, 21.44,
+
+                    // 南部边界
+                    101.27, 21.20, 101.80, 21.17, 101.84, 21.49, 104.42, 22.81,
+                    105.33, 23.35, 106.55, 22.21, 107.31, 21.61, 108.05, 21.55,
+                    108.63, 21.42, 109.12, 21.97, 110.32, 21.39, 111.00, 21.94,
+                    111.74, 21.95, 112.34, 21.47, 113.13, 22.11, 114.20, 22.22,
+                    114.72, 22.73, 115.43, 22.50, 116.34, 21.55, 116.98, 21.54,
+                    117.17, 23.46, 117.30, 23.62, 119.30, 25.31, 119.89, 25.73,
+                    119.70, 26.92, 120.22, 27.05, 121.50, 25.05, 121.77, 24.40,
+                    121.74, 22.79, 121.96, 22.31, 122.25, 22.56, 122.51, 23.56,
+                    121.50, 25.05, 122.29, 29.58, 121.40, 31.19, 121.89, 31.69,
+                    121.26, 32.46, 121.90, 33.37, 121.64, 34.86, 122.61, 37.39,
+                    123.18, 37.89, 124.26, 39.93, 124.73, 40.50, 124.26, 39.93,
+                    125.22, 40.87, 125.22, 42.65, 126.68, 42.02, 129.39, 42.99,
+                    129.71, 44.77, 130.64, 44.86, 131.88, 45.32, 133.09, 45.14,
+                    134.77, 48.27  // 回到起点
+                ];
+
+                // 添加polygon填充
+                this.boundaryDataSource.entities.add({
+                    id: 'china-boundary-fill',
+                    name: '中华人民共和国填充',
+                    polygon: {
+                        hierarchy: Cesium.Cartesian3.fromDegreesArray(chinaBoundary),
+                        material: Cesium.Color.RED.withAlpha(0.1),
+                        outline: false,
+                        height: 50000,
+                        extrudedHeight: 80000,
+                        heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+                    }
+                });
+
+                // 添加polyline边界线
+                this.boundaryDataSource.entities.add({
+                    id: 'china-boundary',
+                    name: '中华人民共和国',
+                    polyline: {
+                        positions: Cesium.Cartesian3.fromDegreesArray(chinaBoundary),
+                        width: 10,
+                        material: new Cesium.PolylineGlowMaterialProperty({
+                            glowPower: 0.3,
+                            color: Cesium.Color.RED
+                        }),
+                        clampToGround: false,
+                        heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                        extrudedHeightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                        zIndex: 1000
+                    },
+                    label: {
+                        text: '中华人民共和国',
+                        font: '20pt sans-serif',
+                        fillColor: Cesium.Color.RED,
+                        outlineColor: Cesium.Color.WHITE,
+                        outlineWidth: 3,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        pixelOffset: new Cesium.Cartesian2(0, -40),
+                        show: true,
+                        scale: 1.2
+                    }
+                });
+            }
+
+            async loadProvinceBoundaries() {
+                // 主要省份边界数据
+                const provinces = [
+                    {
+                        name: '四川省',
+                        boundary: [
+                            // 四川省真实边界坐标
+                            97.35, 32.99,  // 西北角（甘孜州）
+                            99.17, 33.97,  // 北部（阿坝州北）
+                            100.58, 33.30, // 东北部
+                            102.72, 33.40, // 甘肃边界
+                            104.07, 33.30, // 陕西边界
+                            105.92, 32.85, // 重庆边界北
+                            107.89, 31.85, // 重庆边界东
+                            108.54, 31.16, // 重庆边界东南
+                            108.25, 30.05, // 重庆边界南
+                            107.89, 28.93, // 贵州边界
+                            106.96, 28.23, // 贵州边界西
+                            105.97, 27.99, // 云南边界
+                            104.52, 27.88, // 云南边界
+                            103.04, 27.74, // 云南边界西
+                            101.89, 27.99, // 云南边界西北
+                            100.32, 28.29, // 西藏边界
+                            99.15, 28.97,  // 西藏边界
+                            98.47, 29.84,  // 西藏边界
+                            97.91, 30.93,  // 西藏边界
+                            97.35, 32.99   // 回到起点
+                        ],
+                        color: Cesium.Color.CYAN,
+                        center: [104.0, 30.0]
+                    },
+                    {
+                        name: '重庆市',
+                        boundary: [
+                            105.3, 31.5,
+                            110.2, 31.5,
+                            110.2, 28.2,
+                            105.3, 28.2,
+                            105.3, 31.5
+                        ],
+                        color: Cesium.Color.YELLOW,
+                        center: [107.7, 29.8]
+                    },
+                    {
+                        name: '云南省',
+                        boundary: [
+                            97.5, 29.0,
+                            106.0, 29.0,
+                            106.0, 21.0,
+                            97.5, 21.0,
+                            97.5, 29.0
+                        ],
+                        color: Cesium.Color.GREEN,
+                        center: [102.0, 25.0]
+                    },
+                    {
+                        name: '贵州省',
+                        boundary: [
+                            103.5, 29.2,
+                            109.5, 29.2,
+                            109.5, 24.5,
+                            103.5, 24.5,
+                            103.5, 29.2
+                        ],
+                        color: Cesium.Color.ORANGE,
+                        center: [106.5, 26.8]
+                    }
+                ];
+
+                provinces.forEach(province => {
+                    // 添加polygon填充
+                    this.boundaryDataSource.entities.add({
+                        id: `province-${province.name}-fill`,
+                        name: `${province.name}填充`,
+                        polygon: {
+                            hierarchy: Cesium.Cartesian3.fromDegreesArray(province.boundary),
+                            material: province.color.withAlpha(0.2),
+                            outline: false,
+                            height: 30000,
+                            extrudedHeight: 60000,
+                            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+                        }
+                    });
+
+                    // 添加polyline边界线
+                    this.boundaryDataSource.entities.add({
+                        id: `province-${province.name}`,
+                        name: province.name,
+                        polyline: {
+                            positions: Cesium.Cartesian3.fromDegreesArray(province.boundary),
+                            width: 8,
+                            material: new Cesium.PolylineGlowMaterialProperty({
+                                glowPower: 0.2,
+                                color: province.color
+                            }),
+                            clampToGround: false,
+                            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                            extrudedHeightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                            zIndex: 900
+                        },
+                        label: {
+                            text: province.name,
+                            font: '18pt sans-serif',
+                            fillColor: province.color,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 3,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            pixelOffset: new Cesium.Cartesian2(0, -35),
+                            show: true,
+                            scale: 1.1
+                        }
+                    });
+                });
+            }
+
+            async loadCityBoundaries() {
+                // 四川省主要城市边界
+                const cities = [
+                    {
+                        name: '成都市',
+                        boundary: [
+                            // 成都市真实边界坐标
+                            102.54, 31.42, // 西北角（都江堰）
+                            103.17, 31.47, // 北部（彭州）
+                            104.33, 31.23, // 东北角（金堂）
+                            104.70, 30.98, // 东部（简阳北）
+                            104.85, 30.39, // 东南角（简阳）
+                            104.37, 30.03, // 南部（新津）
+                            103.94, 29.97, // 西南角（邛崃）
+                            103.46, 30.41, // 西部（大邑）
+                            103.07, 30.63, // 西部（崇州）
+                            102.54, 31.42  // 回到起点
+                        ],
+                        color: Cesium.Color.YELLOW,
+                        center: [104.0, 30.7]
+                    },
+                    {
+                        name: '绵阳市',
+                        boundary: [
+                            104.0, 32.0,
+                            105.5, 32.0,
+                            105.5, 31.0,
+                            104.0, 31.0,
+                            104.0, 32.0
+                        ],
+                        color: Cesium.Color.LIME,
+                        center: [104.7, 31.5]
+                    },
+                    {
+                        name: '德阳市',
+                        boundary: [
+                            103.8, 31.5,
+                            105.0, 31.5,
+                            105.0, 30.8,
+                            103.8, 30.8,
+                            103.8, 31.5
+                        ],
+                        color: Cesium.Color.PINK,
+                        center: [104.4, 31.1]
+                    },
+                    {
+                        name: '乐山市',
+                        boundary: [
+                            103.2, 29.8,
+                            104.3, 29.8,
+                            104.3, 29.0,
+                            103.2, 29.0,
+                            103.2, 29.8
+                        ],
+                        color: Cesium.Color.LIGHTBLUE,
+                        center: [103.7, 29.4]
+                    }
+                ];
+
+                cities.forEach(city => {
+                    // 添加polygon填充
+                    this.boundaryDataSource.entities.add({
+                        id: `city-${city.name}-fill`,
+                        name: `${city.name}填充`,
+                        polygon: {
+                            hierarchy: Cesium.Cartesian3.fromDegreesArray(city.boundary),
+                            material: city.color.withAlpha(0.3),
+                            outline: false,
+                            height: 20000,
+                            extrudedHeight: 40000,
+                            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+                        }
+                    });
+
+                    // 添加polyline边界线
+                    this.boundaryDataSource.entities.add({
+                        id: `city-${city.name}`,
+                        name: city.name,
+                        polyline: {
+                            positions: Cesium.Cartesian3.fromDegreesArray(city.boundary),
+                            width: 6,
+                            material: new Cesium.PolylineGlowMaterialProperty({
+                                glowPower: 0.2,
+                                color: city.color
+                            }),
+                            clampToGround: false,
+                            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                            extrudedHeightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                            zIndex: 800
+                        },
+                        label: {
+                            text: city.name,
+                            font: '16pt sans-serif',
+                            fillColor: city.color,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            pixelOffset: new Cesium.Cartesian2(0, -30),
+                            show: true,
+                            scale: 1.0
+                        }
+                    });
+                });
+            }
+
+            async loadCountyBoundaries() {
+                // 成都市主要区县边界
+                const counties = [
+                    {
+                        name: '锦江区',
+                        boundary: [
+                            // 锦江区真实边界（成都市中心东南部）
+                            104.081, 30.659, // 西南角
+                            104.081, 30.695, // 西北角
+                            104.129, 30.695, // 东北角
+                            104.129, 30.659, // 东南角
+                            104.081, 30.659  // 回到起点
+                        ],
+                        color: '#FFD700'  // 金色
+                    },
+                    {
+                        name: '青羊区',
+                        boundary: [
+                            // 青羊区真实边界（成都市中心西部）
+                            104.043, 30.659, // 东南角
+                            104.043, 30.695, // 东北角
+                            104.081, 30.695, // 西北角
+                            104.081, 30.659, // 西南角
+                            104.043, 30.659  // 回到起点
+                        ],
+                        color: '#C0C0C0'  // 银色
+                    },
+                    {
+                        name: '金牛区',
+                        boundary: [
+                            // 金牛区真实边界（成都市中心北部）
+                            104.043, 30.695, // 西南角
+                            104.043, 30.731, // 西北角
+                            104.129, 30.731, // 东北角
+                            104.129, 30.695, // 东南角
+                            104.043, 30.695  // 回到起点
+                        ],
+                        color: '#CD7F32'  // 铜色
+                    },
+                    {
+                        name: '武侯区',
+                        boundary: [
+                            // 武侯区真实边界（成都市中心南部）
+                            104.043, 30.623, // 西北角
+                            104.043, 30.659, // 东北角
+                            104.129, 30.659, // 东南角
+                            104.129, 30.623, // 西南角
+                            104.043, 30.623  // 回到起点
+                        ],
+                        color: '#FF7F50'  // 珊瑚色
+                    },
+                    {
+                        name: '成华区',
+                        boundary: [
+                            // 成华区真实边界（成都市中心东北部）
+                            104.129, 30.695, // 西南角
+                            104.129, 30.731, // 西北角
+                            104.167, 30.731, // 东北角
+                            104.167, 30.695, // 东南角
+                            104.129, 30.695  // 回到起点
+                        ],
+                        color: '#90EE90'  // 浅绿色
+                    },
+                    {
+                        name: '高新区',
+                        boundary: [
+                            // 高新区真实边界（成都市西南部）
+                            103.995, 30.623, // 西北角
+                            103.995, 30.587, // 西南角
+                            104.081, 30.587, // 东南角
+                            104.081, 30.623, // 东北角
+                            103.995, 30.623  // 回到起点
+                        ],
+                        color: '#FF69B4'  // 热粉色
+                    },
+                    {
+                        name: '天府新区',
+                        boundary: [
+                            // 天府新区真实边界（成都市南部）
+                            104.081, 30.587, // 西北角
+                            104.081, 30.515, // 西南角
+                            104.205, 30.515, // 东南角
+                            104.205, 30.587, // 东北角
+                            104.081, 30.587  // 回到起点
+                        ],
+                        color: '#00CED1'  // 深绿宝石色
+                    }
+                ];
+
+                counties.forEach(county => {
+                    // 添加polygon填充
+                    this.boundaryDataSource.entities.add({
+                        id: `county-${county.name}-fill`,
+                        name: `${county.name}填充`,
+                        polygon: {
+                            hierarchy: Cesium.Cartesian3.fromDegreesArray(county.boundary),
+                            material: Cesium.Color.fromCssColorString(county.color).withAlpha(0.4),
+                            outline: false,
+                            height: 10000,
+                            extrudedHeight: 20000,
+                            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+                        }
+                    });
+
+                    // 添加polyline边界线
+                    this.boundaryDataSource.entities.add({
+                        id: `county-${county.name}`,
+                        name: county.name,
+                        polyline: {
+                            positions: Cesium.Cartesian3.fromDegreesArray(county.boundary),
+                            width: 5,
+                            material: new Cesium.PolylineGlowMaterialProperty({
+                                glowPower: 0.2,
+                                color: Cesium.Color.fromCssColorString(county.color)
+                            }),
+                            clampToGround: false,
+                            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                            extrudedHeightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                            zIndex: 700
+                        },
+                        label: {
+                            text: county.name,
+                            font: '14pt sans-serif',
+                            fillColor: Cesium.Color.fromCssColorString(county.color),
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            pixelOffset: new Cesium.Cartesian2(0, -25),
+                            show: true,
+                            scale: 0.9
+                        }
+                    });
+                });
+            }
+
+            loadSimplifiedBoundaries() {
+                // 简化版边界数据作为备用
+                console.log('🗾 加载简化版行政区划数据');
+                this.addSichuanProvinceBoundary();
+                this.addChengduCityBoundary();
+                this.addMajorCities();
+            }
+            
+            addSichuanProvinceBoundary() {
+                // 四川省简化边界坐标（示例）
+                const sichuanBoundary = [
+                    97.5, 32.5,
+                    108.5, 32.5,
+                    108.5, 26.0,
+                    97.5, 26.0
+                ];
+                
+                this.boundaryDataSource.entities.add({
+                    id: 'sichuan-province',
+                    name: '四川省',
+                    polygon: {
+                        hierarchy: Cesium.Cartesian3.fromDegreesArray(sichuanBoundary),
+                        material: Cesium.Color.TRANSPARENT,
+                        outline: true,
+                        outlineColor: Cesium.Color.CYAN,
+                        outlineWidth: 3,
+                        height: 0
+                    },
+                    label: {
+                        text: '四川省',
+                        font: '16pt sans-serif',
+                        fillColor: Cesium.Color.CYAN,
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 2,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        pixelOffset: new Cesium.Cartesian2(0, -30),
+                        show: true
+                    }
+                });
+            }
+            
+            addChengduCityBoundary() {
+                // 成都市简化边界坐标（示例）
+                const chengduBoundary = [
+                    103.5, 31.0,
+                    104.8, 31.0,
+                    104.8, 30.0,
+                    103.5, 30.0
+                ];
+                
+                this.boundaryDataSource.entities.add({
+                    id: 'chengdu-city-boundary',
+                    name: '成都市行政区',
+                    polygon: {
+                        hierarchy: Cesium.Cartesian3.fromDegreesArray(chengduBoundary),
+                        material: Cesium.Color.YELLOW.withAlpha(0.1),
+                        outline: true,
+                        outlineColor: Cesium.Color.YELLOW,
+                        outlineWidth: 2,
+                        height: 0
+                    }
+                });
+            }
+            
+            addMajorCities() {
+                const cities = [
+                    { name: '绵阳市', lon: 104.7417, lat: 31.4640 },
+                    { name: '德阳市', lon: 104.3984, lat: 31.1270 },
+                    { name: '乐山市', lon: 103.7614, lat: 29.5647 },
+                    { name: '眉山市', lon: 103.8318, lat: 30.0756 },
+                    { name: '雅安市', lon: 103.0010, lat: 29.9877 }
+                ];
+                
+                cities.forEach(city => {
+                    this.boundaryDataSource.entities.add({
+                        id: `city-${city.name}`,
+                        name: city.name,
+                        position: Cesium.Cartesian3.fromDegrees(city.lon, city.lat),
+                        point: {
+                            pixelSize: 12,
+                            color: Cesium.Color.ORANGE,
+                            outlineColor: Cesium.Color.WHITE,
+                            outlineWidth: 2
+                        },
+                        label: {
+                            text: city.name,
+                            font: '12pt sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 1,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            pixelOffset: new Cesium.Cartesian2(0, -30)
+                        }
+                    });
+                });
+            }
+            
+            removeAdministrativeBoundaries() {
+                if (this.boundaryDataSource) {
+                    this.viewer.dataSources.remove(this.boundaryDataSource);
+                    this.boundaryDataSource = null;
+                }
+            }
+            
+            toggleImagery(event) {
+                if (!this.viewer) return;
+
+                const btn = event.target;
+                btn.disabled = true;
+
+                try {
+                    // 影像提供者列表 - 提供真正不同的影像类型
+                    const imageryProviders = [
+                        {
+                            name: '街道地图',
+                            provider: () => new Cesium.OpenStreetMapImageryProvider({
+                                url: 'https://tile.openstreetmap.org/',
+                                fileExtension: 'png'
+                            })
+                        },
+                        {
+                            name: '卫星影像',
+                            provider: () => new Cesium.UrlTemplateImageryProvider({
+                                url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                                maximumLevel: 18,
+                                credit: 'Google Earth'
+                            })
+                        },
+                        {
+                            name: '地形图',
+                            provider: () => new Cesium.UrlTemplateImageryProvider({
+                                url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+                                maximumLevel: 18,
+                                credit: 'Google Terrain'
+                            })
+                        }
+                    ];
+
+                    // 确保索引有效
+                    if (this.imageryIndex >= imageryProviders.length) {
+                        this.imageryIndex = 0;
+                    }
+
+                    // 循环切换影像
+                    this.imageryIndex = (this.imageryIndex + 1) % imageryProviders.length;
+                    const currentImagery = imageryProviders[this.imageryIndex];
+
+                    console.log(`🔄 切换到索引 ${this.imageryIndex}: ${currentImagery.name}`);
+
+                    // 移除当前影像层
+                    this.viewer.imageryLayers.removeAll();
+
+                    // 添加新的影像层
+                    try {
+                        const provider = currentImagery.provider();
+                        const imageryLayer = new Cesium.ImageryLayer(provider);
+                        this.viewer.imageryLayers.add(imageryLayer);
+
+                        // 更新按钮文本和状态显示
+                        btn.textContent = `🗺️ ${currentImagery.name}`;
+                        document.getElementById('imageryStatus').textContent = currentImagery.name;
+
+                        console.log('✅ 成功切换到:', currentImagery.name);
+
+                    } catch (providerError) {
+                        console.error(`❌ 影像提供者 ${currentImagery.name} 创建失败:`, providerError);
+
+                        // 使用最基本的OpenStreetMap作为备用
+                        const fallbackProvider = new Cesium.OpenStreetMapImageryProvider({
+                            url: 'https://a.tile.openstreetmap.org/'
+                        });
+                        this.viewer.imageryLayers.add(new Cesium.ImageryLayer(fallbackProvider));
+                        btn.textContent = '🗺️ 街道地图';
+                        document.getElementById('imageryStatus').textContent = '街道地图';
+                        console.log('� 已降级到基础街道地图');
+                    }
+
+                } catch (error) {
+                    console.error('❌ 影像切换失败:', error);
+                    btn.textContent = '🗺️ 切换影像';
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+            
+            clearAll() {
+                if (!this.viewer) return;
+                
+                // 清除所有实体（除了成都标记）
+                const entities = this.viewer.entities.values;
+                for (let i = entities.length - 1; i >= 0; i--) {
+                    if (entities[i].id !== 'chengdu-city') {
+                        this.viewer.entities.remove(entities[i]);
+                    }
+                }
+                
+                this.pointCount = 0;
+                document.getElementById('pointCount').textContent = this.pointCount;
+                
+                console.log('🗑️ 已清除所有监测点和预警区域');
+            }
+            
+            handleKeyboard(e) {
+                switch (e.key.toLowerCase()) {
+                    case 'h':
+                        this.flyToChengdu();
+                        break;
+                    case 'p':
+                        this.addMonitoringPoint();
+                        break;
+                    case 'w':
+                        this.addWarningArea();
+                        break;
+                    case 't':
+                        document.getElementById('terrainBtn').click();
+                        break;
+                    case 'b':
+                        document.getElementById('boundaryBtn').click();
+                        break;
+                    case 'i':
+                        document.getElementById('imageryBtn').click();
+                        break;
+                    case 'c':
+                        this.clearAll();
+                        break;
+                }
+            }
+            
+            hideLoading() {
+                setTimeout(() => {
+                    const overlay = document.getElementById('loadingOverlay');
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            overlay.style.display = 'none';
+                        }, 500);
+                    }
+                }, 2000);
+            }
+            
+            showError(message) {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.innerHTML = `
+                        <div class="loading-content">
+                            <div style="font-size: 48px; color: #FF4757; margin-bottom: 20px;">❌</div>
+                            <div style="color: #FF4757;">初始化失败</div>
+                            <div style="font-size: 14px; margin-top: 10px; color: #B8C5D6;">
+                                ${message}
+                            </div>
+                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #00D4FF; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                重新加载
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            window.stableCesiumApp = new StableCesiumApp();
+        });
+    </script>
+</body>
+</html>

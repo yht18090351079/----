@@ -1,0 +1,27 @@
+{
+  "name": "geological-disaster-warning-system",
+  "version": "1.0.0",
+  "description": "地质灾害预警系统 - 基于CesiumJS的3D地球监控大屏",
+  "main": "proxy-server.js",
+  "scripts": {
+    "start": "node proxy-server.js",
+    "dev": "node start-cesium.js"
+  },
+  "keywords": [
+    "cesium",
+    "3d",
+    "earth",
+    "geological",
+    "disaster",
+    "warning",
+    "monitoring"
+  ],
+  "author": "Geological Disaster Warning System Team",
+  "license": "MIT",
+  "dependencies": {
+    "cesium": "^1.131.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
