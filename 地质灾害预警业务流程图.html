@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地质灾害预警系统业务流程图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', '宋体', serif;
+            background: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+            padding: 8px;
+            line-height: 1.2;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 14px;
+            color: #000000;
+            font-weight: bold;
+            margin-bottom: 3px;
+            text-align: center;
+        }
+
+        .header p {
+            font-size: 10px;
+            color: #666666;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .step {
+            position: relative;
+            width: 100%;
+            max-width: 750px;
+            background: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 2px;
+            padding: 8px;
+            margin: 2px 0;
+            box-shadow: none;
+        }
+
+        .step-number {
+            display: none;
+        }
+
+        .step-title {
+            font-size: 11px;
+            color: #000000;
+            margin-bottom: 4px;
+            margin-left: 0px;
+            font-weight: bold;
+        }
+
+        .step-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 4px;
+        }
+
+        .feature {
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 1px;
+            padding: 4px;
+            margin-bottom: 2px;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 2px;
+            font-size: 10px;
+        }
+
+        .feature-desc {
+            color: #333333;
+            line-height: 1.1;
+            font-size: 9px;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 10px solid #000000;
+            margin: 3px auto;
+            position: relative;
+        }
+
+        .special-note {
+            background: #f5f5f5;
+            border: 1px solid #cccccc;
+            border-radius: 1px;
+            padding: 4px;
+            margin-top: 3px;
+        }
+
+        .special-note .note-title {
+            color: #000000;
+            font-weight: bold;
+            margin-bottom: 2px;
+            font-size: 9px;
+        }
+
+        .auto-badge {
+            display: inline-block;
+            background: #000000;
+            color: #ffffff;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-size: 8px;
+            font-weight: normal;
+            margin-left: 3px;
+        }
+
+        .manual-badge {
+            display: inline-block;
+            background: #666666;
+            color: #ffffff;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-size: 8px;
+            font-weight: normal;
+            margin-left: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .step-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 12px;
+            }
+
+            .step {
+                padding: 6px;
+                margin: 1px 0;
+            }
+
+
+
+            .container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>地质灾害预警系统业务流程图</h1>
+            <p>从数据监控到效果跟踪的智能化预警全流程</p>
+        </div>
+
+        <div class="flowchart">
+            <!-- 第一步：数据监控 -->
+            <div class="step">
+                <h2 class="step-title">数据监控 <span class="auto-badge">自动化</span></h2>
+                <div class="step-content">
+                    <div class="feature">
+                        <div class="feature-title">系统自动监控界面</div>
+                        <div class="feature-desc">用户登录后在主界面可以看到"实时监控"模块，24小时不间断监控</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">监控数据展示</div>
+                        <div class="feature-desc">界面显示各监测点的实时数据，包括降雨量、位移、倾斜等关键指标</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">异常提示</div>
+                        <div class="feature-desc">当数据超过预设阈值时，系统会在监控界面显示警告标识</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">操作说明</div>
+                        <div class="feature-desc">用户无需手动操作，系统自动运行，但需要关注异常提示</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow"></div>
+
+            <!-- 第二步：AI风险评估 -->
+            <div class="step">
+                <h2 class="step-title">AI风险评估 <span class="auto-badge">智能化</span></h2>
+                <div class="step-content">
+                    <div class="feature">
+                        <div class="feature-title">自动触发</div>
+                        <div class="feature-desc">当监测数据异常时，系统自动启动AI风险评估流程</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">评估过程</div>
+                        <div class="feature-desc">AI算法综合分析气象、地质、水文数据，计算风险等级</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">结果展示</div>
+                        <div class="feature-desc">评估结果在"风险分析"界面显示，包括风险等级、影响范围、置信度</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">用户查看</div>
+                        <div class="feature-desc">值班人员可以点击"查看详情"按钮查看详细的分析过程和数据依据</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow"></div>
+
+            <!-- 第三步：预警草案生成 -->
+            <div class="step">
+                <h2 class="step-title">预警草案生成 <span class="auto-badge">智能生成</span></h2>
+                <div class="step-content">
+                    <div class="feature">
+                        <div class="feature-title">自动生成</div>
+                        <div class="feature-desc">系统根据风险评估结果自动生成预警内容草案</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">草案内容</div>
+                        <div class="feature-desc">包括预警等级、影响区域、风险描述、建议措施、有效时间等</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">模板应用</div>
+                        <div class="feature-desc">系统根据预警类型自动选择相应的内容模板</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">智能优化</div>
+                        <div class="feature-desc">AI算法根据历史预警效果优化预警内容的表达方式</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow"></div>
+
+            <!-- 第四步：人工审核确认 -->
+            <div class="step">
+                <h2 class="step-title">人工审核确认 <span class="manual-badge">可选操作</span></h2>
+                <div class="step-content">
+                    <div class="feature">
+                        <div class="feature-title">通知推送</div>
+                        <div class="feature-desc">系统通过短信、电话、APP推送等方式通知值班人员</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">登录审核</div>
+                        <div class="feature-desc">值班人员收到通知后登录系统，进入"预警审核"界面</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">内容审核</div>
+                        <div class="feature-desc">查看预警草案内容，可以进行修改和完善</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">审核操作</div>
+                        <div class="feature-desc">点击"通过审核"或"退回修改"按钮，填写审核意见</div>
+                    </div>
+                </div>
+                <div class="special-note">
+                    <div class="note-title">⚡ 特别说明</div>
+                    <div>默认情况下无需人工审核，系统自动通过。紧急情况下可启用快速发布模式。</div>
+                </div>
+            </div>
+
+            <div class="arrow"></div>
+
+            <!-- 第五步：预警发布 -->
+            <div class="step">
+                <h2 class="step-title">预警发布 <span class="auto-badge">多渠道</span></h2>
+                <div class="step-content">
+                    <div class="feature">
+                        <div class="feature-title">发布确认</div>
+                        <div class="feature-desc">审核通过后，系统显示发布确认界面</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">渠道选择</div>
+                        <div class="feature-desc">选择发布渠道（短信、AI电话、APP、网站、广播等）</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">目标设置</div>
+                        <div class="feature-desc">设置接收对象（按地区、部门、角色筛选）</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">发布执行</div>
+                        <div class="feature-desc">点击"立即发布"按钮，系统自动通过各渠道发布预警</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow"></div>
+
+            <!-- 第六步：效果跟踪 -->
+            <div class="step">
+                <h2 class="step-title">效果跟踪 <span class="auto-badge">智能分析</span></h2>
+                <div class="step-content">
+                    <div class="feature">
+                        <div class="feature-title">发布监控</div>
+                        <div class="feature-desc">系统实时监控预警发布状态，显示发送成功率</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">反馈收集</div>
+                        <div class="feature-desc">收集用户阅读确认、响应行动等反馈信息</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">效果评估</div>
+                        <div class="feature-desc">预警结束后，系统自动生成效果评估报告</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-title">模型优化</div>
+                        <div class="feature-desc">根据效果评估结果优化AI预警模型，持续改进系统性能</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.step');
+            
+            steps.forEach((step, index) => {
+                step.style.opacity = '0';
+                step.style.transform = 'translateY(50px)';
+                
+                setTimeout(() => {
+                    step.style.transition = 'all 0.6s ease';
+                    step.style.opacity = '1';
+                    step.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+
+            // 点击步骤展开/收缩效果
+            steps.forEach(step => {
+                step.addEventListener('click', function() {
+                    this.classList.toggle('expanded');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -5,7 +5,9 @@
   "main": "proxy-server.js",
   "scripts": {
     "start": "node proxy-server.js",
-    "dev": "node start-cesium.js"
+    "dev": "node start-cesium.js",
+    "server": "node proxy-server.js",
+    "cesium": "node start-cesium.js"
   },
   "keywords": [
     "cesium",

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地质灾害预警系统 | 基于CesiumJS的3D地球监控平台</title>
+    <meta name="description" content="地质灾害预警系统 - 基于CesiumJS的3D地球监控大屏，提供实时地质灾害监测、预警和可视化功能">
+    <meta name="keywords" content="地质灾害,预警系统,CesiumJS,3D地球,监控大屏,地质监测">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #0c1445 0%, #1a2980 50%, #26d0ce 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            padding: 40px 0;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00D4FF;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+            to { text-shadow: 0 0 50px rgba(0, 212, 255, 0.8); }
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #B8C5D6;
+            margin-bottom: 30px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #8A9BA8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            padding: 60px 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 24px;
+            color: #00D4FF;
+            margin-bottom: 15px;
+        }
+
+        .feature-description {
+            color: #B8C5D6;
+            line-height: 1.6;
+        }
+
+        .navigation-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .nav-title {
+            font-size: 32px;
+            color: #00FF88;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .nav-card {
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.1));
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(0, 255, 136, 0.2));
+        }
+
+        .nav-card-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .nav-card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00D4FF;
+        }
+
+        .nav-card-description {
+            font-size: 14px;
+            color: #B8C5D6;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            color: #8A9BA8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 36px;
+            }
+            
+            .subtitle {
+                font-size: 18px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 class="logo">🌍 地质灾害预警系统</h1>
+            <p class="subtitle">基于 CesiumJS 的 3D 地球监控平台</p>
+            <p class="description">
+                集成实时监测、智能预警、可视化展示于一体的综合性地质灾害防控系统，
+                为地质安全提供全方位的技术保障和决策支持。
+            </p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🗺️</span>
+                    <h3 class="feature-title">3D 地球可视化</h3>
+                    <p class="feature-description">基于 CesiumJS 技术，提供高精度的三维地球展示，支持多种地图图层和地形数据加载。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">⚠️</span>
+                    <h3 class="feature-title">实时预警监测</h3>
+                    <p class="feature-description">集成多源监测数据，实现地质灾害的实时监测、智能分析和及时预警。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3 class="feature-title">数据可视化</h3>
+                    <p class="feature-description">丰富的图表展示和数据分析功能，支持多维度的地质数据可视化呈现。</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">🎛️</span>
+                    <h3 class="feature-title">智能管控</h3>
+                    <p class="feature-description">提供完整的管理控制台，支持系统配置、用户管理和业务流程管控。</p>
+                </div>
+            </div>
+
+            <div class="navigation-section">
+                <h2 class="nav-title">🚀 快速访问</h2>
+                <div class="nav-grid">
+                    <a href="/cesium-stable.html" class="nav-card">
+                        <span class="nav-card-icon">🌍</span>
+                        <div class="nav-card-title">CesiumJS 主页</div>
+                        <div class="nav-card-description">3D 地球展示和基础功能演示</div>
+                    </a>
+                    
+                    <a href="/原型页面/pc端/index.html" class="nav-card">
+                        <span class="nav-card-icon">🖥️</span>
+                        <div class="nav-card-title">PC端原型</div>
+                        <div class="nav-card-description">完整的桌面端用户界面</div>
+                    </a>
+                    
+                    <a href="/原型页面/pc端/pages/monitor/dashboard.html" class="nav-card">
+                        <span class="nav-card-icon">📊</span>
+                        <div class="nav-card-title">监控仪表板</div>
+                        <div class="nav-card-description">实时数据监控和分析面板</div>
+                    </a>
+                    
+                    <a href="/原型页面/pc端/pages/monitor/geological-disaster-dashboard.html" class="nav-card">
+                        <span class="nav-card-icon">🗺️</span>
+                        <div class="nav-card-title">地灾监控大屏</div>
+                        <div class="nav-card-description">专业的地质灾害监控大屏</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>© 2024 地质灾害预警系统 v1.0.0 | 基于 CesiumJS 技术构建</p>
+                <p>为地质安全保驾护航 🛡️</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 添加页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card, .nav-card');
+            
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

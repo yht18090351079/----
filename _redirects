@@ -1,0 +1,40 @@
+# 主页重定向
+/  /index.html  200
+
+# 友好的URL重定向
+/cesium  /cesium-stable.html  200
+/main    /cesium-stable.html  200
+/home    /index.html  200
+
+# 原型页面重定向
+/prototype/*  /原型页面/:splat  200
+/pc/*         /原型页面/pc端/:splat  200
+
+# 监控页面快捷访问
+/dashboard           /原型页面/pc端/pages/monitor/dashboard.html  200
+/monitor             /原型页面/pc端/pages/monitor/dashboard.html  200
+/geological-dashboard /原型页面/pc端/pages/monitor/geological-disaster-dashboard.html  200
+/disaster-monitor    /原型页面/pc端/pages/monitor/geological-disaster-dashboard.html  200
+
+# PC端页面快捷访问
+/pc-prototype        /原型页面/pc端/index.html  200
+/pc-index           /原型页面/pc端/index.html  200
+
+# 文档页面重定向
+/docs/*             /建设方案/:splat  200
+/documentation/*    /建设方案/:splat  200
+
+# API代理重定向（如果需要）
+/api/cesium-ion/*   https://api.cesium.com/:splat  200
+/api/cesium-assets/* https://assets.cesium.com/:splat  200
+
+# 处理中文路径的URL编码
+/原型页面/*          /原型页面/:splat  200
+/建设方案/*          /建设方案/:splat  200
+
+# 错误页面处理
+/404                /404.html  200
+/error              /404.html  200
+
+# 兜底重定向 - 所有未匹配的路径返回404
+/*                  /404.html  404

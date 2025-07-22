@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../../Users/yht/Downloads/Cesium-1.131"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "地灾预警"
+	}
+}

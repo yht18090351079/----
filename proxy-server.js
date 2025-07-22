@@ -9,7 +9,7 @@ const path = require('path');
 const url = require('url');
 
 // 服务器配置
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const HOST = 'localhost';
 
 // MIME类型映射
@@ -105,9 +105,10 @@ function serveLocalFile(req, res, filePath) {
                         <h1>404 - 文件未找到</h1>
                         <p>请求的文件 <code>${req.url}</code> 不存在。</p>
                         <p>文件路径: <code>${filePath}</code></p>
-                        <p><a href="/cesium-test.html">🌍 CesiumJS测试页面</a></p>
-                        <p><a href="/cesium-offline.html">🌍 离线版本</a></p>
-                        <p><a href="/原型页面/pc端/pages/monitor/dashboard-cesium.html">📊 监控大屏</a></p>
+                        <p><a href="/cesium-stable.html">🌍 CesiumJS稳定版</a></p>
+                        <p><a href="/geological-disaster-dashboard.html">📊 地灾监控大屏</a></p>
+                        <p><a href="/原型页面/pc端/index.html">🖥️ PC端原型页面</a></p>
+                        <p><a href="/原型页面/pc端/pages/monitor/dashboard.html">� 监控仪表板</a></p>
                     </body>
                 </html>
             `);
@@ -117,7 +118,10 @@ function serveLocalFile(req, res, filePath) {
         const ext = path.extname(filePath).toLowerCase();
         const contentType = mimeTypes[ext] || 'application/octet-stream';
 
-        console.log(`📁 服务本地文件: ${filePath} (${contentType})`);
+        // 只记录HTML文件的服务日志，减少噪音
+        if (ext === '.html') {
+            console.log(`📁 服务页面: ${path.basename(filePath)}`);
+        }
 
         fs.readFile(filePath, (err, data) => {
             if (err) {
@@ -168,11 +172,14 @@ const server = http.createServer((req, res) => {
         const parsedUrl = url.parse(req.url, true);
         let pathname = decodeURIComponent(parsedUrl.pathname);
 
-        console.log(`📥 ${req.method} ${pathname}`);
+        // 只记录非静态资源请求，减少日志噪音
+        if (!pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|otf)$/)) {
+            console.log(`📥 ${req.method} ${pathname}`);
+        }
 
         // 处理根路径
         if (pathname === '/') {
-            pathname = '/cesium-test.html';
+            pathname = '/cesium-stable.html';
         }
 
         // 检查是否需要代理到外部服务
@@ -213,31 +220,60 @@ const server = http.createServer((req, res) => {
 
 // 启动服务器
 server.listen(PORT, HOST, () => {
-    console.log(`🚀 CesiumJS代理服务器已启动`);
-    console.log(`📍 地址: http://${HOST}:${PORT}`);
-    console.log(`🌍 CesiumJS测试页面: http://${HOST}:${PORT}/cesium-test.html`);
-    console.log(`📊 监控大屏: http://${HOST}:${PORT}/原型页面/pc端/pages/monitor/dashboard-cesium.html`);
-    console.log(`🔄 代理功能已启用，支持Cesium Ion和Assets请求`);
-    console.log(`⏹️  按 Ctrl+C 停止服务器`);
+    console.log(`🚀 地质灾害预警系统代理服务器已启动`);
+    console.log(`📍 服务地址: http://${HOST}:${PORT}`);
+    console.log(`🕐 启动时间: ${new Date().toLocaleString()}`);
+    console.log(`📁 工作目录: ${__dirname}`);
+    console.log(`\n📄 可用页面:`);
+    console.log(`   🌍 CesiumJS稳定版: http://${HOST}:${PORT}/cesium-stable.html`);
+    console.log(`   📊 地灾监控大屏: http://${HOST}:${PORT}/原型页面/pc端/pages/monitor/geological-disaster-dashboard.html`);
+    console.log(`   🖥️  PC端原型页面: http://${HOST}:${PORT}/原型页面/pc端/index.html`);
+    console.log(`   📈 监控仪表板: http://${HOST}:${PORT}/原型页面/pc端/pages/monitor/dashboard.html`);
+    console.log(`\n� 服务功能:`);
+    console.log(`   ✅ 静态文件服务`);
+    console.log(`   ✅ CORS跨域支持`);
+    console.log(`   ✅ Cesium Ion API代理`);
+    console.log(`   ✅ Cesium Assets代理`);
+    console.log(`   ✅ 自动MIME类型识别`);
+    console.log(`\n⏹️  按 Ctrl+C 停止服务器`);
 });
 
 // 优雅关闭
 process.on('SIGINT', () => {
     console.log('\n🛑 正在关闭代理服务器...');
+    console.log('⏳ 等待现有连接完成...');
     server.close(() => {
-        console.log('✅ 代理服务器已关闭');
+        console.log('✅ 代理服务器已安全关闭');
+        console.log(`🕐 关闭时间: ${new Date().toLocaleString()}`);
         process.exit(0);
     });
 });
 
 // 错误处理
 server.on('error', (err) => {
+    console.log('\n' + '='.repeat(50));
+    console.error('❌ 服务器启动失败');
+    console.log('='.repeat(50));
+
     if (err.code === 'EADDRINUSE') {
-        console.error(`❌ 端口 ${PORT} 已被占用，请尝试其他端口`);
-        console.log(`💡 尝试运行: lsof -ti:${PORT} | xargs kill -9`);
+        console.error(`🚫 端口 ${PORT} 已被占用`);
+        console.log('\n💡 解决方案:');
+        console.log(`   1. 查找占用进程: lsof -ti:${PORT}`);
+        console.log(`   2. 终止占用进程: lsof -ti:${PORT} | xargs kill -9`);
+        console.log(`   3. 或使用其他端口: PORT=3000 npm start`);
+    } else if (err.code === 'EACCES') {
+        console.error(`🚫 权限不足，无法绑定端口 ${PORT}`);
+        console.log('\n💡 解决方案:');
+        console.log('   1. 使用大于1024的端口号');
+        console.log('   2. 或使用sudo运行（不推荐）');
     } else {
-        console.error('❌ 服务器错误:', err);
+        console.error(`🚫 未知错误: ${err.message}`);
+        console.log('\n💡 错误详情:');
+        console.log(`   代码: ${err.code}`);
+        console.log(`   消息: ${err.message}`);
     }
+
+    console.log('\n🔄 请解决问题后重新启动服务器\n');
     process.exit(1);
 });
 
@@ -246,7 +282,7 @@ process.on('uncaughtException', (err) => {
     console.error('未捕获的异常:', err);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason) => {
     console.error('未处理的Promise拒绝:', reason);
 });
 
