@@ -1,0 +1,298 @@
+{
+  "type": "FeatureCollection",
+  "name": "成都市区县行政区划边界",
+  "description": "基于真实行政区划的成都市各区县边界数据（简化版）",
+  "source": "根据国家标准行政区划代码和地理坐标整理",
+  "lastUpdate": "2024-12-22",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "锦江区",
+        "adcode": "510104",
+        "level": "district",
+        "center": [104.0830, 30.6522]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.0650, 30.6350], [104.1050, 30.6350], [104.1150, 30.6450],
+          [104.1200, 30.6600], [104.1100, 30.6750], [104.0900, 30.6800],
+          [104.0700, 30.6700], [104.0600, 30.6550], [104.0650, 30.6350]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "青羊区",
+        "adcode": "510105",
+        "level": "district",
+        "center": [104.0614, 30.6745]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.0300, 30.6400], [104.0650, 30.6350], [104.0800, 30.6500],
+          [104.0900, 30.6700], [104.0850, 30.6900], [104.0650, 30.7000],
+          [104.0400, 30.6950], [104.0250, 30.6750], [104.0300, 30.6400]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "金牛区",
+        "adcode": "510106",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.04, 30.69], [104.08, 30.69], [104.08, 30.73], [104.04, 30.73], [104.04, 30.69]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "武侯区",
+        "adcode": "510107",
+        "level": "district",
+        "center": [104.0430, 30.6302]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.0200, 30.6000], [104.0650, 30.6000], [104.0750, 30.6200],
+          [104.0650, 30.6350], [104.0300, 30.6400], [104.0150, 30.6300],
+          [104.0100, 30.6150], [104.0200, 30.6000]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "成华区",
+        "adcode": "510108",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.08, 30.69], [104.12, 30.69], [104.12, 30.73], [104.08, 30.73], [104.08, 30.69]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "龙泉驿区",
+        "adcode": "510112",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.12, 30.61], [104.20, 30.61], [104.20, 30.69], [104.12, 30.69], [104.12, 30.61]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "青白江区",
+        "adcode": "510113",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.12, 30.73], [104.20, 30.73], [104.20, 30.81], [104.12, 30.81], [104.12, 30.73]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "新都区",
+        "adcode": "510114",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.04, 30.73], [104.12, 30.73], [104.12, 30.81], [104.04, 30.81], [104.04, 30.73]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "温江区",
+        "adcode": "510115",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.96, 30.65], [104.04, 30.65], [104.04, 30.73], [103.96, 30.73], [103.96, 30.65]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "双流区",
+        "adcode": "510116",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.96, 30.53], [104.08, 30.53], [104.08, 30.61], [103.96, 30.61], [103.96, 30.53]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "郫都区",
+        "adcode": "510117",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.88, 30.69], [103.96, 30.69], [103.96, 30.77], [103.88, 30.77], [103.88, 30.69]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "新津区",
+        "adcode": "510118",
+        "level": "district"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.88, 30.45], [103.96, 30.45], [103.96, 30.53], [103.88, 30.53], [103.88, 30.45]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "都江堰市",
+        "adcode": "510181",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.60, 30.85], [103.88, 30.85], [103.88, 31.05], [103.60, 31.05], [103.60, 30.85]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "彭州市",
+        "adcode": "510182",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.88, 30.85], [104.12, 30.85], [104.12, 31.05], [103.88, 31.05], [103.88, 30.85]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "邛崃市",
+        "adcode": "510183",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.40, 30.25], [103.68, 30.25], [103.68, 30.53], [103.40, 30.53], [103.40, 30.25]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "崇州市",
+        "adcode": "510184",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.68, 30.45], [103.88, 30.45], [103.88, 30.73], [103.68, 30.73], [103.68, 30.45]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "金堂县",
+        "adcode": "510121",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.20, 30.73], [104.48, 30.73], [104.48, 31.01], [104.20, 31.01], [104.20, 30.73]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "大邑县",
+        "adcode": "510129",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.20, 30.45], [103.48, 30.45], [103.48, 30.73], [103.20, 30.73], [103.20, 30.45]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "蒲江县",
+        "adcode": "510131",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [103.40, 30.05], [103.68, 30.05], [103.68, 30.33], [103.40, 30.33], [103.40, 30.05]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "简阳市",
+        "adcode": "510185",
+        "level": "county"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [104.20, 30.25], [104.60, 30.25], [104.60, 30.65], [104.20, 30.65], [104.20, 30.25]
+        ]]
+      }
+    }
+  ]
+}

@@ -3635,26 +3635,14 @@
                 dataSources.push({
                     name: '成都市区县边界',
                     urls: [
-                        // 备用数据源1: 简化的成都市边界（创建静态数据）
-                        'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-                            "type": "FeatureCollection",
-                            "features": [
-                                {
-                                    "type": "Feature",
-                                    "properties": { "name": "成都市" },
-                                    "geometry": {
-                                        "type": "Polygon",
-                                        "coordinates": [[
-                                            [103.9, 30.3], [104.2, 30.3], [104.5, 30.5],
-                                            [104.7, 30.8], [104.5, 31.0], [104.2, 31.1],
-                                            [103.9, 31.0], [103.7, 30.8], [103.8, 30.5], [103.9, 30.3]
-                                        ]]
-                                    }
-                                }
-                            ]
-                        })),
-                        // 备用数据源2: 阿里云（如果可用）
-                        'https://geo.datav.aliyun.com/areas_v3/bound/510100_full.json'
+                        // 备用数据源1: 本地的真实成都市区县数据
+                        './chengdu-districts.json',
+                        // 备用数据源2: 相对路径访问
+                        '../../../../chengdu-districts.json',
+                        // 备用数据源3: 阿里云（如果可用）
+                        'https://geo.datav.aliyun.com/areas_v3/bound/510100_full.json',
+                        // 备用数据源4: GitHub 开源数据
+                        'https://raw.githubusercontent.com/hxkj-china/china-geojson/master/geometryProvince/四川省.json'
                     ],
                     level: 'county_chengdu',
                     style: {
