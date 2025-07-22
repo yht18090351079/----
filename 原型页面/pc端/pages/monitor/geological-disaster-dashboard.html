@@ -3409,7 +3409,11 @@
 
             // 清除之前的动画
             if (animationTimers.has(entity.id)) {
-                clearInterval(animationTimers.get(entity.id));
+                const oldData = animationTimers.get(entity.id);
+                if (oldData.timer) clearInterval(oldData.timer);
+                if (oldData.ripples) {
+                    oldData.ripples.forEach(ripple => viewer.entities.remove(ripple));
+                }
                 animationTimers.delete(entity.id);
             }
 
@@ -3419,80 +3423,65 @@
             const longitude = Cesium.Math.toDegrees(cartographic.longitude);
             const latitude = Cesium.Math.toDegrees(cartographic.latitude);
 
-            // 创建多个波纹圆圈，使用CallbackProperty实现平滑动画
+            // 创建波纹圆圈 - 修复地形兼容性问题
             const ripples = [];
-            const startTime = Cesium.JulianDate.now();
-
-            for (let i = 0; i < 3; i++) {
-                const delay = i * 0.8; // 每个波纹延迟0.8秒
-
+            for (let i = 0; i < 2; i++) {
                 const ripple = viewer.entities.add({
-                    position: Cesium.Cartesian3.fromDegrees(longitude, latitude),
+                    position: Cesium.Cartesian3.fromDegrees(longitude, latitude, 10), // 设置明确高度
                     ellipse: {
-                        semiMajorAxis: new Cesium.CallbackProperty(function(time, result) {
-                            const elapsed = Cesium.JulianDate.secondsDifference(time, startTime) - delay;
-                            if (elapsed < 0) return 0;
-
-                            const progress = (elapsed % 3) / 3; // 3秒周期
-                            return 100 + progress * 1900; // 100-2000米
-                        }, false),
-
-                        semiMinorAxis: new Cesium.CallbackProperty(function(time, result) {
-                            const elapsed = Cesium.JulianDate.secondsDifference(time, startTime) - delay;
-                            if (elapsed < 0) return 0;
-
-                            const progress = (elapsed % 3) / 3; // 3秒周期
-                            return 100 + progress * 1900; // 100-2000米
-                        }, false),
-
-                        material: new Cesium.ColorMaterialProperty(
-                            new Cesium.CallbackProperty(function(time, result) {
-                                const elapsed = Cesium.JulianDate.secondsDifference(time, startTime) - delay;
-                                if (elapsed < 0) return Cesium.Color.TRANSPARENT;
-
-                                const progress = (elapsed % 3) / 3;
-                                const alpha = Math.max(0, 0.3 * (1 - progress));
-                                return Cesium.Color.ORANGE.withAlpha(alpha);
-                            }, false)
-                        ),
-
-                        outline: true,
-                        outlineColor: new Cesium.CallbackProperty(function(time, result) {
-                            const elapsed = Cesium.JulianDate.secondsDifference(time, startTime) - delay;
-                            if (elapsed < 0) return Cesium.Color.TRANSPARENT;
-
-                            const progress = (elapsed % 3) / 3;
-                            const alpha = Math.max(0, 0.6 * (1 - progress));
-                            return Cesium.Color.ORANGE.withAlpha(alpha);
-                        }, false),
-
-                        outlineWidth: 2,
-                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-                    },
-                    properties: {
-                        type: 'ripple',
-                        parentEntity: entity.id
+                        semiMajorAxis: 500,
+                        semiMinorAxis: 500,
+                        height: 10, // 明确设置高度
+                        material: Cesium.Color.ORANGE.withAlpha(0.2),
+                        outline: false, // 禁用outline避免地形问题
+                        heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
                     }
                 });
                 ripples.push(ripple);
             }
 
-            // 中心点的轻微脉冲动效
-            entity.point.color = new Cesium.CallbackProperty(function(time, result) {
-                const elapsed = Cesium.JulianDate.secondsDifference(time, startTime);
-                const pulse = (Math.sin(elapsed * 2) + 1) / 2; // 2Hz脉冲
-                const alpha = 0.8 + pulse * 0.2;
-                return Cesium.Color.ORANGE.withAlpha(alpha);
-            }, false);
+            // 动画逻辑
+            let time = 0;
+            const timer = setInterval(() => {
+                time += 0.05;
 
-            entity.point.pixelSize = new Cesium.CallbackProperty(function(time, result) {
-                const elapsed = Cesium.JulianDate.secondsDifference(time, startTime);
-                const pulse = (Math.sin(elapsed * 2) + 1) / 2; // 2Hz脉冲
-                return 18 + pulse * 4;
-            }, false);
+                // 更新波纹
+                ripples.forEach((ripple, index) => {
+                    const phase = time - index * 1.5; // 1.5秒延迟
+                    if (phase < 0) {
+                        // 隐藏未开始的波纹
+                        ripple.ellipse.semiMajorAxis = 1;
+                        ripple.ellipse.semiMinorAxis = 1;
+                        ripple.ellipse.material = Cesium.Color.TRANSPARENT;
+                        return;
+                    }
 
-            // 存储波纹信息（不需要timer了）
-            animationTimers.set(entity.id, { ripples });
+                    const progress = (phase % 3) / 3; // 3秒周期
+                    const radius = 200 + progress * 1300; // 200-1500米
+
+                    // 使用平滑的缓动函数
+                    const easeOut = 1 - Math.pow(1 - progress, 3); // 缓出效果
+                    const alpha = Math.max(0, 0.25 * (1 - easeOut));
+
+                    ripple.ellipse.semiMajorAxis = radius;
+                    ripple.ellipse.semiMinorAxis = radius;
+                    ripple.ellipse.material = Cesium.Color.ORANGE.withAlpha(alpha);
+                });
+
+                // 中心点平滑脉冲
+                const rawPulse = (Math.sin(time * 1.5) + 1) / 2; // 降低频率到1.5Hz
+                const smoothPulse = rawPulse < 0.5 ?
+                    2 * rawPulse * rawPulse :
+                    1 - Math.pow(-2 * rawPulse + 2, 2) / 2; // 缓入缓出
+
+                entity.point.color = new Cesium.Color(1.0, 0.5 + smoothPulse * 0.3, 0.0, 0.9 + smoothPulse * 0.1);
+                entity.point.pixelSize = 18 + smoothPulse * 4;
+                entity.point.outlineColor = Cesium.Color.YELLOW.withAlpha(0.4 + smoothPulse * 0.3);
+                entity.point.outlineWidth = 3 + smoothPulse * 1;
+
+            }, 50); // 20FPS
+
+            animationTimers.set(entity.id, { timer, ripples });
             console.log(`🌊 预警设备波纹扩散动效已启用: ${entity.name}`);
         }
 
@@ -3501,21 +3490,21 @@
             if (animationTimers.has(entity.id)) {
                 const animationData = animationTimers.get(entity.id);
 
-                // 移除波纹实体
-                if (animationData.ripples) {
-                    animationData.ripples.forEach(ripple => {
-                        viewer.entities.remove(ripple);
-                    });
+                // 清除定时器
+                if (animationData.timer) {
+                    clearInterval(animationData.timer);
                 }
 
                 // 重置中心点属性为静态
                 if (entity.point) {
                     entity.point.color = Cesium.Color.ORANGE;
                     entity.point.pixelSize = 18;
+                    entity.point.outlineColor = Cesium.Color.WHITE;
+                    entity.point.outlineWidth = 3;
                 }
 
                 animationTimers.delete(entity.id);
-                console.log(`🛑 停止设备波纹动效: ${entity.name}`);
+                console.log(`🛑 停止设备脉冲动效: ${entity.name}`);
             }
         }
 

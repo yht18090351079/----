@@ -14,9 +14,9 @@
 
 # 重定向规则 - 处理单页应用路由
 [[redirects]]
-  # 默认首页重定向到 cesium-stable.html
+  # 默认首页重定向到 PC端原型页面（主业务页面）
   from = "/"
-  to = "/cesium-stable.html"
+  to = "/原型页面/pc端/index.html"
   status = 200
 
 [[redirects]]

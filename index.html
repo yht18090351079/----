@@ -6,6 +6,14 @@
     <title>地质灾害预警系统 | 基于CesiumJS的3D地球监控平台</title>
     <meta name="description" content="地质灾害预警系统 - 基于CesiumJS的3D地球监控大屏，提供实时地质灾害监测、预警和可视化功能">
     <meta name="keywords" content="地质灾害,预警系统,CesiumJS,3D地球,监控大屏,地质监测">
+
+    <!-- 自动重定向到PC端原型页面 -->
+    <script>
+        // 3秒后自动跳转到主业务页面
+        setTimeout(function() {
+            window.location.href = '/原型页面/pc端/index.html';
+        }, 3000);
+    </script>
     
     <style>
         * {
@@ -42,6 +50,56 @@
             text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
             margin-bottom: 10px;
             animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .redirect-notice {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00FF88;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .redirect-notice h2 {
+            color: #00FF88;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .redirect-notice p {
+            color: #B8C5D6;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            font-size: 32px;
+            color: #00D4FF;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .quick-access {
+            margin-top: 20px;
+        }
+
+        .quick-access a {
+            display: inline-block;
+            background: linear-gradient(45deg, #00FF88, #00CC6A);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .quick-access a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
         }
 
         @keyframes glow {
@@ -201,6 +259,16 @@
                 集成实时监测、智能预警、可视化展示于一体的综合性地质灾害防控系统，
                 为地质安全提供全方位的技术保障和决策支持。
             </p>
+
+            <!-- 重定向提示 -->
+            <div class="redirect-notice">
+                <h2>🚀 正在跳转到主业务系统</h2>
+                <p>系统将在 <span class="countdown" id="countdown">3</span> 秒后自动跳转到PC端原型页面</p>
+                <div class="quick-access">
+                    <a href="/原型页面/pc端/index.html">立即进入系统</a>
+                    <a href="#" onclick="cancelRedirect()">留在此页</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -235,16 +303,16 @@
             <div class="navigation-section">
                 <h2 class="nav-title">🚀 快速访问</h2>
                 <div class="nav-grid">
+                    <a href="/原型页面/pc端/index.html" class="nav-card" style="background: linear-gradient(45deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2)); border: 2px solid #00FF88;">
+                        <span class="nav-card-icon">🖥️</span>
+                        <div class="nav-card-title">PC端原型 ⭐ 主业务系统</div>
+                        <div class="nav-card-description">完整的桌面端用户界面 - 系统核心功能</div>
+                    </a>
+
                     <a href="/cesium-stable.html" class="nav-card">
                         <span class="nav-card-icon">🌍</span>
-                        <div class="nav-card-title">CesiumJS 主页</div>
+                        <div class="nav-card-title">CesiumJS 演示</div>
                         <div class="nav-card-description">3D 地球展示和基础功能演示</div>
-                    </a>
-                    
-                    <a href="/原型页面/pc端/index.html" class="nav-card">
-                        <span class="nav-card-icon">🖥️</span>
-                        <div class="nav-card-title">PC端原型</div>
-                        <div class="nav-card-description">完整的桌面端用户界面</div>
                     </a>
                     
                     <a href="/原型页面/pc端/pages/monitor/dashboard.html" class="nav-card">
@@ -273,14 +341,56 @@
     </footer>
 
     <script>
-        // 添加页面加载动画
+        let redirectTimer;
+        let countdownTimer;
+        let timeLeft = 3;
+
+        // 倒计时功能
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+
+            countdownTimer = setInterval(function() {
+                timeLeft--;
+                countdownElement.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+        }
+
+        // 取消重定向
+        function cancelRedirect() {
+            clearTimeout(redirectTimer);
+            clearInterval(countdownTimer);
+
+            const notice = document.querySelector('.redirect-notice');
+            notice.innerHTML = `
+                <h2>✅ 已取消自动跳转</h2>
+                <p>您可以继续浏览此页面，或手动选择要访问的功能模块</p>
+                <div class="quick-access">
+                    <a href="/原型页面/pc端/index.html">进入PC端系统</a>
+                </div>
+            `;
+        }
+
+        // 页面加载完成后启动
         document.addEventListener('DOMContentLoaded', function() {
+            // 启动倒计时
+            startCountdown();
+
+            // 设置重定向定时器
+            redirectTimer = setTimeout(function() {
+                window.location.href = '/原型页面/pc端/index.html';
+            }, 3000);
+
+            // 添加页面加载动画
             const cards = document.querySelectorAll('.feature-card, .nav-card');
-            
+
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
-                
+
                 setTimeout(() => {
                     card.style.transition = 'all 0.6s ease';
                     card.style.opacity = '1';

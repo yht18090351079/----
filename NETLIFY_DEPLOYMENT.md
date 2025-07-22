@@ -60,11 +60,12 @@
 
 部署后可通过以下URL访问：
 
-- **主页**: `https://your-site.netlify.app/`
-- **CesiumJS 稳定版**: `https://your-site.netlify.app/cesium-stable.html`
-- **PC端原型**: `https://your-site.netlify.app/原型页面/pc端/index.html`
+- **主页**: `https://your-site.netlify.app/` - 自动跳转到PC端原型
+- **PC端原型** ⭐: `https://your-site.netlify.app/原型页面/pc端/index.html` - **主业务系统**
 - **监控仪表板**: `https://your-site.netlify.app/dashboard`
 - **地灾监控大屏**: `https://your-site.netlify.app/geological-dashboard`
+- **CesiumJS 演示**: `https://your-site.netlify.app/cesium-stable.html`
+- **系统介绍页**: `https://your-site.netlify.app/index.html`
 
 ## 注意事项
 

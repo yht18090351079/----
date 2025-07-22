@@ -29,11 +29,12 @@ npm start
 
 ### 主要页面
 
-- **主页**: `/` 或 `/index.html`
-- **CesiumJS 演示**: `/cesium-stable.html`
-- **PC端原型**: `/原型页面/pc端/index.html`
+- **主页**: `/` - 自动跳转到PC端原型页面
+- **PC端原型** ⭐: `/原型页面/pc端/index.html` - **主业务系统**
 - **监控仪表板**: `/原型页面/pc端/pages/monitor/dashboard.html`
 - **地灾监控大屏**: `/原型页面/pc端/pages/monitor/geological-disaster-dashboard.html`
+- **CesiumJS 演示**: `/cesium-stable.html`
+- **系统介绍页**: `/index.html`
 
 ## 🌐 Netlify 部署
 
