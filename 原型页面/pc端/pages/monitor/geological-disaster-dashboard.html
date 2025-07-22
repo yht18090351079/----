@@ -3635,14 +3635,29 @@
                 dataSources.push({
                     name: '成都市区县边界',
                     urls: [
-                        // 备用数据源1: 本地的真实成都市区县数据
-                        './chengdu-districts.json',
-                        // 备用数据源2: 相对路径访问
-                        '../../../../chengdu-districts.json',
-                        // 备用数据源3: 阿里云（如果可用）
-                        'https://geo.datav.aliyun.com/areas_v3/bound/510100_full.json',
-                        // 备用数据源4: GitHub 开源数据
-                        'https://raw.githubusercontent.com/hxkj-china/china-geojson/master/geometryProvince/四川省.json'
+                        // 备用数据源1: 使用开源的中国行政区划数据
+                        'https://raw.githubusercontent.com/modood/Administrative-divisions-of-China/master/dist/pc-code.json',
+                        // 备用数据源2: 另一个可靠的开源数据源
+                        'https://raw.githubusercontent.com/airyland/china-area-data/master/v4/data.json',
+                        // 备用数据源3: 使用 ECharts 的地图数据
+                        'https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/sichuan.json',
+                        // 备用数据源4: 如果以上都失败，显示提示信息而不是错误边界
+                        'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({
+                            "type": "FeatureCollection",
+                            "features": [
+                                {
+                                    "type": "Feature",
+                                    "properties": {
+                                        "name": "成都市（数据加载中）",
+                                        "note": "正在尝试加载真实的行政区划数据..."
+                                    },
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [104.0668, 30.5728]
+                                    }
+                                }
+                            ]
+                        }))
                     ],
                     level: 'county_chengdu',
                     style: {
@@ -4158,20 +4173,55 @@
                 }
             }
 
-            // 所有数据源都失败了
+            // 所有数据源都失败了，显示用户友好的提示
             console.error(`❌ ${source.name} 所有数据源都失败了`);
-            return { success: false, error: lastError };
+            await handleBoundaryLoadFailure(source, lastError);
+            return { success: false, error: lastError, fallbackShown: true };
         }
 
-        // 简化的边界加载失败处理
-        function handleBoundaryLoadFailure(source, error) {
-            console.warn(`⚠️ ${source.name} 加载失败，将显示简化边界`);
+        // 边界加载失败处理 - 显示用户友好的提示
+        async function handleBoundaryLoadFailure(source, error) {
+            console.warn(`⚠️ ${source.name} 加载失败，显示提示信息`);
 
-            // 可以在这里添加简化的几何图形作为备用
-            // 例如：显示一个简单的矩形边界框
-            if (source.level === 'county_chengdu') {
-                console.log('🔄 显示成都市简化边界框');
-                // 这里可以添加简化的成都市边界
+            try {
+                // 创建一个提示数据源
+                const fallbackDataSource = new Cesium.CustomDataSource(source.name + '_提示');
+                boundaryLayers[source.level] = fallbackDataSource;
+                await viewer.dataSources.add(fallbackDataSource);
+
+                if (source.level === 'county_chengdu') {
+                    // 在成都市中心显示提示信息
+                    fallbackDataSource.entities.add({
+                        name: '边界数据加载提示',
+                        position: Cesium.Cartesian3.fromDegrees(104.0668, 30.5728, 1000),
+                        label: {
+                            text: '成都市区县边界数据加载中...\n请检查网络连接',
+                            font: '16pt Microsoft YaHei',
+                            fillColor: Cesium.Color.YELLOW,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            pixelOffset: new Cesium.Cartesian2(0, -50),
+                            showBackground: true,
+                            backgroundColor: Cesium.Color.BLACK.withAlpha(0.7),
+                            backgroundPadding: new Cesium.Cartesian2(10, 5)
+                        },
+                        point: {
+                            pixelSize: 15,
+                            color: Cesium.Color.YELLOW,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2
+                        }
+                    });
+
+                    console.log('📍 已在成都市中心显示边界数据加载提示');
+                }
+
+                // 显示用户提示
+                showToast('warning', '边界数据', `${source.name}加载失败，请检查网络连接`);
+
+            } catch (fallbackError) {
+                console.error('创建提示信息失败:', fallbackError);
             }
         }
 
