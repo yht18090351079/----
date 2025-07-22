@@ -3423,18 +3423,19 @@
             const longitude = Cesium.Math.toDegrees(cartographic.longitude);
             const latitude = Cesium.Math.toDegrees(cartographic.latitude);
 
-            // 创建波纹圆圈 - 修复地形兼容性问题
+            // 创建波纹圆圈 - 设置足够高度避免被地形遮挡
             const ripples = [];
             for (let i = 0; i < 2; i++) {
                 const ripple = viewer.entities.add({
-                    position: Cesium.Cartesian3.fromDegrees(longitude, latitude, 10), // 设置明确高度
+                    position: Cesium.Cartesian3.fromDegrees(longitude, latitude, 100), // 提高到100米高度
                     ellipse: {
                         semiMajorAxis: 500,
                         semiMinorAxis: 500,
-                        height: 10, // 明确设置高度
+                        height: 100, // 设置100米高度，确保在地形之上
                         material: Cesium.Color.ORANGE.withAlpha(0.2),
-                        outline: false, // 禁用outline避免地形问题
-                        heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+                        outline: false,
+                        heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND, // 相对地面高度
+                        extrudedHeight: 0 // 不拉伸
                     }
                 });
                 ripples.push(ripple);
@@ -3443,43 +3444,52 @@
             // 动画逻辑
             let time = 0;
             const timer = setInterval(() => {
-                time += 0.05;
+                time += 0.1; // 增加时间步长
+
+                console.log(`🌊 动画更新 time: ${time.toFixed(2)}`);
 
                 // 更新波纹
                 ripples.forEach((ripple, index) => {
-                    const phase = time - index * 1.5; // 1.5秒延迟
+                    const phase = time - index * 2; // 2秒延迟，更明显
+
                     if (phase < 0) {
                         // 隐藏未开始的波纹
-                        ripple.ellipse.semiMajorAxis = 1;
-                        ripple.ellipse.semiMinorAxis = 1;
+                        ripple.ellipse.semiMajorAxis = 50;
+                        ripple.ellipse.semiMinorAxis = 50;
                         ripple.ellipse.material = Cesium.Color.TRANSPARENT;
+                        console.log(`波纹 ${index} 等待中...`);
                         return;
                     }
 
-                    const progress = (phase % 3) / 3; // 3秒周期
-                    const radius = 200 + progress * 1300; // 200-1500米
+                    const progress = (phase % 4) / 4; // 4秒周期，更慢
+                    const radius = 100 + progress * 1400; // 100-1500米
 
-                    // 使用平滑的缓动函数
-                    const easeOut = 1 - Math.pow(1 - progress, 3); // 缓出效果
-                    const alpha = Math.max(0, 0.25 * (1 - easeOut));
+                    // 使用极高的透明度和鲜艳颜色，确保非常显眼
+                    let alpha, color;
+                    if (progress < 0.5) {
+                        // 前50%时间使用几乎不透明的颜色
+                        alpha = 0.95; // 几乎完全不透明
+                        color = new Cesium.Color(1.0, 0.2, 0.0, alpha); // 鲜艳的红橙色
+                    } else {
+                        // 后50%时间仍然保持较高透明度
+                        alpha = Math.max(0.6, 0.95 * (1 - (progress - 0.5) / 0.5));
+                        color = new Cesium.Color(1.0, 0.3, 0.0, alpha); // 橙红色
+                    }
 
                     ripple.ellipse.semiMajorAxis = radius;
                     ripple.ellipse.semiMinorAxis = radius;
-                    ripple.ellipse.material = Cesium.Color.ORANGE.withAlpha(alpha);
+                    ripple.ellipse.material = color;
+
+                    console.log(`波纹 ${index} - 半径: ${radius.toFixed(0)}m, 透明度: ${alpha.toFixed(2)}`);
                 });
 
-                // 中心点平滑脉冲
-                const rawPulse = (Math.sin(time * 1.5) + 1) / 2; // 降低频率到1.5Hz
-                const smoothPulse = rawPulse < 0.5 ?
-                    2 * rawPulse * rawPulse :
-                    1 - Math.pow(-2 * rawPulse + 2, 2) / 2; // 缓入缓出
+                // 中心点保持稳定
+                entity.point.color = Cesium.Color.ORANGE;
+                entity.point.pixelSize = 22;
+                entity.point.outlineColor = Cesium.Color.YELLOW.withAlpha(0.7);
+                entity.point.outlineWidth = 4;
 
-                entity.point.color = new Cesium.Color(1.0, 0.5 + smoothPulse * 0.3, 0.0, 0.9 + smoothPulse * 0.1);
-                entity.point.pixelSize = 18 + smoothPulse * 4;
-                entity.point.outlineColor = Cesium.Color.YELLOW.withAlpha(0.4 + smoothPulse * 0.3);
-                entity.point.outlineWidth = 3 + smoothPulse * 1;
-
-            }, 50); // 20FPS
+            }, 100); // 10FPS，更容易观察
 
             animationTimers.set(entity.id, { timer, ripples });
             console.log(`🌊 预警设备波纹扩散动效已启用: ${entity.name}`);
