@@ -2112,3 +2112,194 @@ select[multiple]::-webkit-scrollbar,
         min-width: 120px;
     }
 }
+
+/* 预警通知合并面板样式 - 页卡在顶部横向充满 */
+.warning-notification-panel {
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(ellipse at top right, rgba(0,255,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at bottom left, rgba(0,150,255,0.08) 0%, transparent 60%),
+        linear-gradient(225deg, rgba(0,30,60,0.25) 0%, rgba(0,15,40,0.45) 50%, rgba(0,8,25,0.65) 100%);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    box-shadow:
+        0 8px 32px rgba(0,0,0,0.4),
+        0 4px 16px rgba(0,255,255,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(0,0,0,0.2);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    animation: panelFloat 6s ease-in-out infinite;
+}
+
+.warning-notification-panel::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(180deg,
+        rgba(0,255,255,0.4) 0%,
+        rgba(0,150,255,0.3) 25%,
+        rgba(0,100,200,0.2) 50%,
+        rgba(0,80,160,0.15) 75%,
+        rgba(0,50,120,0.1) 100%);
+    border-radius: 22px;
+    z-index: -1;
+    animation: borderGlow 4s ease-in-out infinite alternate;
+}
+
+/* 页卡头部样式 - 直接在看板顶部，横向充满 */
+.panel-tabs-header {
+    display: flex;
+    width: 100%;
+    background: linear-gradient(135deg, rgba(0,25,50,0.8) 0%, rgba(0,15,35,0.9) 100%);
+    border-bottom: 2px solid rgba(0,255,255,0.3);
+    border-radius: 20px 20px 0 0; /* 只有顶部圆角，与面板顶部对齐 */
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 2px 8px rgba(0,0,0,0.3);
+}
+
+.panel-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 20px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(0,255,255,0.2); /* 页卡之间的分隔线 */
+    color: rgba(255,255,255,0.7);
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-tab:last-child {
+    border-right: none; /* 最后一个页卡不需要右边框 */
+}
+
+.panel-tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(0,255,255,0.1),
+        rgba(0,150,255,0.08),
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.panel-tab:hover::before {
+    left: 100%;
+}
+
+.panel-tab:hover {
+    color: rgba(255,255,255,0.9);
+    background: linear-gradient(135deg, rgba(0,255,255,0.08) 0%, rgba(0,150,255,0.06) 100%);
+}
+
+.panel-tab.active {
+    background: linear-gradient(135deg, rgba(0,255,255,0.15) 0%, rgba(0,150,255,0.12) 100%);
+    color: #00ffff;
+    text-shadow: 0 0 12px rgba(0,255,255,0.8);
+    box-shadow:
+        inset 0 -3px 0 rgba(0,255,255,0.6),
+        0 0 20px rgba(0,255,255,0.2);
+}
+
+.tab-icon {
+    font-size: 16px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.panel-tab.active .tab-icon {
+    opacity: 1;
+    text-shadow: 0 0 12px currentColor;
+    transform: scale(1.1);
+}
+
+.tab-text {
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.panel-tab.active .tab-text {
+    text-shadow: 0 0 8px rgba(0,255,255,0.5);
+}
+
+.tab-badge {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Orbitron', monospace;
+    padding: 3px 7px;
+    border-radius: 12px;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow:
+        0 2px 8px rgba(255,107,53,0.4),
+        0 0 12px rgba(255,107,53,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    animation: badgePulse 2s infinite;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* 页卡内容样式 */
+.tab-content {
+    display: none;
+    flex: 1;
+    overflow: hidden;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .panel-tabs-header {
+        flex-direction: column;
+    }
+
+    .panel-tab {
+        border-right: none;
+        border-bottom: 1px solid rgba(0,255,255,0.2);
+    }
+
+    .panel-tab:last-child {
+        border-bottom: none;
+    }
+}

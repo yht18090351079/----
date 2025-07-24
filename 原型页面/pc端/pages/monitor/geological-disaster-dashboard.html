@@ -92,44 +92,7 @@
 
         <!-- 左侧面板容器 -->
         <div class="left-panels-container">
-            <!-- 预警信息面板 -->
-            <div class="panel-wrapper">
-                <div class="warning-panel">
-                    <div class="panel-header">
-                        <h3 class="section-title">
-                            <span>△</span>
-                            最新预警信息
-                        </h3>
-                    </div>
-                    <div class="panel-content">
-                        <div class="warning-list" id="warningList">
-                            <div class="warning-item red">
-                                <div class="warning-header">
-                                    <span class="warning-level red">红色预警</span>
-                                    <span class="warning-time">14:25</span>
-                                </div>
-                                <div class="warning-content">XX村滑坡风险极高，请立即撤离</div>
-                            </div>
 
-                            <div class="warning-item orange">
-                                <div class="warning-header">
-                                    <span class="warning-level orange">橙色预警</span>
-                                    <span class="warning-time">13:45</span>
-                                </div>
-                                <div class="warning-content">XX镇泥石流风险较高，注意防范</div>
-                            </div>
-
-                            <div class="warning-item yellow">
-                                <div class="warning-header">
-                                    <span class="warning-level yellow">黄色预警</span>
-                                    <span class="warning-time">12:30</span>
-                                </div>
-                                <div class="warning-content">XX县地质灾害风险一般，保持警惕</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- 设备状态面板 -->
             <div class="panel-wrapper">
@@ -193,35 +156,76 @@
                 </div>
             </div>
 
-            <!-- 实时通知面板 -->
+            <!-- 预警通知合并面板 -->
             <div class="panel-wrapper">
-                <div class="notification-panel">
-                    <div class="panel-header">
-                        <h3 class="section-title">
-                            <span>◈</span>
-                            实时通知
-                        </h3>
+                <div class="warning-notification-panel">
+                    <!-- 页卡头部直接在看板顶部，横向充满 -->
+                    <div class="panel-tabs-header">
+                        <button class="panel-tab active" data-tab="warnings">
+                            <span class="tab-icon">△</span>
+                            <span class="tab-text">预警信息</span>
+                            <span class="tab-badge" id="warningBadge">3</span>
+                        </button>
+                        <button class="panel-tab" data-tab="notifications">
+                            <span class="tab-icon">◈</span>
+                            <span class="tab-text">实时通知</span>
+                            <span class="tab-badge" id="notificationBadge">4</span>
+                        </button>
                     </div>
+
+                    <!-- 面板内容区域 -->
                     <div class="panel-content">
-                        <div id="notificationList">
-                            <div class="notification-item">
-                                <span class="notification-content">系统自检完成，所有模块正常运行</span>
-                                <span class="notification-time">16:30</span>
-                            </div>
+                        <!-- 预警信息页卡内容 -->
+                        <div class="tab-content active" id="warningsTab">
+                            <div class="warning-list" id="warningListMerged">
+                                <div class="warning-item red">
+                                    <div class="warning-header">
+                                        <span class="warning-level red">红色预警</span>
+                                        <span class="warning-time">14:25</span>
+                                    </div>
+                                    <div class="warning-content">XX村滑坡风险极高，请立即撤离</div>
+                                </div>
 
-                            <div class="notification-item">
-                                <span class="notification-content">新增3个监测点数据接入</span>
-                                <span class="notification-time">16:25</span>
-                            </div>
+                                <div class="warning-item orange">
+                                    <div class="warning-header">
+                                        <span class="warning-level orange">橙色预警</span>
+                                        <span class="warning-time">13:45</span>
+                                    </div>
+                                    <div class="warning-content">XX镇泥石流风险较高，注意防范</div>
+                                </div>
 
-                            <div class="notification-item">
-                                <span class="notification-content">预警推送服务已启动</span>
-                                <span class="notification-time">16:20</span>
+                                <div class="warning-item yellow">
+                                    <div class="warning-header">
+                                        <span class="warning-level yellow">黄色预警</span>
+                                        <span class="warning-time">12:30</span>
+                                    </div>
+                                    <div class="warning-content">XX县地质灾害风险一般，保持警惕</div>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="notification-item">
-                                <span class="notification-content">数据备份任务执行成功</span>
-                                <span class="notification-time">16:15</span>
+                        <!-- 实时通知页卡内容 -->
+                        <div class="tab-content" id="notificationsTab">
+                            <div id="notificationListMerged">
+                                <div class="notification-item">
+                                    <span class="notification-content">系统自检完成，所有模块正常运行</span>
+                                    <span class="notification-time">16:30</span>
+                                </div>
+
+                                <div class="notification-item">
+                                    <span class="notification-content">新增3个监测点数据接入</span>
+                                    <span class="notification-time">16:25</span>
+                                </div>
+
+                                <div class="notification-item">
+                                    <span class="notification-content">预警推送服务已启动</span>
+                                    <span class="notification-time">16:20</span>
+                                </div>
+
+                                <div class="notification-item">
+                                    <span class="notification-content">数据备份任务执行成功</span>
+                                    <span class="notification-time">16:15</span>
+                                </div>
                             </div>
                         </div>
                     </div>

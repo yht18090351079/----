@@ -1939,3 +1939,166 @@ function simulateStatusChange() {
         console.log(`监测点状态变化: ${randomEntity.name} ${currentStatus} → ${newStatus}`);
     }
 }
+
+// ========== 页卡切换功能 ==========
+
+// 初始化页卡切换功能
+function initTabSwitching() {
+    console.log('🔄 初始化页卡切换功能...');
+
+    // 获取所有页卡按钮
+    const tabButtons = document.querySelectorAll('.panel-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    if (tabButtons.length === 0) {
+        console.warn('⚠️ 未找到页卡按钮，跳过页卡功能初始化');
+        return;
+    }
+
+    console.log(`📋 找到 ${tabButtons.length} 个页卡按钮`);
+
+    // 为每个页卡按钮添加点击事件
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            console.log(`🔄 切换到页卡: ${targetTab}`);
+
+            // 移除所有按钮的active类
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+
+            // 隐藏所有页卡内容
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // 激活当前按钮
+            this.classList.add('active');
+
+            // 显示对应的页卡内容
+            const targetContent = document.getElementById(targetTab + 'Tab');
+            if (targetContent) {
+                targetContent.classList.add('active');
+                console.log(`✅ 页卡内容已显示: ${targetTab}Tab`);
+
+                // 显示切换成功的提示
+                const tabText = this.querySelector('.tab-text').textContent;
+                showToast('info', '页卡切换', `已切换到${tabText}页卡`);
+
+                // 如果切换到预警信息，更新预警数据
+                if (targetTab === 'warnings') {
+                    updateWarningData();
+                }
+
+                // 如果切换到通知，更新通知数据
+                if (targetTab === 'notifications') {
+                    updateNotificationData();
+                }
+            } else {
+                console.error(`❌ 未找到页卡内容: ${targetTab}Tab`);
+            }
+        });
+    });
+
+    // 初始化页卡徽章数字
+    updateTabBadges();
+
+    console.log('✅ 页卡切换功能初始化完成');
+}
+
+// 更新页卡徽章数字
+function updateTabBadges() {
+    // 统计预警数量
+    const warningItems = document.querySelectorAll('#warningListMerged .warning-item');
+    const warningBadge = document.getElementById('warningBadge');
+    if (warningBadge) {
+        warningBadge.textContent = warningItems.length;
+    }
+
+    // 统计通知数量
+    const notificationItems = document.querySelectorAll('#notificationListMerged .notification-item');
+    const notificationBadge = document.getElementById('notificationBadge');
+    if (notificationBadge) {
+        notificationBadge.textContent = notificationItems.length;
+    }
+
+    console.log(`📊 页卡徽章更新: 预警${warningItems.length}个, 通知${notificationItems.length}个`);
+}
+
+// 更新预警数据
+function updateWarningData() {
+    console.log('🚨 更新预警数据...');
+
+    // 模拟添加新预警（演示用）
+    const warningList = document.getElementById('warningListMerged');
+    if (warningList && Math.random() < 0.1) { // 10%概率添加新预警
+        const newWarning = document.createElement('div');
+        newWarning.className = 'warning-item blue';
+        newWarning.innerHTML = `
+            <div class="warning-header">
+                <span class="warning-level blue">蓝色预警</span>
+                <span class="warning-time">${new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}</span>
+            </div>
+            <div class="warning-content">系统检测到轻微地质变化，请保持关注</div>
+        `;
+
+        // 添加点击事件
+        newWarning.addEventListener('click', handleWarningItemClick);
+
+        warningList.insertBefore(newWarning, warningList.firstChild);
+        updateTabBadges();
+
+        console.log('➕ 添加了新的预警信息');
+    }
+}
+
+// 更新通知数据
+function updateNotificationData() {
+    console.log('📢 更新通知数据...');
+
+    // 模拟添加新通知（演示用）
+    const notificationList = document.getElementById('notificationListMerged');
+    if (notificationList && Math.random() < 0.2) { // 20%概率添加新通知
+        const newNotification = document.createElement('div');
+        newNotification.className = 'notification-item';
+        newNotification.innerHTML = `
+            <span class="notification-content">系统状态检查完成，所有服务正常运行</span>
+            <span class="notification-time">${new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}</span>
+        `;
+
+        notificationList.insertBefore(newNotification, notificationList.firstChild);
+        updateTabBadges();
+
+        console.log('➕ 添加了新的系统通知');
+    }
+}
+
+// 预警项点击处理函数
+function handleWarningItemClick() {
+    const level = this.querySelector('.warning-level').textContent;
+    const content = this.querySelector('.warning-content').textContent;
+    const time = this.querySelector('.warning-time').textContent;
+
+    // 更新弹窗内容
+    document.getElementById('warningLevelBadge').textContent = level;
+    document.getElementById('warningLevelBadge').className = 'warning-level-badge ' +
+        (level.includes('红色') ? 'red' :
+         level.includes('橙色') ? 'orange' :
+         level.includes('黄色') ? 'yellow' :
+         level.includes('蓝色') ? 'blue' : 'yellow');
+    document.getElementById('warningTitle').textContent = content;
+    document.getElementById('warningLevel').textContent = level;
+    document.getElementById('warningTime').textContent = '2025-07-18 ' + time;
+
+    openModal('warningModal');
+}
+
+// 在DOM加载完成后初始化页卡功能
+document.addEventListener('DOMContentLoaded', function() {
+    // 延迟初始化页卡功能，确保HTML完全加载
+    setTimeout(() => {
+        initTabSwitching();
+
+        // 绑定预警项点击事件
+        document.querySelectorAll('.warning-item').forEach(item => {
+            item.addEventListener('click', handleWarningItemClick);
+        });
+    }, 1000);
+});
