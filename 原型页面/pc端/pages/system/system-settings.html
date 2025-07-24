@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - 地质灾害预警系统</title>
+    <link rel="stylesheet" href="../../common/css/reset.css">
+    <link rel="stylesheet" href="../../common/css/variables.css">
+    <link rel="stylesheet" href="css/system-settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🌍</span>
+                    <span class="logo-text">地质灾害预警系统</span>
+                </div>
+                <nav class="breadcrumb">
+                    <a href="../monitor/geological-disaster-dashboard.html">监控中心</a>
+                    <span class="separator">></span>
+                    <span class="current">系统设置</span>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span class="user-name">系统管理员</span>
+                    <div class="user-avatar">👤</div>
+                </div>
+                <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 左侧设置菜单 -->
+            <div class="settings-menu">
+                <div class="menu-header">
+                    <h3>设置菜单</h3>
+                </div>
+                <div class="menu-list">
+                    <div class="menu-item active" data-section="general">
+                        <span class="menu-icon">⚙️</span>
+                        <span class="menu-text">基础设置</span>
+                    </div>
+                    <div class="menu-item" data-section="monitoring">
+                        <span class="menu-icon">📡</span>
+                        <span class="menu-text">监测配置</span>
+                    </div>
+                    <div class="menu-item" data-section="warning">
+                        <span class="menu-icon">⚠️</span>
+                        <span class="menu-text">预警设置</span>
+                    </div>
+                    <div class="menu-item" data-section="users">
+                        <span class="menu-icon">👥</span>
+                        <span class="menu-text">用户管理</span>
+                    </div>
+                    <div class="menu-item" data-section="devices">
+                        <span class="menu-icon">📱</span>
+                        <span class="menu-text">设备管理</span>
+                    </div>
+                    <div class="menu-item" data-section="logs">
+                        <span class="menu-icon">📋</span>
+                        <span class="menu-text">日志管理</span>
+                    </div>
+                    <div class="menu-item" data-section="backup">
+                        <span class="menu-icon">💾</span>
+                        <span class="menu-text">备份恢复</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧设置内容 -->
+            <div class="settings-content">
+                <!-- 基础设置 -->
+                <div class="settings-section active" id="general">
+                    <div class="section-header">
+                        <h3>基础设置</h3>
+                        <p>配置系统的基本参数和运行环境</p>
+                    </div>
+                    <div class="section-content">
+                        <div class="setting-group">
+                            <h4>系统信息</h4>
+                            <div class="setting-item">
+                                <label>系统名称</label>
+                                <input type="text" value="地质灾害预警系统" readonly>
+                            </div>
+                            <div class="setting-item">
+                                <label>系统版本</label>
+                                <input type="text" value="v1.0.0" readonly>
+                            </div>
+                            <div class="setting-item">
+                                <label>部署环境</label>
+                                <select>
+                                    <option value="production" selected>生产环境</option>
+                                    <option value="testing">测试环境</option>
+                                    <option value="development">开发环境</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <h4>数据更新</h4>
+                            <div class="setting-item">
+                                <label>自动刷新间隔</label>
+                                <select>
+                                    <option value="10">10秒</option>
+                                    <option value="30" selected>30秒</option>
+                                    <option value="60">1分钟</option>
+                                    <option value="300">5分钟</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label>数据保存期限</label>
+                                <select>
+                                    <option value="30">30天</option>
+                                    <option value="90" selected>90天</option>
+                                    <option value="180">180天</option>
+                                    <option value="365">1年</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <h4>界面设置</h4>
+                            <div class="setting-item">
+                                <label>主题模式</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="theme" value="dark" checked>
+                                        <span class="radio-mark"></span>
+                                        <span class="label-text">深色主题</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="theme" value="light">
+                                        <span class="radio-mark"></span>
+                                        <span class="label-text">浅色主题</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>语言设置</label>
+                                <select>
+                                    <option value="zh-CN" selected>简体中文</option>
+                                    <option value="en-US">English</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 监测配置 -->
+                <div class="settings-section" id="monitoring">
+                    <div class="section-header">
+                        <h3>监测配置</h3>
+                        <p>配置监测设备和数据采集参数</p>
+                    </div>
+                    <div class="section-content">
+                        <div class="setting-group">
+                            <h4>数据采集</h4>
+                            <div class="setting-item">
+                                <label>采集频率</label>
+                                <select>
+                                    <option value="1">1分钟</option>
+                                    <option value="5" selected>5分钟</option>
+                                    <option value="10">10分钟</option>
+                                    <option value="30">30分钟</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label>数据传输方式</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        <span class="label-text">4G网络</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        <span class="label-text">WiFi</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span class="checkmark"></span>
+                                        <span class="label-text">卫星通信</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <h4>阈值设置</h4>
+                            <div class="setting-item">
+                                <label>位移预警阈值 (mm)</label>
+                                <div class="threshold-inputs">
+                                    <input type="number" placeholder="蓝色" value="5">
+                                    <input type="number" placeholder="黄色" value="10">
+                                    <input type="number" placeholder="橙色" value="20">
+                                    <input type="number" placeholder="红色" value="50">
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>降雨量预警阈值 (mm/h)</label>
+                                <div class="threshold-inputs">
+                                    <input type="number" placeholder="蓝色" value="10">
+                                    <input type="number" placeholder="黄色" value="25">
+                                    <input type="number" placeholder="橙色" value="50">
+                                    <input type="number" placeholder="红色" value="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 预警设置 -->
+                <div class="settings-section" id="warning">
+                    <div class="section-header">
+                        <h3>预警设置</h3>
+                        <p>配置预警发布和通知参数</p>
+                    </div>
+                    <div class="section-content">
+                        <div class="setting-group">
+                            <h4>发布渠道</h4>
+                            <div class="setting-item">
+                                <label>默认发布渠道</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        <span class="label-text">网站发布</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        <span class="label-text">移动端推送</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span class="checkmark"></span>
+                                        <span class="label-text">短信通知</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span class="checkmark"></span>
+                                        <span class="label-text">邮件通知</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <h4>通知设置</h4>
+                            <div class="setting-item">
+                                <label>预警音效</label>
+                                <div class="switch-container">
+                                    <input type="checkbox" id="warningSound" checked>
+                                    <label for="warningSound" class="switch"></label>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>自动发布</label>
+                                <div class="switch-container">
+                                    <input type="checkbox" id="autoPublish">
+                                    <label for="autoPublish" class="switch"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理 -->
+                <div class="settings-section" id="users">
+                    <div class="section-header">
+                        <h3>用户管理</h3>
+                        <p>管理系统用户和权限</p>
+                        <button class="btn btn-primary" onclick="addUser()">➕ 添加用户</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="user-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>用户名</th>
+                                        <th>角色</th>
+                                        <th>状态</th>
+                                        <th>最后登录</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>admin</td>
+                                        <td>系统管理员</td>
+                                        <td><span class="status online">在线</span></td>
+                                        <td>2025-07-24 15:30</td>
+                                        <td>
+                                            <button class="btn-small" onclick="editUser('admin')">编辑</button>
+                                            <button class="btn-small danger" onclick="deleteUser('admin')">删除</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>operator1</td>
+                                        <td>操作员</td>
+                                        <td><span class="status offline">离线</span></td>
+                                        <td>2025-07-24 12:15</td>
+                                        <td>
+                                            <button class="btn-small" onclick="editUser('operator1')">编辑</button>
+                                            <button class="btn-small danger" onclick="deleteUser('operator1')">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设备管理 -->
+                <div class="settings-section" id="devices">
+                    <div class="section-header">
+                        <h3>设备管理</h3>
+                        <p>管理监测设备和传感器</p>
+                        <button class="btn btn-primary" onclick="addDevice()">➕ 添加设备</button>
+                    </div>
+                    <div class="section-content">
+                        <div class="device-grid">
+                            <div class="device-card">
+                                <div class="device-status online"></div>
+                                <div class="device-info">
+                                    <h4>位移传感器-001</h4>
+                                    <p>XX村监测点</p>
+                                    <div class="device-data">
+                                        <span>位移: 2.3mm</span>
+                                        <span>电量: 85%</span>
+                                    </div>
+                                </div>
+                                <div class="device-actions">
+                                    <button class="btn-small" onclick="configDevice('001')">配置</button>
+                                    <button class="btn-small" onclick="calibrateDevice('001')">校准</button>
+                                </div>
+                            </div>
+                            
+                            <div class="device-card">
+                                <div class="device-status warning"></div>
+                                <div class="device-info">
+                                    <h4>雨量计-002</h4>
+                                    <p>YY镇监测点</p>
+                                    <div class="device-data">
+                                        <span>降雨: 15mm/h</span>
+                                        <span>电量: 25%</span>
+                                    </div>
+                                </div>
+                                <div class="device-actions">
+                                    <button class="btn-small" onclick="configDevice('002')">配置</button>
+                                    <button class="btn-small" onclick="calibrateDevice('002')">校准</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他设置部分... -->
+            </div>
+        </main>
+
+        <!-- 底部操作栏 -->
+        <footer class="footer">
+            <div class="footer-actions">
+                <button class="btn btn-secondary" onclick="resetSettings()">🔄 重置设置</button>
+                <button class="btn btn-primary" onclick="saveSettings()">💾 保存设置</button>
+                <button class="btn btn-success" onclick="applySettings()">✅ 应用设置</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/system-settings.js"></script>
+</body>
+</html>
