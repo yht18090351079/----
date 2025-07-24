@@ -1,0 +1,307 @@
+/* CSS Variables - 地质灾害预警系统 */
+
+:root {
+    /* ========== 色彩系统 ========== */
+    
+    /* 主色调 */
+    --primary-color: #1890FF;
+    --primary-light: #40A9FF;
+    --primary-dark: #096DD9;
+    
+    /* 辅助色 */
+    --success-color: #52C41A;
+    --success-light: #73D13D;
+    --success-dark: #389E0D;
+    
+    --warning-color: #FA8C16;
+    --warning-light: #FFA940;
+    --warning-dark: #D46B08;
+    
+    --error-color: #FF4D4F;
+    --error-light: #FF7875;
+    --error-dark: #CF1322;
+    
+    --info-color: #00FFFF;
+    --info-light: #66FFFF;
+    --info-dark: #00CCCC;
+    
+    /* 预警等级色彩 */
+    --warning-blue: #1890FF;
+    --warning-yellow: #FADB14;
+    --warning-orange: #FA8C16;
+    --warning-red: #FF4D4F;
+    
+    /* 中性色 */
+    --text-primary: #FFFFFF;
+    --text-secondary: #CCDDFF;
+    --text-tertiary: #99CCFF;
+    --text-disabled: #666666;
+    
+    /* 背景色 */
+    --bg-primary: #0A0E1A;
+    --bg-secondary: #1A1F2E;
+    --bg-tertiary: #252A3A;
+    --bg-panel: rgba(0, 25, 50, 0.8);
+    --bg-card: rgba(0, 30, 60, 0.3);
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+    
+    /* 边框色 */
+    --border-primary: rgba(0, 255, 255, 0.3);
+    --border-secondary: rgba(0, 255, 255, 0.2);
+    --border-tertiary: rgba(0, 255, 255, 0.1);
+    
+    /* 阴影色 */
+    --shadow-primary: rgba(0, 0, 0, 0.3);
+    --shadow-secondary: rgba(0, 255, 255, 0.1);
+    --shadow-glow: rgba(0, 255, 255, 0.5);
+    
+    /* ========== 字体系统 ========== */
+    
+    /* 字体族 */
+    --font-family-base: 'Roboto', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+    --font-family-mono: 'Roboto Mono', 'Consolas', 'Monaco', monospace;
+    --font-family-display: 'Orbitron', monospace;
+    
+    /* 字体大小 */
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+    --font-size-3xl: 32px;
+    
+    /* 字体权重 */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* 行高 */
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.6;
+    
+    /* ========== 间距系统 ========== */
+    
+    /* 基础间距 */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-base: 16px;
+    --spacing-lg: 20px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
+    --spacing-3xl: 48px;
+    --spacing-4xl: 64px;
+    
+    /* 组件间距 */
+    --gap-xs: 4px;
+    --gap-sm: 8px;
+    --gap-md: 12px;
+    --gap-base: 16px;
+    --gap-lg: 20px;
+    --gap-xl: 24px;
+    --gap-2xl: 32px;
+    
+    /* ========== 圆角系统 ========== */
+    
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-base: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 50%;
+    
+    /* ========== 阴影系统 ========== */
+    
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-base: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.25);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
+    
+    /* 发光阴影 */
+    --glow-xs: 0 0 5px var(--shadow-glow);
+    --glow-sm: 0 0 10px var(--shadow-glow);
+    --glow-base: 0 0 15px var(--shadow-glow);
+    --glow-md: 0 0 20px var(--shadow-glow);
+    --glow-lg: 0 0 25px var(--shadow-glow);
+    
+    /* ========== 过渡动画 ========== */
+    
+    /* 过渡时长 */
+    --transition-fast: 0.15s;
+    --transition-base: 0.3s;
+    --transition-slow: 0.5s;
+    
+    /* 过渡函数 */
+    --ease-linear: linear;
+    --ease-in: ease-in;
+    --ease-out: ease-out;
+    --ease-in-out: ease-in-out;
+    --ease-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* 常用过渡 */
+    --transition-all: all var(--transition-base) var(--ease-in-out);
+    --transition-color: color var(--transition-base) var(--ease-in-out);
+    --transition-background: background var(--transition-base) var(--ease-in-out);
+    --transition-border: border var(--transition-base) var(--ease-in-out);
+    --transition-transform: transform var(--transition-base) var(--ease-in-out);
+    --transition-opacity: opacity var(--transition-base) var(--ease-in-out);
+    
+    /* ========== 布局系统 ========== */
+    
+    /* 容器宽度 */
+    --container-xs: 480px;
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
+    --container-2xl: 1536px;
+    
+    /* 断点 */
+    --breakpoint-xs: 480px;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+    
+    /* 组件尺寸 */
+    --header-height: 64px;
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 64px;
+    --footer-height: 48px;
+    
+    /* ========== Z-Index 层级 ========== */
+    
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-toast: 1080;
+    
+    /* ========== 渐变背景 ========== */
+    
+    /* 主要渐变 */
+    --gradient-primary: linear-gradient(135deg, #0A0E1A 0%, #1A1F2E 50%, #252A3A 100%);
+    --gradient-panel: linear-gradient(135deg, rgba(0,25,50,0.8) 0%, rgba(0,15,35,0.9) 100%);
+    --gradient-card: linear-gradient(135deg, rgba(0,30,60,0.3) 0%, rgba(0,15,40,0.4) 100%);
+    --gradient-button: linear-gradient(135deg, #0066cc, #0099ff);
+    --gradient-success: linear-gradient(135deg, #00cc66, #00ff88);
+    --gradient-warning: linear-gradient(135deg, #cc6600, #ff8800);
+    --gradient-error: linear-gradient(135deg, #cc0000, #ff4444);
+    
+    /* 边框渐变 */
+    --gradient-border: linear-gradient(45deg, rgba(0,255,255,0.4) 0%, rgba(0,150,255,0.3) 25%, rgba(0,100,200,0.2) 50%, rgba(0,150,255,0.3) 75%, rgba(0,255,255,0.4) 100%);
+    
+    /* ========== 滤镜效果 ========== */
+    
+    --blur-xs: blur(2px);
+    --blur-sm: blur(4px);
+    --blur-base: blur(8px);
+    --blur-md: blur(12px);
+    --blur-lg: blur(16px);
+    --blur-xl: blur(24px);
+    
+    --backdrop-blur-xs: blur(2px);
+    --backdrop-blur-sm: blur(4px);
+    --backdrop-blur-base: blur(8px);
+    --backdrop-blur-md: blur(12px);
+    --backdrop-blur-lg: blur(16px);
+    --backdrop-blur-xl: blur(24px);
+    
+    /* ========== 组件变量 ========== */
+    
+    /* 按钮 */
+    --button-height-sm: 32px;
+    --button-height-base: 40px;
+    --button-height-lg: 48px;
+    --button-padding-x: 16px;
+    --button-padding-y: 8px;
+    
+    /* 输入框 */
+    --input-height-sm: 32px;
+    --input-height-base: 40px;
+    --input-height-lg: 48px;
+    --input-padding-x: 12px;
+    --input-padding-y: 8px;
+    
+    /* 卡片 */
+    --card-padding: 24px;
+    --card-border-radius: 12px;
+    --card-border-width: 1px;
+    
+    /* 模态框 */
+    --modal-padding: 24px;
+    --modal-border-radius: 20px;
+    --modal-max-width: 600px;
+    
+    /* 表格 */
+    --table-row-height: 48px;
+    --table-cell-padding: 12px 16px;
+    --table-border-width: 1px;
+    
+    /* ========== 动画关键帧 ========== */
+    
+    /* 淡入淡出 */
+    --animation-fade-in: fadeIn var(--transition-base) var(--ease-out);
+    --animation-fade-out: fadeOut var(--transition-base) var(--ease-in);
+    
+    /* 滑动 */
+    --animation-slide-in-up: slideInUp var(--transition-base) var(--ease-out);
+    --animation-slide-in-down: slideInDown var(--transition-base) var(--ease-out);
+    --animation-slide-in-left: slideInLeft var(--transition-base) var(--ease-out);
+    --animation-slide-in-right: slideInRight var(--transition-base) var(--ease-out);
+    
+    /* 缩放 */
+    --animation-scale-in: scaleIn var(--transition-base) var(--ease-back);
+    --animation-scale-out: scaleOut var(--transition-base) var(--ease-in);
+    
+    /* 旋转 */
+    --animation-rotate: rotate 2s var(--ease-linear) infinite;
+    
+    /* 脉冲 */
+    --animation-pulse: pulse 2s var(--ease-in-out) infinite;
+    
+    /* 呼吸灯 */
+    --animation-breathing: breathing 3s var(--ease-in-out) infinite;
+}
+
+/* ========== 深色主题变量 ========== */
+[data-theme="dark"] {
+    /* 在深色主题下，大部分变量保持不变，因为系统本身就是深色设计 */
+    /* 如果需要更深的深色主题，可以在这里覆盖变量 */
+}
+
+/* ========== 高对比度主题变量 ========== */
+[data-theme="high-contrast"] {
+    --text-primary: #FFFFFF;
+    --text-secondary: #FFFFFF;
+    --text-tertiary: #CCCCCC;
+    --border-primary: #FFFFFF;
+    --border-secondary: #CCCCCC;
+    --bg-panel: rgba(0, 0, 0, 0.9);
+    --bg-card: rgba(0, 0, 0, 0.8);
+}
+
+/* ========== 打印主题变量 ========== */
+@media print {
+    :root {
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --text-tertiary: #666666;
+        --bg-primary: #FFFFFF;
+        --bg-secondary: #F5F5F5;
+        --bg-tertiary: #EEEEEE;
+        --border-primary: #CCCCCC;
+        --border-secondary: #DDDDDD;
+    }
+}

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析 - 地质灾害预警系统</title>
+    <link rel="stylesheet" href="../../common/css/reset.css">
+    <link rel="stylesheet" href="../../common/css/variables.css">
+    <link rel="stylesheet" href="css/data-analysis.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🌍</span>
+                    <span class="logo-text">地质灾害预警系统</span>
+                </div>
+                <nav class="breadcrumb">
+                    <a href="../monitor/geological-disaster-dashboard.html">监控中心</a>
+                    <span class="separator">></span>
+                    <span class="current">数据分析</span>
+                </nav>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary" onclick="exportData()">📊 导出报告</button>
+                <div class="user-info">
+                    <span class="user-name">张三</span>
+                    <div class="user-avatar">👤</div>
+                </div>
+                <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+            </div>
+        </header>
+
+        <!-- 数据概览卡片组 -->
+        <div class="overview-section">
+            <div class="overview-cards">
+                <div class="overview-card">
+                    <div class="card-icon">📡</div>
+                    <div class="card-content">
+                        <div class="card-value" id="onlineDevices">98.5%</div>
+                        <div class="card-label">在线设备率</div>
+                        <div class="card-trend up">↗ +2.3%</div>
+                    </div>
+                </div>
+                <div class="overview-card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-content">
+                        <div class="card-value" id="dataIntegrity">95.2%</div>
+                        <div class="card-label">数据完整性</div>
+                        <div class="card-trend down">↘ -1.1%</div>
+                    </div>
+                </div>
+                <div class="overview-card">
+                    <div class="card-icon">⚠️</div>
+                    <div class="card-content">
+                        <div class="card-value" id="abnormalData">2.1%</div>
+                        <div class="card-label">异常数据率</div>
+                        <div class="card-trend up">↗ +0.5%</div>
+                    </div>
+                </div>
+                <div class="overview-card">
+                    <div class="card-icon">🔄</div>
+                    <div class="card-content">
+                        <div class="card-value" id="updateFreq">1分钟</div>
+                        <div class="card-label">更新频率</div>
+                        <div class="card-trend stable">→ 稳定</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 左侧筛选面板 -->
+            <div class="filter-panel">
+                <div class="panel-header">
+                    <h3>数据筛选</h3>
+                    <button class="reset-btn" onclick="resetFilters()">🔄 重置</button>
+                </div>
+                <div class="panel-content">
+                    <!-- 监测点选择 -->
+                    <div class="filter-group">
+                        <label>监测点选择</label>
+                        <div class="checkbox-group" id="monitoringPoints">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="point1" checked>
+                                <span class="checkmark"></span>
+                                <span class="label-text">XX村滑坡点</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="point2" checked>
+                                <span class="checkmark"></span>
+                                <span class="label-text">YY镇泥石流点</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="point3">
+                                <span class="checkmark"></span>
+                                <span class="label-text">ZZ县崩塌点</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="point4">
+                                <span class="checkmark"></span>
+                                <span class="label-text">AA区地陷点</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 数据类型 -->
+                    <div class="filter-group">
+                        <label>数据类型</label>
+                        <div class="checkbox-group" id="dataTypes">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="displacement" checked>
+                                <span class="checkmark"></span>
+                                <span class="label-text">位移数据</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="rainfall" checked>
+                                <span class="checkmark"></span>
+                                <span class="label-text">降雨量</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="soil-moisture">
+                                <span class="checkmark"></span>
+                                <span class="label-text">土壤含水量</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="temperature">
+                                <span class="checkmark"></span>
+                                <span class="label-text">温度</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 时间范围 -->
+                    <div class="filter-group">
+                        <label>时间范围</label>
+                        <select id="timeRange">
+                            <option value="1h">最近1小时</option>
+                            <option value="1d" selected>最近1天</option>
+                            <option value="1w">最近1周</option>
+                            <option value="1m">最近1月</option>
+                            <option value="custom">自定义</option>
+                        </select>
+                        <div class="custom-time" id="customTimeRange" style="display: none;">
+                            <input type="datetime-local" id="startTime">
+                            <span class="time-separator">至</span>
+                            <input type="datetime-local" id="endTime">
+                        </div>
+                    </div>
+
+                    <!-- 数据质量 -->
+                    <div class="filter-group">
+                        <label>数据质量</label>
+                        <div class="radio-group" id="dataQuality">
+                            <label class="radio-item">
+                                <input type="radio" name="quality" value="all" checked>
+                                <span class="radio-mark"></span>
+                                <span class="label-text">全部数据</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="quality" value="normal">
+                                <span class="radio-mark"></span>
+                                <span class="label-text">正常数据</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="quality" value="abnormal">
+                                <span class="radio-mark"></span>
+                                <span class="label-text">异常数据</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 应用筛选按钮 -->
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="applyFilters()">🔍 应用筛选</button>
+                        <button class="btn btn-secondary" onclick="exportFilteredData()">📤 导出数据</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧图表展示区域 -->
+            <div class="chart-panel">
+                <div class="chart-container">
+                    <!-- 实时数据折线图 -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4>实时监测数据趋势</h4>
+                            <div class="chart-controls">
+                                <button class="control-btn" onclick="refreshChart('lineChart')">🔄</button>
+                                <button class="control-btn" onclick="fullscreenChart('lineChart')">⛶</button>
+                            </div>
+                        </div>
+                        <div class="chart-content">
+                            <div id="lineChart" class="chart"></div>
+                        </div>
+                    </div>
+
+                    <!-- 设备状态饼图 -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4>设备状态分布</h4>
+                            <div class="chart-controls">
+                                <button class="control-btn" onclick="refreshChart('pieChart')">🔄</button>
+                                <button class="control-btn" onclick="fullscreenChart('pieChart')">⛶</button>
+                            </div>
+                        </div>
+                        <div class="chart-content">
+                            <div id="pieChart" class="chart"></div>
+                        </div>
+                    </div>
+
+                    <!-- 预警统计柱状图 -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4>预警统计分析</h4>
+                            <div class="chart-controls">
+                                <button class="control-btn" onclick="refreshChart('barChart')">🔄</button>
+                                <button class="control-btn" onclick="fullscreenChart('barChart')">⛶</button>
+                            </div>
+                        </div>
+                        <div class="chart-content">
+                            <div id="barChart" class="chart"></div>
+                        </div>
+                    </div>
+
+                    <!-- 风险热力图 -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4>区域风险热力图</h4>
+                            <div class="chart-controls">
+                                <button class="control-btn" onclick="refreshChart('heatmapChart')">🔄</button>
+                                <button class="control-btn" onclick="fullscreenChart('heatmapChart')">⛶</button>
+                            </div>
+                        </div>
+                        <div class="chart-content">
+                            <div id="heatmapChart" class="chart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部状态栏 -->
+        <footer class="footer">
+            <div class="status-info">
+                <span class="status-item">
+                    <span class="status-label">数据更新时间:</span>
+                    <span class="status-value" id="lastUpdateTime">2025-07-24 15:30:25</span>
+                </span>
+                <span class="status-item">
+                    <span class="status-label">数据来源:</span>
+                    <span class="status-value">实时监测系统</span>
+                </span>
+                <span class="status-item">
+                    <span class="status-label">刷新频率:</span>
+                    <span class="status-value">30秒</span>
+                </span>
+                <span class="status-item">
+                    <span class="status-label">数据状态:</span>
+                    <span class="status-value online">在线</span>
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 全屏图表模态框 -->
+    <div id="chartModal" class="modal">
+        <div class="modal-content fullscreen">
+            <div class="modal-header">
+                <h3 id="modalChartTitle">图表详情</h3>
+                <span class="close" onclick="closeChartModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modalChart" class="chart-fullscreen"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data-analysis.js"></script>
+</body>
+</html>

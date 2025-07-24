@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预警发布 - 地质灾害预警系统</title>
+    <link rel="stylesheet" href="../../common/css/reset.css">
+    <link rel="stylesheet" href="../../common/css/variables.css">
+    <link rel="stylesheet" href="css/warning-publish.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🌍</span>
+                    <span class="logo-text">地质灾害预警系统</span>
+                </div>
+                <nav class="breadcrumb">
+                    <a href="../monitor/geological-disaster-dashboard.html">监控中心</a>
+                    <span class="separator">></span>
+                    <a href="warning-monitor.html">预警管理</a>
+                    <span class="separator">></span>
+                    <span class="current">预警发布</span>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span class="user-name">张三</span>
+                    <div class="user-avatar">👤</div>
+                </div>
+                <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+            </div>
+        </header>
+
+        <!-- 步骤导航 -->
+        <div class="step-navigation">
+            <div class="step-item active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-text">信息录入</div>
+            </div>
+            <div class="step-item" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-text">内容编辑</div>
+            </div>
+            <div class="step-item" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-text">预览确认</div>
+            </div>
+            <div class="step-item" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-text">发布审核</div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 左侧信息录入区 -->
+            <div class="left-panel">
+                <div class="panel-header">
+                    <h3>预警信息录入</h3>
+                </div>
+                <div class="panel-content">
+                    <form id="warningForm">
+                        <!-- 预警类型 -->
+                        <div class="form-group">
+                            <label for="warningType">预警类型 <span class="required">*</span></label>
+                            <select id="warningType" name="warningType" required>
+                                <option value="">请选择预警类型</option>
+                                <option value="landslide">滑坡</option>
+                                <option value="debris-flow">泥石流</option>
+                                <option value="collapse">崩塌</option>
+                                <option value="ground-subsidence">地面塌陷</option>
+                            </select>
+                        </div>
+
+                        <!-- 风险等级 -->
+                        <div class="form-group">
+                            <label>风险等级 <span class="required">*</span></label>
+                            <div class="risk-level-selector">
+                                <button type="button" class="risk-btn blue" data-level="blue">
+                                    <span class="risk-color"></span>
+                                    <span class="risk-text">蓝色预警</span>
+                                </button>
+                                <button type="button" class="risk-btn yellow" data-level="yellow">
+                                    <span class="risk-color"></span>
+                                    <span class="risk-text">黄色预警</span>
+                                </button>
+                                <button type="button" class="risk-btn orange" data-level="orange">
+                                    <span class="risk-color"></span>
+                                    <span class="risk-text">橙色预警</span>
+                                </button>
+                                <button type="button" class="risk-btn red" data-level="red">
+                                    <span class="risk-color"></span>
+                                    <span class="risk-text">红色预警</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 影响区域 -->
+                        <div class="form-group">
+                            <label for="affectedArea">影响区域 <span class="required">*</span></label>
+                            <input type="text" id="affectedArea" name="affectedArea" placeholder="请输入影响区域" required>
+                            <button type="button" class="area-select-btn">📍 地图选择</button>
+                        </div>
+
+                        <!-- 有效时间 -->
+                        <div class="form-group">
+                            <label for="validTime">有效时间 <span class="required">*</span></label>
+                            <div class="time-range">
+                                <input type="datetime-local" id="startTime" name="startTime" required>
+                                <span class="time-separator">至</span>
+                                <input type="datetime-local" id="endTime" name="endTime" required>
+                            </div>
+                        </div>
+
+                        <!-- 发布渠道 -->
+                        <div class="form-group">
+                            <label>发布渠道 <span class="required">*</span></label>
+                            <div class="channel-selector">
+                                <label class="channel-item">
+                                    <input type="checkbox" name="channels" value="web" checked>
+                                    <span class="checkmark"></span>
+                                    <span class="channel-text">网站发布</span>
+                                </label>
+                                <label class="channel-item">
+                                    <input type="checkbox" name="channels" value="mobile">
+                                    <span class="checkmark"></span>
+                                    <span class="channel-text">移动端推送</span>
+                                </label>
+                                <label class="channel-item">
+                                    <input type="checkbox" name="channels" value="sms">
+                                    <span class="checkmark"></span>
+                                    <span class="channel-text">短信通知</span>
+                                </label>
+                                <label class="channel-item">
+                                    <input type="checkbox" name="channels" value="email">
+                                    <span class="checkmark"></span>
+                                    <span class="channel-text">邮件通知</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 中央内容编辑区 -->
+            <div class="center-panel">
+                <div class="panel-header">
+                    <h3>预警内容编辑</h3>
+                    <div class="editor-tools">
+                        <button class="tool-btn" onclick="selectTemplate()">📋 选择模板</button>
+                        <button class="tool-btn" onclick="aiAssist()">🤖 AI辅助</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <!-- 模板选择 -->
+                    <div class="template-selector">
+                        <select id="templateSelect">
+                            <option value="">选择预警模板</option>
+                            <option value="landslide-template">滑坡预警模板</option>
+                            <option value="debris-flow-template">泥石流预警模板</option>
+                            <option value="collapse-template">崩塌预警模板</option>
+                        </select>
+                    </div>
+
+                    <!-- 富文本编辑器 -->
+                    <div class="editor-container">
+                        <div class="editor-toolbar">
+                            <button type="button" onclick="formatText('bold')"><b>B</b></button>
+                            <button type="button" onclick="formatText('italic')"><i>I</i></button>
+                            <button type="button" onclick="formatText('underline')"><u>U</u></button>
+                            <span class="separator">|</span>
+                            <button type="button" onclick="insertList('ul')">• 列表</button>
+                            <button type="button" onclick="insertList('ol')">1. 列表</button>
+                            <span class="separator">|</span>
+                            <button type="button" onclick="insertMedia()">📷 插入图片</button>
+                        </div>
+                        <div class="editor-content" contenteditable="true" id="warningContent" placeholder="请输入预警内容...">
+                        </div>
+                        <div class="editor-footer">
+                            <span class="word-count">字数: <span id="wordCount">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧预览区 -->
+            <div class="right-panel">
+                <div class="panel-header">
+                    <h3>预警预览</h3>
+                    <div class="preview-tabs">
+                        <button class="tab-btn active" data-preview="pc">PC端</button>
+                        <button class="tab-btn" data-preview="mobile">移动端</button>
+                        <button class="tab-btn" data-preview="sms">短信</button>
+                        <button class="tab-btn" data-preview="email">邮件</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <!-- PC端预览 -->
+                    <div class="preview-container active" id="pcPreview">
+                        <div class="preview-device pc">
+                            <div class="preview-content">
+                                <div class="warning-preview">
+                                    <div class="warning-header">
+                                        <span class="warning-level" id="previewLevel">请选择预警等级</span>
+                                        <span class="warning-time" id="previewTime">发布时间</span>
+                                    </div>
+                                    <div class="warning-title" id="previewTitle">预警标题</div>
+                                    <div class="warning-area" id="previewArea">影响区域</div>
+                                    <div class="warning-content" id="previewContent">预警内容将在这里显示...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 移动端预览 -->
+                    <div class="preview-container" id="mobilePreview">
+                        <div class="preview-device mobile">
+                            <div class="preview-content">
+                                <div class="mobile-warning">
+                                    <div class="mobile-header">
+                                        <span class="mobile-level">预警等级</span>
+                                    </div>
+                                    <div class="mobile-title">预警标题</div>
+                                    <div class="mobile-content">预警内容</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 短信预览 -->
+                    <div class="preview-container" id="smsPreview">
+                        <div class="preview-device sms">
+                            <div class="sms-content">
+                                <div class="sms-header">【地质灾害预警】</div>
+                                <div class="sms-body">短信内容将在这里显示...</div>
+                                <div class="sms-footer">回复TD退订</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 邮件预览 -->
+                    <div class="preview-container" id="emailPreview">
+                        <div class="preview-device email">
+                            <div class="email-header">
+                                <div class="email-subject">主题: 地质灾害预警通知</div>
+                                <div class="email-from">发件人: 地质灾害预警系统</div>
+                            </div>
+                            <div class="email-content">邮件内容将在这里显示...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部操作栏 -->
+        <footer class="footer">
+            <div class="footer-actions">
+                <button class="btn btn-secondary" onclick="saveDraft()">💾 保存草稿</button>
+                <button class="btn btn-primary" onclick="previewWarning()">👁️ 预览效果</button>
+                <button class="btn btn-success" onclick="submitForReview()">📤 提交审核</button>
+                <button class="btn btn-danger" onclick="cancelEdit()">❌ 取消编辑</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">提示</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">操作确认</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="confirmAction()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/warning-publish.js"></script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预警监控 - 地质灾害预警系统</title>
+    <link rel="stylesheet" href="../../common/css/reset.css">
+    <link rel="stylesheet" href="../../common/css/variables.css">
+    <link rel="stylesheet" href="css/warning-monitor.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🌍</span>
+                    <span class="logo-text">地质灾害预警系统</span>
+                </div>
+                <nav class="breadcrumb">
+                    <a href="../monitor/geological-disaster-dashboard.html">监控中心</a>
+                    <span class="separator">></span>
+                    <span class="current">预警监控</span>
+                </nav>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-primary" onclick="window.location.href='warning-publish.html'">
+                    ➕ 发布预警
+                </button>
+                <div class="user-info">
+                    <span class="user-name">张三</span>
+                    <div class="user-avatar">👤</div>
+                </div>
+                <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+            </div>
+        </header>
+
+        <!-- 筛选工具栏 -->
+        <div class="filter-toolbar">
+            <div class="filter-group">
+                <label>时间范围:</label>
+                <select id="timeRange">
+                    <option value="today">今天</option>
+                    <option value="week">最近7天</option>
+                    <option value="month" selected>最近30天</option>
+                    <option value="custom">自定义</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>预警类型:</label>
+                <select id="warningType">
+                    <option value="">全部类型</option>
+                    <option value="landslide">滑坡</option>
+                    <option value="debris-flow">泥石流</option>
+                    <option value="collapse">崩塌</option>
+                    <option value="ground-subsidence">地面塌陷</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>风险等级:</label>
+                <select id="riskLevel">
+                    <option value="">全部等级</option>
+                    <option value="blue">蓝色预警</option>
+                    <option value="yellow">黄色预警</option>
+                    <option value="orange">橙色预警</option>
+                    <option value="red">红色预警</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>状态筛选:</label>
+                <select id="statusFilter">
+                    <option value="">全部状态</option>
+                    <option value="active">生效中</option>
+                    <option value="expired">已过期</option>
+                    <option value="cancelled">已取消</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-secondary" onclick="resetFilters()">🔄 重置</button>
+                <button class="btn btn-primary" onclick="applyFilters()">🔍 筛选</button>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 左侧预警列表 -->
+            <div class="left-panel">
+                <div class="panel-header">
+                    <h3>预警列表</h3>
+                    <div class="list-controls">
+                        <button class="control-btn" onclick="refreshList()">🔄</button>
+                        <button class="control-btn" onclick="toggleView()">📋</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="warning-list" id="warningList">
+                        <!-- 预警项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧预警详情 -->
+            <div class="right-panel">
+                <div class="panel-header">
+                    <h3>预警详情</h3>
+                    <div class="detail-actions">
+                        <button class="action-btn" onclick="editWarning()">✏️ 编辑</button>
+                        <button class="action-btn" onclick="cancelWarning()">❌ 取消</button>
+                        <button class="action-btn" onclick="extendWarning()">⏰ 延期</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="warning-detail" id="warningDetail">
+                        <div class="no-selection">
+                            <div class="no-selection-icon">📋</div>
+                            <div class="no-selection-text">请从左侧列表选择预警查看详情</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部统计栏 -->
+        <footer class="footer">
+            <div class="stats-container">
+                <div class="stat-item">
+                    <span class="stat-label">总预警数</span>
+                    <span class="stat-value" id="totalWarnings">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">生效中</span>
+                    <span class="stat-value active" id="activeWarnings">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">已确认</span>
+                    <span class="stat-value confirmed" id="confirmedWarnings">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">处置中</span>
+                    <span class="stat-value processing" id="processingWarnings">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">已结束</span>
+                    <span class="stat-value ended" id="endedWarnings">0</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 预警详情模态框 -->
+    <div id="warningModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">预警详情</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="warning-details">
+                    <div class="detail-header">
+                        <div class="warning-level-badge" id="modalWarningLevel">红色预警</div>
+                        <div class="warning-status" id="modalWarningStatus">生效中</div>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-section">
+                            <h4>基本信息</h4>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">预警类型:</span>
+                                    <span class="value" id="modalType">滑坡</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">影响区域:</span>
+                                    <span class="value" id="modalArea">成都市武侯区XX村</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">发布时间:</span>
+                                    <span class="value" id="modalPublishTime">2025-07-24 14:30</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">有效期至:</span>
+                                    <span class="value" id="modalValidTime">2025-07-25 14:30</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">发布人:</span>
+                                    <span class="value" id="modalPublisher">张三</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">确认率:</span>
+                                    <span class="value" id="modalConfirmRate">85%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>预警内容</h4>
+                            <div class="warning-content" id="modalContent">
+                                预警内容将在这里显示...
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>发布渠道统计</h4>
+                            <div class="channel-stats">
+                                <div class="channel-item">
+                                    <span class="channel-name">网站发布</span>
+                                    <span class="channel-status success">已发布</span>
+                                    <span class="channel-count">浏览 1,234 次</span>
+                                </div>
+                                <div class="channel-item">
+                                    <span class="channel-name">移动端推送</span>
+                                    <span class="channel-status success">已推送</span>
+                                    <span class="channel-count">送达 856 人</span>
+                                </div>
+                                <div class="channel-item">
+                                    <span class="channel-name">短信通知</span>
+                                    <span class="channel-status success">已发送</span>
+                                    <span class="channel-count">送达 432 人</span>
+                                </div>
+                                <div class="channel-item">
+                                    <span class="channel-name">邮件通知</span>
+                                    <span class="channel-status pending">发送中</span>
+                                    <span class="channel-count">队列 89 封</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>处置进展</h4>
+                            <div class="progress-timeline">
+                                <div class="timeline-item completed">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">预警发布</div>
+                                        <div class="timeline-time">2025-07-24 14:30</div>
+                                        <div class="timeline-desc">预警信息已通过多渠道发布</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item completed">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">人员疏散</div>
+                                        <div class="timeline-time">2025-07-24 15:00</div>
+                                        <div class="timeline-desc">危险区域人员已开始疏散</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item active">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">现场监测</div>
+                                        <div class="timeline-time">进行中</div>
+                                        <div class="timeline-desc">技术人员正在现场进行监测</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">风险解除</div>
+                                        <div class="timeline-time">待完成</div>
+                                        <div class="timeline-desc">等待风险解除确认</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+                <button class="btn btn-warning" onclick="editWarning()">编辑预警</button>
+                <button class="btn btn-danger" onclick="cancelWarning()">取消预警</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认对话框 -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmTitle">确认操作</h3>
+                <span class="close" onclick="closeConfirmModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">确认执行此操作吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">取消</button>
+                <button class="btn btn-primary" onclick="confirmAction()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/warning-monitor.js"></script>
+</body>
+</html>
