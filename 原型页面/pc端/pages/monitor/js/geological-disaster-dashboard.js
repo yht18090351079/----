@@ -1,6 +1,9 @@
 // 地质灾害预警系统 - 实时监控大屏脚本
 // 从 geological-disaster-dashboard.html 自动提取
 
+// 调试模式开关（设置为false可减少控制台日志输出）
+window.DEBUG_MODE = false;
+
 // 全局变量
 let viewer;
 let monitoringPoints = [];
@@ -20,14 +23,18 @@ async function enableWorldTerrain() {
                 requestVertexNormals: true
             });
             isTerrainEnabled = true;
-            console.log('🏔️ 世界地形已自动启用（异步方式）');
+            if (window.DEBUG_MODE) {
+                console.log('🏔️ 世界地形已自动启用（异步方式）');
+            }
         } else if (typeof Cesium.createWorldTerrain === 'function') {
             viewer.terrainProvider = Cesium.createWorldTerrain({
                 requestWaterMask: true,
                 requestVertexNormals: true
             });
             isTerrainEnabled = true;
-            console.log('🏔️ 世界地形已自动启用（同步方式）');
+            if (window.DEBUG_MODE) {
+                console.log('🏔️ 世界地形已自动启用（同步方式）');
+            }
         } else {
             throw new Error('世界地形API不可用');
         }
@@ -64,8 +71,27 @@ async function initMap() {
             return;
         }
 
+        // 抑制Cesium的Service Worker相关错误（这些错误不影响功能）
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('cross-origin redirects') ||
+                message.includes('worker script') ||
+                message.includes('Service Worker')) {
+                return; // 忽略这些错误
+            }
+            originalConsoleError.apply(console, args);
+        };
+
         // 设置Cesium Ion Token
         Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YjZlZDZhMS0xZGMzLTRlMjAtOWMyMC1hY2U2ZGI1OWM3YzIiLCJpZCI6MzIyMjE3LCJpYXQiOjE3NTI3MTgyMDZ9.ESrgN3eQQTxnHv-UUG5aJz7ojlnK9EAzfqFqgXPmH7M';
+
+        // 禁用Cesium的一些可能导致跨域问题的功能
+        if (window.location.protocol === 'file:') {
+            console.log('🔧 检测到本地文件环境，优化Cesium配置...');
+            // 在本地文件环境中禁用某些功能以避免跨域错误
+            Cesium.RequestScheduler.maximumRequestsPerServer = 6;
+        }
 
         viewer = new Cesium.Viewer('cesiumContainer', {
             homeButton: false,
@@ -169,15 +195,21 @@ function addSampleMonitoringPoints() {
         { name: '蒲江朝阳湖监测站', lon: 103.5000, lat: 30.1833, status: 'offline' }
     ];
 
-    console.log(`🚀 准备添加 ${samplePoints.length} 个监测点:`);
+    if (window.DEBUG_MODE) {
+        console.log(`🚀 准备添加 ${samplePoints.length} 个监测点:`);
+    }
     samplePoints.forEach((point, index) => {
-        console.log(`  ${index + 1}. ${point.name}: ${point.status}`);
+        if (window.DEBUG_MODE) {
+            console.log(`  ${index + 1}. ${point.name}: ${point.status}`);
+        }
         addMonitoringPointToMap(point);
     });
 
     // 初始化完成后更新统计并飞行到成都
     setTimeout(() => {
-        console.log(`⏰ 延迟更新设备统计...`);
+        if (window.DEBUG_MODE) {
+            console.log(`⏰ 延迟更新设备统计...`);
+        }
         updateDeviceStatsDisplay();
 
         // 飞行到成都地区以便查看监测点
@@ -186,7 +218,9 @@ function addSampleMonitoringPoints() {
                 destination: Cesium.Cartesian3.fromDegrees(104.0668, 30.6728, 50000),
                 duration: 3.0
             });
-            console.log(`🛩️ 飞行到成都地区查看监测点`);
+            if (window.DEBUG_MODE) {
+                console.log(`🛩️ 飞行到成都地区查看监测点`);
+            }
         }
     }, 1500);
 }
@@ -239,7 +273,9 @@ function addMonitoringPointToMap(point) {
             addDeviceAnimation(entity, point.status);
         }
 
-        console.log(`✅ 成功添加监测点: ${point.name} (${point.status}) 位置: [${point.lon}, ${point.lat}]`);
+        if (window.DEBUG_MODE) {
+            console.log(`✅ 成功添加监测点: ${point.name} (${point.status}) 位置: [${point.lon}, ${point.lat}]`);
+        }
 
         monitoringPoints.push(entity);
 
@@ -591,14 +627,18 @@ function calculateDeviceStats() {
     // 统计viewer中的监测点实体
     if (viewer && viewer.entities) {
         const entities = viewer.entities.values;
-        console.log(`🔍 开始统计设备状态，总实体数: ${entities.length}`);
+        if (window.DEBUG_MODE) {
+            console.log(`🔍 开始统计设备状态，总实体数: ${entities.length}`);
+        }
 
         entities.forEach(entity => {
             if (entity.properties && entity.properties.type &&
                 entity.properties.type.getValue() === 'monitoring_point') {
                 const status = entity.properties.status.getValue();
                 const name = entity.name || '未命名';
-                console.log(`📍 监测点: ${name}, 状态: ${status}`);
+                if (window.DEBUG_MODE) {
+                    console.log(`📍 监测点: ${name}, 状态: ${status}`);
+                }
 
                 switch (status) {
                     case 'online':
@@ -617,7 +657,9 @@ function calculateDeviceStats() {
         });
     }
 
-    console.log(`📊 统计结果: 正常${onlineCount}, 预警${warningCount}, 离线${offlineCount}`);
+    if (window.DEBUG_MODE) {
+        console.log(`📊 统计结果: 正常${onlineCount}, 预警${warningCount}, 离线${offlineCount}`);
+    }
     return { onlineCount, warningCount, offlineCount };
 }
 
@@ -726,7 +768,9 @@ function updateDeviceList() {
             deviceListContainer.appendChild(deviceItem);
         });
 
-        console.log(`📋 设备列表已更新: ${monitoringPoints.length} 个监测站`);
+        if (window.DEBUG_MODE) {
+            console.log(`📋 设备列表已更新: ${monitoringPoints.length} 个监测站`);
+        }
     }
 }
 
@@ -802,7 +846,9 @@ function initMapClickHandler() {
         }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-    console.log('🖱️ 地图点击事件处理器已初始化');
+    if (window.DEBUG_MODE) {
+        console.log('🖱️ 地图点击事件处理器已初始化');
+    }
 }
 
 // 存储动画定时器
@@ -892,7 +938,9 @@ function addDeviceAnimation(entity, status) {
     }, 100); // 10FPS
 
     animationTimers.set(entity.id, { timer, ripples });
-    console.log(`🌊 预警设备波纹扩散动效已启用: ${entity.name}`);
+    if (window.DEBUG_MODE) {
+        console.log(`🌊 预警设备波纹扩散动效已启用: ${entity.name}`);
+    }
 }
 
 // 停止设备动效
@@ -947,37 +995,20 @@ function updateWarning() {
 
 // 主函数：加载真实的多层级行政区划
 async function loadMultiLevelBoundaries() {
-    console.log('🗾 开始加载真实行政区划数据...');
+    if (window.DEBUG_MODE) {
+        console.log('🗾 开始加载真实行政区划数据...');
+    }
 
     try {
         // 清除现有边界
         removeAllBoundaries();
 
-        // 全国省级行政区划边界 - 使用多个备用数据源
+        // 只加载指定的三个数据文件
         const dataSources = [
-            // 1. 中国国界 - 使用可靠的数据源
+            // 1. 中国国界
             {
                 name: '中国国界',
-                urls: [
-                    // 备用数据源1: 阿里云数据源（最可靠）
-                    'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
-                    // 备用数据源2: 创建简化的中国边界（确保有数据显示）
-                    'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-                        "type": "FeatureCollection",
-                        "features": [
-                            {
-                                "type": "Feature",
-                                "properties": { "name": "中华人民共和国" },
-                                "geometry": {
-                                    "type": "Polygon",
-                                    "coordinates": [[
-                                        [73, 18], [135, 18], [135, 54], [73, 54], [73, 18]
-                                    ]]
-                                }
-                            }
-                        ]
-                    }))
-                ],
+                urls: ['data/china-boundary-real.json'],
                 level: 'country',
                 style: {
                     stroke: Cesium.Color.RED,
@@ -985,212 +1016,60 @@ async function loadMultiLevelBoundaries() {
                     fill: Cesium.Color.RED.withAlpha(0.02),
                     clampToGround: true
                 }
-            }
-        ];
-
-        // 2. 全国34个省级行政区
-        const provinces = [
-            { code: '110000', name: '北京市' },
-            { code: '120000', name: '天津市' },
-            { code: '130000', name: '河北省' },
-            { code: '140000', name: '山西省' },
-            { code: '150000', name: '内蒙古自治区' },
-            { code: '210000', name: '辽宁省' },
-            { code: '220000', name: '吉林省' },
-            { code: '230000', name: '黑龙江省' },
-            { code: '310000', name: '上海市' },
-            { code: '320000', name: '江苏省' },
-            { code: '330000', name: '浙江省' },
-            { code: '340000', name: '安徽省' },
-            { code: '350000', name: '福建省' },
-            { code: '360000', name: '江西省' },
-            { code: '370000', name: '山东省' },
-            { code: '410000', name: '河南省' },
-            { code: '420000', name: '湖北省' },
-            { code: '430000', name: '湖南省' },
-            { code: '440000', name: '广东省' },
-            { code: '450000', name: '广西壮族自治区' },
-            { code: '460000', name: '海南省' },
-            { code: '500000', name: '重庆市' },
-            { code: '510000', name: '四川省' },
-            { code: '520000', name: '贵州省' },
-            { code: '530000', name: '云南省' },
-            { code: '540000', name: '西藏自治区' },
-            { code: '610000', name: '陕西省' },
-            { code: '620000', name: '甘肃省' },
-            { code: '630000', name: '青海省' },
-            { code: '640000', name: '宁夏回族自治区' },
-            { code: '650000', name: '新疆维吾尔自治区' },
-            { code: '710000', name: '台湾省' },
-            { code: '810000', name: '香港特别行政区' },
-            { code: '820000', name: '澳门特别行政区' }
-        ];
-
-        // 为所有省份添加边界数据源
-        provinces.forEach(province => {
-            dataSources.push({
-                name: `${province.name}边界`,
-                urls: [
-                    // 备用数据源1: 阿里云数据源（主要数据源）
-                    `https://geo.datav.aliyun.com/areas_v3/bound/${province.code}_full.json`
-                ],
-                level: `province_${province.code}`,
+            },
+            // 2. 四川省市级区划
+            {
+                name: '四川省市级区划',
+                urls: ['data/sichuan-cities-real.json'],
+                level: 'cities_sichuan',
                 style: {
-                    stroke: Cesium.Color.CYAN,
-                    strokeWidth: 2,
-                    fill: Cesium.Color.CYAN.withAlpha(0.03),
+                    stroke: Cesium.Color.YELLOW,
+                    strokeWidth: 1.5,
+                    fill: Cesium.Color.YELLOW.withAlpha(0.02),
                     clampToGround: true
                 }
-            });
-        });
-
-        // 3. 特别添加成都市的区县边界（详细展示）
-        dataSources.push({
-            name: '成都市区县边界',
-            urls: [
-                // 备用数据源1: 阿里云数据源（主要数据源）
-                'https://geo.datav.aliyun.com/areas_v3/bound/510100_full.json',
-                // 备用数据源2: 使用成都市各区县的点位标记（当边界数据无法加载时）
-                'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-                    "type": "FeatureCollection",
-                    "features": [
-                        {"type": "Feature", "properties": {"name": "锦江区", "adcode": "510104"}, "geometry": {"type": "Point", "coordinates": [104.0830, 30.6522]}},
-                        {"type": "Feature", "properties": {"name": "青羊区", "adcode": "510105"}, "geometry": {"type": "Point", "coordinates": [104.0614, 30.6745]}},
-                        {"type": "Feature", "properties": {"name": "金牛区", "adcode": "510106"}, "geometry": {"type": "Point", "coordinates": [104.0465, 30.6927]}},
-                        {"type": "Feature", "properties": {"name": "武侯区", "adcode": "510107"}, "geometry": {"type": "Point", "coordinates": [104.0430, 30.6302]}},
-                        {"type": "Feature", "properties": {"name": "成华区", "adcode": "510108"}, "geometry": {"type": "Point", "coordinates": [104.1015, 30.6598]}},
-                        {"type": "Feature", "properties": {"name": "龙泉驿区", "adcode": "510112"}, "geometry": {"type": "Point", "coordinates": [104.2748, 30.5565]}},
-                        {"type": "Feature", "properties": {"name": "青白江区", "adcode": "510113"}, "geometry": {"type": "Point", "coordinates": [104.2513, 30.8831]}},
-                        {"type": "Feature", "properties": {"name": "新都区", "adcode": "510114"}, "geometry": {"type": "Point", "coordinates": [104.1590, 30.8238]}},
-                        {"type": "Feature", "properties": {"name": "温江区", "adcode": "510115"}, "geometry": {"type": "Point", "coordinates": [103.8426, 30.6827]}},
-                        {"type": "Feature", "properties": {"name": "双流区", "adcode": "510116"}, "geometry": {"type": "Point", "coordinates": [103.9209, 30.5746]}},
-                        {"type": "Feature", "properties": {"name": "郫都区", "adcode": "510117"}, "geometry": {"type": "Point", "coordinates": [103.8878, 30.7948]}},
-                        {"type": "Feature", "properties": {"name": "新津区", "adcode": "510118"}, "geometry": {"type": "Point", "coordinates": [103.8111, 30.4097]}},
-                        {"type": "Feature", "properties": {"name": "都江堰市", "adcode": "510181"}, "geometry": {"type": "Point", "coordinates": [103.6470, 30.9882]}},
-                        {"type": "Feature", "properties": {"name": "彭州市", "adcode": "510182"}, "geometry": {"type": "Point", "coordinates": [103.9580, 30.9903]}},
-                        {"type": "Feature", "properties": {"name": "邛崃市", "adcode": "510183"}, "geometry": {"type": "Point", "coordinates": [103.4641, 30.4147]}},
-                        {"type": "Feature", "properties": {"name": "崇州市", "adcode": "510184"}, "geometry": {"type": "Point", "coordinates": [103.6739, 30.6302]}},
-                        {"type": "Feature", "properties": {"name": "金堂县", "adcode": "510121"}, "geometry": {"type": "Point", "coordinates": [104.4118, 30.8620]}},
-                        {"type": "Feature", "properties": {"name": "大邑县", "adcode": "510129"}, "geometry": {"type": "Point", "coordinates": [103.5218, 30.5877]}},
-                        {"type": "Feature", "properties": {"name": "蒲江县", "adcode": "510131"}, "geometry": {"type": "Point", "coordinates": [103.5061, 30.1967]}},
-                        {"type": "Feature", "properties": {"name": "简阳市", "adcode": "510185"}, "geometry": {"type": "Point", "coordinates": [104.5477, 30.4106]}}
-                    ]
-                }))
-            ],
-            level: 'county_chengdu',
-            style: {
-                stroke: Cesium.Color.ORANGE,
-                strokeWidth: 3,
-                fill: Cesium.Color.ORANGE.withAlpha(0.02),
-                clampToGround: true
+            },
+            // 3. 成都市区县边界
+            {
+                name: '成都市区县边界',
+                urls: ['data/chengdu-districts-real.json'],
+                level: 'county_chengdu',
+                style: {
+                    stroke: Cesium.Color.ORANGE,
+                    strokeWidth: 3,
+                    fill: Cesium.Color.ORANGE.withAlpha(0.02),
+                    clampToGround: true
+                }
             }
-        });
+        ];
 
-        // 全国省级行政区划 + 成都市区县
-        console.log(`📊 全国省级行政区划 + 成都市区县：需要加载 ${dataSources.length} 个数据源`);
-        console.log(`📋 包括：国界 + ${provinces.length}个省级行政区边界 + 成都市区县边界`);
-        console.log(`🗺️ 省份列表: ${provinces.map(p => p.name).join(', ')}`);
-
-        // 分阶段加载：基础层级 → 区县边界
+        // 静默加载区划边界数据
         let loadedCount = 0;
 
-        // 第一阶段：加载国界
-        const countrySources = dataSources.slice(0, 1);
-        console.log(`\n🚀 第一阶段：加载国界 (${countrySources.length} 个)`);
-
-        for (const source of countrySources) {
-            console.log(`📡 加载: ${source.name}`);
+        // 并行加载所有数据源
+        const allPromises = dataSources.map(async (source) => {
             const result = await loadRealBoundaryData(source);
-            if (result && result.success) {
-                loadedCount++;
-                console.log(`✅ ${source.name} 成功 (${result.entityCount || 0} 个实体)`);
-            } else {
-                console.log(`❌ ${source.name} 失败`);
-            }
-        }
+            return { source, result };
+        });
 
-        // 第二阶段：加载所有省级边界
-        const provinceSources = dataSources.slice(1, -1); // 排除最后的成都市区县
-        console.log(`\n🏛️ 第二阶段：加载省级边界 (${provinceSources.length} 个省份)`);
+        const allResults = await Promise.allSettled(allPromises);
 
-        // 第三阶段：成都市区县边界
-        const chengduCountySource = dataSources[dataSources.length - 1];
-        console.log(`\n🏘️ 第三阶段：加载成都市区县边界`);
-
-        const batchSize = 3; // 每批3个省份，避免过多并发请求
-        for (let i = 0; i < provinceSources.length; i += batchSize) {
-            const batch = provinceSources.slice(i, i + batchSize);
-            const batchNum = Math.floor(i / batchSize) + 1;
-            const totalBatches = Math.ceil(provinceSources.length / batchSize);
-
-            console.log(`\n📦 批次 ${batchNum}/${totalBatches}: ${batch.map(s => s.name).join(', ')}`);
-
-            // 并行加载同一批次
-            const batchPromises = batch.map(async (source) => {
-                const result = await loadRealBoundaryData(source);
-                return { source, result };
-            });
-
-            const batchResults = await Promise.allSettled(batchPromises);
-
-            // 处理批次结果
-            batchResults.forEach((promiseResult, index) => {
-                if (promiseResult.status === 'fulfilled') {
-                    const { source, result } = promiseResult.value;
-                    if (result && result.success) {
-                        loadedCount++;
-                        console.log(`  ✅ ${source.name} 成功 (${result.entityCount || 0} 个实体)`);
-                    } else {
-                        console.log(`  ❌ ${source.name} 失败`);
-                    }
-                } else {
-                    console.log(`  ❌ ${batch[index].name} 异常: ${promiseResult.reason}`);
-                }
-            });
-
-            // 批次间延迟
-            if (i + batchSize < provinceSources.length) {
-                console.log(`⏸️ 批次间暂停2秒...`);
-                await new Promise(resolve => setTimeout(resolve, 2000));
-            }
-        }
-
-        // 加载成都市区县边界
-        console.log(`📡 加载: ${chengduCountySource.name}`);
-        const chengduResult = await loadRealBoundaryData(chengduCountySource);
-        if (chengduResult && chengduResult.success) {
-            loadedCount++;
-            console.log(`✅ ${chengduCountySource.name} 成功 (${chengduResult.entityCount || 0} 个区县)`);
-
-            // 详细检查成都市区县
-            const dataSource = boundaryLayers[chengduCountySource.level];
-            if (dataSource) {
-                const entities = dataSource.entities.values;
-                const countyEntities = entities.filter(e => e.name && typeof e.name === 'string' &&
-                    (e.name.includes('区') || e.name.includes('县')));
-                console.log(`🏘️ 成都市区县详情: 总共 ${entities.length} 个实体，其中 ${countyEntities.length} 个区县`);
-
-                // 显示前5个区县名称
-                countyEntities.slice(0, 5).forEach((entity, index) => {
-                    console.log(`  ${index + 1}. ${entity.name}`);
-                });
-                if (countyEntities.length > 5) {
-                    console.log(`  ... 还有 ${countyEntities.length - 5} 个区县`);
+        // 处理所有结果
+        allResults.forEach((promiseResult, index) => {
+            if (promiseResult.status === 'fulfilled') {
+                const { source, result } = promiseResult.value;
+                if (result && result.success) {
+                    loadedCount++;
                 }
             }
-        } else {
-            console.log(`❌ ${chengduCountySource.name} 失败`);
-        }
-
-        console.log(`\n🎉 全国省级行政区划 + 成都市区县加载完成！`);
-        console.log(`📊 最终统计: 成功 ${loadedCount}/${dataSources.length} 个数据源`);
-        console.log(`🗺️ 包含: 国界 + ${Math.max(0, loadedCount - 2)}个省级行政区边界 + 成都市区县边界`);
-        console.log(`🌏 预期加载: 1个国界 + ${provinces.length}个省份 + 1个成都市区县 = ${1 + provinces.length + 1}个边界`);
+        });
 
         // 最终检查：统计所有边界线
         await checkAllBoundaries();
 
-        console.log('✅ 真实行政区划数据加载完成');
+        if (window.DEBUG_MODE) {
+            console.log('✅ 真实行政区划数据加载完成');
+        }
 
         // 强制刷新场景
         viewer.scene.requestRender();
@@ -1206,14 +1085,18 @@ async function loadMultiLevelBoundaries() {
 // 为实体创建边界线
 function createEntityBoundaryLine(dataSource, entity, style, customName = null) {
     const entityName = customName || entity.name || '未命名';
-    console.log(`🔍 为实体创建边界线: ${entityName} (customName: ${customName})`);
+    if (window.DEBUG_MODE) {
+        console.log(`🔍 为实体创建边界线: ${entityName} (customName: ${customName})`);
+    }
 
     try {
         if (entity.polygon && entity.polygon.hierarchy) {
             // 处理面要素的边界
             let positions = extractPositionsFromHierarchy(entity.polygon.hierarchy);
             if (positions && positions.length >= 2) {
-                console.log(`✅ 提取到 ${positions.length} 个位置点，创建边界线: ${entityName}_边界`);
+                if (window.DEBUG_MODE) {
+                    console.log(`✅ 提取到 ${positions.length} 个位置点，创建边界线: ${entityName}_边界`);
+                }
                 createSimpleBoundaryLine(dataSource, entity.id + '_boundary', entityName + '_边界', positions, style);
             } else {
                 console.log(`❌ 无法提取位置数据`);
@@ -1262,7 +1145,9 @@ function extractPositionsFromHierarchy(hierarchy) {
 // 创建简单的边界线
 function createSimpleBoundaryLine(dataSource, id, name, positions, style) {
     try {
-        console.log(`🎨 创建简单边界线: ${name}, 位置数量: ${positions.length}`);
+        if (window.DEBUG_MODE) {
+            console.log(`🎨 创建简单边界线: ${name}, 位置数量: ${positions.length}`);
+        }
 
         // 增强边界的可见性，特别是区县级
         let enhancedWidth = style.strokeWidth;
@@ -1274,7 +1159,9 @@ function createSimpleBoundaryLine(dataSource, id, name, positions, style) {
             enhancedWidth = Math.max(style.strokeWidth, 4); // 区县边界至少4px，确保可见
             enhancedGlow = 0.8; // 强发光效果
             enhancedColor = Cesium.Color.ORANGE.brighten(0.3, new Cesium.Color()); // 明亮橙色
-            console.log(`🎨 区县边界增强: ${name} → 宽度${enhancedWidth}px, 发光${enhancedGlow}`);
+            if (window.DEBUG_MODE) {
+                console.log(`🎨 区县边界增强: ${name} → 宽度${enhancedWidth}px, 发光${enhancedGlow}`);
+            }
         } else if (name.includes('市') || name.includes('州')) {
             enhancedWidth = Math.max(style.strokeWidth, 3); // 市级边界至少3px
             enhancedGlow = 0.6; // 增强发光效果
@@ -1301,7 +1188,9 @@ function createSimpleBoundaryLine(dataSource, id, name, positions, style) {
             }
         });
 
-        console.log(`✅ 边界线创建成功: ${name} (宽度: ${enhancedWidth}px, 发光: ${enhancedGlow})`);
+        if (window.DEBUG_MODE) {
+            console.log(`✅ 边界线创建成功: ${name} (宽度: ${enhancedWidth}px, 发光: ${enhancedGlow})`);
+        }
         return entity;
 
     } catch (error) {
@@ -1392,14 +1281,14 @@ function createTerrainFollowingPolyline(dataSource, id, name, positions, width, 
 // 核心函数：加载真实的GeoJSON边界数据（支持多个备用URL）
 async function loadRealBoundaryData(source) {
     const urls = source.urls || [source.url]; // 支持新的 urls 数组或旧的 url 字段
-    console.log(`🌐 正在加载 ${source.name}... 可用数据源: ${urls.length} 个`);
+
 
     let lastError = null;
 
     // 尝试每个URL直到成功
     for (let i = 0; i < urls.length; i++) {
         const url = urls[i];
-        console.log(`📡 尝试数据源 ${i + 1}/${urls.length}: ${url.substring(0, 100)}${url.length > 100 ? '...' : ''}`);
+
 
         try {
             // 创建数据源
@@ -1421,22 +1310,24 @@ async function loadRealBoundaryData(source) {
                 markerSymbol: isPointData ? '?' : undefined
             });
 
-            console.log(`✅ 数据源 ${i + 1} 加载成功: ${source.name}`);
+
 
         // 将GeoJSON实体复制到我们的数据源中，并设置高度属性
-        console.log(`📋 处理 ${geoJsonDataSource.entities.values.length} 个实体`);
+
 
         geoJsonDataSource.entities.values.forEach((entity, index) => {
             try {
                 // 获取实体的真实名称（重点修复区县名称）
                 let entityName = `实体${index + 1}`;
 
-                // 详细调试实体属性
-                console.log(`🔍 实体 ${index + 1} 详细信息:`);
-                console.log(`  - entity.name: "${entity.name}" (${typeof entity.name})`);
-                console.log(`  - entity.id: "${entity.id}"`);
+                // 简化日志输出，只在调试模式下显示详细信息
+                if (window.DEBUG_MODE) {
+                    console.log(`🔍 实体 ${index + 1} 详细信息:`);
+                    console.log(`  - entity.name: "${entity.name}" (${typeof entity.name})`);
+                    console.log(`  - entity.id: "${entity.id}"`);
+                }
 
-                if (entity.properties) {
+                if (entity.properties && window.DEBUG_MODE) {
                     console.log(`  - properties:`, entity.properties);
                     console.log(`  - properties._propertyNames:`, entity.properties._propertyNames);
 
@@ -1455,12 +1346,16 @@ async function loadRealBoundaryData(source) {
                                     }
                                     if (value && typeof value === 'string' && value.trim() !== '') {
                                         entityName = value.trim();
-                                        console.log(`  ✅ 从 properties.${field} 获取名称: "${entityName}"`);
+                                        if (window.DEBUG_MODE) {
+                                            console.log(`  ✅ 从 properties.${field} 获取名称: "${entityName}"`);
+                                        }
                                         break;
                                     }
                                 }
                             } catch (fieldError) {
-                                console.log(`  ⚠️ 访问 properties.${field} 失败:`, fieldError);
+                                if (window.DEBUG_MODE) {
+                                    console.log(`  ⚠️ 访问 properties.${field} 失败:`, fieldError);
+                                }
                             }
                         }
 
@@ -1512,26 +1407,31 @@ async function loadRealBoundaryData(source) {
                     } catch (propsError) {
                         console.log(`  ❌ 处理properties失败:`, propsError);
                     }
-                } else {
+                } else if (window.DEBUG_MODE) {
                     console.log(`  - properties: null`);
                 }
 
                 // 如果entity.name存在且是字符串，优先使用
                 if (entity.name && typeof entity.name === 'string' && entity.name.trim() !== '') {
                     entityName = entity.name.trim();
-                    console.log(`  ✅ 使用 entity.name: "${entityName}"`);
+                    if (window.DEBUG_MODE) {
+                        console.log(`  ✅ 使用 entity.name: "${entityName}"`);
+                    }
                 }
 
                 // 如果还是没有获取到有效名称，使用ID
                 if (entityName.startsWith('实体') && entity.id) {
                     entityName = `区域_${entity.id.substring(0, 8)}`;
-                    console.log(`  ⚠️ 使用备用名称: "${entityName}"`);
+                    if (window.DEBUG_MODE) {
+                        console.log(`  ⚠️ 使用备用名称: "${entityName}"`);
+                    }
                 }
 
-                console.log(`🎯 最终实体名称: "${entityName}"`);
-                console.log(`---`);
-
-                console.log(`🔍 处理实体 ${index + 1}: ${entityName}, 类型: ${entity.polygon ? 'polygon' : entity.polyline ? 'polyline' : '其他'}`);
+                if (window.DEBUG_MODE) {
+                    console.log(`🎯 最终实体名称: "${entityName}"`);
+                    console.log(`---`);
+                    console.log(`🔍 处理实体 ${index + 1}: ${entityName}, 类型: ${entity.polygon ? 'polygon' : entity.polyline ? 'polyline' : '其他'}`);
+                }
 
                 if (entity.polygon) {
                     // 处理面要素 - 跟随地形起伏
@@ -1548,10 +1448,12 @@ async function loadRealBoundaryData(source) {
                         }
                     });
 
-                    console.log(`✅ 创建面要素: ${entityName}`);
+                    if (window.DEBUG_MODE) {
+                        console.log(`✅ 创建面要素: ${entityName}`);
+                        console.log(`🎨 准备创建边界线，使用名称: "${entityName}"`);
+                    }
 
                     // 强制创建边界线，使用正确的区县名称
-                    console.log(`🎨 准备创建边界线，使用名称: "${entityName}"`);
                     createEntityBoundaryLine(dataSource, entity, source.style, entityName);
 
                 } else if (entity.polyline) {
@@ -1560,7 +1462,9 @@ async function loadRealBoundaryData(source) {
                     createEntityBoundaryLine(dataSource, entity, source.style);
                 } else if (entity.point || (entity.position && isPointData)) {
                     // 处理点要素（成都市区县中心点）
-                    console.log(`📍 处理点要素: ${entityName}`);
+                    if (window.DEBUG_MODE) {
+                        console.log(`📍 处理点要素: ${entityName}`);
+                    }
 
                     const pointEntity = dataSource.entities.add({
                         id: entity.id,
@@ -1602,7 +1506,9 @@ async function loadRealBoundaryData(source) {
 
             // 统计加载的实体数量
             const entityCount = dataSource.entities.values.length;
-            console.log(`✅ ${source.name} 加载成功，包含 ${entityCount} 个实体`);
+            if (window.DEBUG_MODE) {
+                console.log(`✅ ${source.name} 加载成功，包含 ${entityCount} 个实体`);
+            }
 
             return { success: true, entityCount };
 
@@ -1684,7 +1590,9 @@ async function handleBoundaryLoadFailure(source, error) {
 
 // 检查所有边界线
 async function checkAllBoundaries() {
-    console.log(`\n🔍 最终边界检查:`);
+    if (window.DEBUG_MODE) {
+        console.log(`\n🔍 最终边界检查:`);
+    }
 
     let totalEntities = 0;
     let totalPolylines = 0;
@@ -1722,20 +1630,22 @@ async function checkAllBoundaries() {
         }
     });
 
-    console.log(`\n📊 边界统计总览:`);
-    console.log(`  🎯 总实体数: ${totalEntities}`);
-    console.log(`  📏 总边界线: ${totalPolylines}`);
-    console.log(`  📐 总面要素: ${totalPolygons}`);
-    console.log(`  🏘️ 区县边界线: ${countyBoundaries}`);
+    if (window.DEBUG_MODE) {
+        console.log(`\n📊 边界统计总览:`);
+        console.log(`  🎯 总实体数: ${totalEntities}`);
+        console.log(`  📏 总边界线: ${totalPolylines}`);
+        console.log(`  📐 总面要素: ${totalPolygons}`);
+        console.log(`  🏘️ 区县边界线: ${countyBoundaries}`);
 
-    if (countyBoundaries === 0) {
-        console.log(`\n❌ 警告: 没有检测到区县边界线！`);
-        console.log(`🔧 建议检查:`);
-        console.log(`  1. 数据源URL是否正确`);
-        console.log(`  2. 实体名称是否包含"区"或"县"`);
-        console.log(`  3. 边界线创建逻辑是否正确`);
-    } else {
-        console.log(`\n✅ 区县边界检查通过！`);
+        if (countyBoundaries === 0) {
+            console.log(`\n❌ 警告: 没有检测到区县边界线！`);
+            console.log(`🔧 建议检查:`);
+            console.log(`  1. 数据源URL是否正确`);
+            console.log(`  2. 实体名称是否包含"区"或"县"`);
+            console.log(`  3. 边界线创建逻辑是否正确`);
+        } else {
+            console.log(`\n✅ 区县边界检查通过！`);
+        }
     }
 }
 
@@ -1936,7 +1846,9 @@ function simulateStatusChange() {
         // 更新统计显示
         updateDeviceStatsDisplay();
 
-        console.log(`监测点状态变化: ${randomEntity.name} ${currentStatus} → ${newStatus}`);
+        if (window.DEBUG_MODE) {
+            console.log(`监测点状态变化: ${randomEntity.name} ${currentStatus} → ${newStatus}`);
+        }
     }
 }
 
@@ -1944,7 +1856,9 @@ function simulateStatusChange() {
 
 // 初始化页卡切换功能
 function initTabSwitching() {
-    console.log('🔄 初始化页卡切换功能...');
+    if (window.DEBUG_MODE) {
+        console.log('🔄 初始化页卡切换功能...');
+    }
 
     // 获取所有页卡按钮
     const tabButtons = document.querySelectorAll('.panel-tab');
@@ -1955,7 +1869,9 @@ function initTabSwitching() {
         return;
     }
 
-    console.log(`📋 找到 ${tabButtons.length} 个页卡按钮`);
+    if (window.DEBUG_MODE) {
+        console.log(`📋 找到 ${tabButtons.length} 个页卡按钮`);
+    }
 
     // 为每个页卡按钮添加点击事件
     tabButtons.forEach(button => {
@@ -2000,7 +1916,9 @@ function initTabSwitching() {
     // 初始化页卡徽章数字
     updateTabBadges();
 
-    console.log('✅ 页卡切换功能初始化完成');
+    if (window.DEBUG_MODE) {
+        console.log('✅ 页卡切换功能初始化完成');
+    }
 }
 
 // 更新页卡徽章数字
@@ -2019,7 +1937,9 @@ function updateTabBadges() {
         notificationBadge.textContent = notificationItems.length;
     }
 
-    console.log(`📊 页卡徽章更新: 预警${warningItems.length}个, 通知${notificationItems.length}个`);
+    if (window.DEBUG_MODE) {
+        console.log(`📊 页卡徽章更新: 预警${warningItems.length}个, 通知${notificationItems.length}个`);
+    }
 }
 
 // 更新预警数据
