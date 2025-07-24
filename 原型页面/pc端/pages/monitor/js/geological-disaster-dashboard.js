@@ -167,42 +167,47 @@ async function initMap() {
     }
 }
 
-// 添加示例监测点 - 使用真实的成都地区坐标
+// 添加示例设备 - 使用真实的成都地区坐标
 function addSampleMonitoringPoints() {
-    const samplePoints = [
-        // 12个正常状态 - 成都主城区及近郊
-        { name: '天府广场监测站', lon: 104.0665, lat: 30.5723, status: 'online' },
-        { name: '春熙路监测站', lon: 104.0810, lat: 30.5702, status: 'online' },
-        { name: '宽窄巷子监测站', lon: 104.0556, lat: 30.6739, status: 'online' },
-        { name: '武侯祠监测站', lon: 104.0438, lat: 30.6417, status: 'online' },
-        { name: '杜甫草堂监测站', lon: 104.0264, lat: 30.6608, status: 'online' },
-        { name: '金沙遗址监测站', lon: 104.0158, lat: 30.6956, status: 'online' },
-        { name: '熊猫基地监测站', lon: 104.1469, lat: 30.7328, status: 'online' },
-        { name: '东郊记忆监测站', lon: 104.1158, lat: 30.6456, status: 'online' },
-        { name: '环球中心监测站', lon: 104.0625, lat: 30.5417, status: 'online' },
-        { name: '双流机场监测站', lon: 103.9467, lat: 30.5785, status: 'online' },
-        { name: '温江大学城监测站', lon: 103.8333, lat: 30.6833, status: 'online' },
-        { name: '郫都犀浦监测站', lon: 103.9667, lat: 30.7667, status: 'online' },
+    const sampleDevices = [
+        // 气象站设备
+        { name: '锦江气象站', type: 'weather', lon: 104.0810, lat: 30.5702, status: 'online' },
+        { name: '双流气象站', type: 'weather', lon: 103.9467, lat: 30.5785, status: 'warning' },
+        { name: '新都气象站', type: 'weather', lon: 104.1500, lat: 30.8200, status: 'online' },
 
-        // 4个预警状态 - 周边区县
-        { name: '都江堰水利监测站', lon: 103.6167, lat: 31.0167, status: 'warning' },
-        { name: '青城山监测站', lon: 103.5667, lat: 30.9000, status: 'warning' },
-        { name: '龙泉山监测站', lon: 104.2667, lat: 30.5667, status: 'warning' },
-        { name: '西岭雪山监测站', lon: 103.1333, lat: 30.6167, status: 'warning' },
+        // 水位计设备
+        { name: '府河水位计', type: 'water', lon: 104.0665, lat: 30.5723, status: 'online' },
+        { name: '沱江水位计', type: 'water', lon: 104.4167, lat: 30.8667, status: 'online' },
+        { name: '岷江水位计', type: 'water', lon: 103.8333, lat: 30.6833, status: 'warning' },
 
-        // 2个离线状态 - 远郊区县
-        { name: '金堂淮口监测站', lon: 104.4167, lat: 30.8667, status: 'offline' },
-        { name: '蒲江朝阳湖监测站', lon: 103.5000, lat: 30.1833, status: 'offline' }
+        // 摄像头设备
+        { name: '龙泉山摄像头', type: 'camera', lon: 104.2667, lat: 30.5667, status: 'warning' },
+        { name: '彭州监控摄像头', type: 'camera', lon: 103.9500, lat: 30.9900, status: 'online' },
+        { name: '大邑监控摄像头', type: 'camera', lon: 103.5200, lat: 30.5800, status: 'online' },
+
+        // 位移计设备
+        { name: '青城山位移计', type: 'displacement', lon: 103.5667, lat: 30.9000, status: 'online' },
+        { name: '汶川位移计', type: 'displacement', lon: 103.5900, lat: 31.4800, status: 'online' },
+
+        // 雨量计设备
+        { name: '都江堰雨量计', type: 'rainfall', lon: 103.6167, lat: 31.0167, status: 'offline' },
+        { name: '天府新区雨量计', type: 'rainfall', lon: 104.0625, lat: 30.5417, status: 'online' },
+        { name: '金堂雨量计', type: 'rainfall', lon: 104.4000, lat: 30.8500, status: 'online' },
+
+        // 土壤监测设备
+        { name: '温江土壤监测仪', type: 'soil', lon: 103.8500, lat: 30.6900, status: 'online' },
+        { name: '邛崃土壤监测仪', type: 'soil', lon: 103.4600, lat: 30.4100, status: 'online' },
+        { name: '崇州土壤监测仪', type: 'soil', lon: 103.6700, lat: 30.6300, status: 'offline' }
     ];
 
     if (window.DEBUG_MODE) {
-        console.log(`🚀 准备添加 ${samplePoints.length} 个监测点:`);
+        console.log(`🚀 准备添加 ${sampleDevices.length} 个设备:`);
     }
-    samplePoints.forEach((point, index) => {
+    sampleDevices.forEach((device, index) => {
         if (window.DEBUG_MODE) {
-            console.log(`  ${index + 1}. ${point.name}: ${point.status}`);
+            console.log(`  ${index + 1}. ${device.name} (${device.type}): ${device.status}`);
         }
-        addMonitoringPointToMap(point);
+        addMonitoringPointToMap(device);
     });
 
     // 初始化完成后更新统计并飞行到成都
@@ -225,21 +230,33 @@ function addSampleMonitoringPoints() {
     }, 1500);
 }
 
-// 在地图上添加监测点
-function addMonitoringPointToMap(point) {
+// 在地图上添加设备
+function addMonitoringPointToMap(device) {
     if (!viewer || !Cesium) {
-        console.log('地图未初始化，监测点数据已保存:', point);
+        console.log('地图未初始化，设备数据已保存:', device);
         return;
     }
 
     try {
-        const color = point.status === 'online' ? Cesium.Color.GREEN :
-                     point.status === 'warning' ? Cesium.Color.ORANGE :
+        const color = device.status === 'online' ? Cesium.Color.GREEN :
+                     device.status === 'warning' ? Cesium.Color.ORANGE :
                      Cesium.Color.RED;
 
+        // 根据设备类型选择不同的图标
+        const deviceIcons = {
+            weather: '🌡️',
+            water: '💧',
+            camera: '📹',
+            displacement: '📏',
+            rainfall: '🌧️',
+            soil: '🌱'
+        };
+
+        const icon = deviceIcons[device.type] || '📍';
+
         const entity = viewer.entities.add({
-            name: point.name,
-            position: Cesium.Cartesian3.fromDegrees(point.lon, point.lat),
+            name: device.name,
+            position: Cesium.Cartesian3.fromDegrees(device.lon, device.lat),
             point: {
                 pixelSize: 18,
                 color: color,
@@ -250,7 +267,7 @@ function addMonitoringPointToMap(point) {
                 disableDepthTestDistance: Number.POSITIVE_INFINITY
             },
             label: {
-                text: point.name,
+                text: `${icon} ${device.name}`,
                 font: '14pt Microsoft YaHei, sans-serif',
                 pixelOffset: new Cesium.Cartesian2(0, -45),
                 fillColor: Cesium.Color.WHITE,
@@ -262,19 +279,20 @@ function addMonitoringPointToMap(point) {
                 disableDepthTestDistance: Number.POSITIVE_INFINITY
             },
             properties: {
-                name: point.name,
-                status: point.status,
-                type: 'monitoring_point'
+                name: device.name,
+                status: device.status,
+                type: 'monitoring_device',
+                deviceType: device.type
             }
         });
 
         // 只为预警设备添加动效
-        if (point.status === 'warning') {
-            addDeviceAnimation(entity, point.status);
+        if (device.status === 'warning') {
+            addDeviceAnimation(entity, device.status);
         }
 
         if (window.DEBUG_MODE) {
-            console.log(`✅ 成功添加监测点: ${point.name} (${point.status}) 位置: [${point.lon}, ${point.lat}]`);
+            console.log(`✅ 成功添加设备: ${device.name} (${device.type}) 状态: ${device.status} 位置: [${device.lon}, ${device.lat}]`);
         }
 
         monitoringPoints.push(entity);
@@ -282,7 +300,7 @@ function addMonitoringPointToMap(point) {
         // 更新设备统计
         updateDeviceStatsDisplay();
     } catch (error) {
-        console.error('添加监测点失败:', error);
+        console.error('添加设备失败:', error);
     }
 }
 
@@ -290,6 +308,9 @@ function addMonitoringPointToMap(point) {
 document.addEventListener('DOMContentLoaded', function() {
     // 初始化地图
     initMap();
+
+    // 初始化任务面板
+    initializeTaskPanel();
 
     // 绑定工具栏按钮事件
     document.getElementById('homeBtn').addEventListener('click', function() {
@@ -408,9 +429,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('addPointBtn').addEventListener('click', function() {
-        openModal('addPointModal');
-    });
+
 
     document.getElementById('clearBtn').addEventListener('click', function() {
         if (confirm('确定要清除所有监测点和预警区域吗？')) {
@@ -473,6 +492,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('click', function(event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
+            // 恢复背景页面滚动
+            document.body.style.overflow = 'auto';
         }
     });
 });
@@ -480,10 +501,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // 模态框操作函数
 function openModal(modalId) {
     document.getElementById(modalId).style.display = 'block';
+    // 阻止背景页面滚动
+    document.body.style.overflow = 'hidden';
 }
 
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
+    // 恢复背景页面滚动
+    document.body.style.overflow = 'auto';
 }
 
 // 通知提示函数
@@ -618,13 +643,13 @@ const globalTooltip = {
     }
 };
 
-// 统计实际监测点状态
+// 统计实际设备状态
 function calculateDeviceStats() {
     let onlineCount = 0;
     let warningCount = 0;
     let offlineCount = 0;
 
-    // 统计viewer中的监测点实体
+    // 统计viewer中的设备实体
     if (viewer && viewer.entities) {
         const entities = viewer.entities.values;
         if (window.DEBUG_MODE) {
@@ -633,11 +658,12 @@ function calculateDeviceStats() {
 
         entities.forEach(entity => {
             if (entity.properties && entity.properties.type &&
-                entity.properties.type.getValue() === 'monitoring_point') {
+                entity.properties.type.getValue() === 'monitoring_device') {
                 const status = entity.properties.status.getValue();
+                const deviceType = entity.properties.deviceType ? entity.properties.deviceType.getValue() : '未知';
                 const name = entity.name || '未命名';
                 if (window.DEBUG_MODE) {
-                    console.log(`📍 监测点: ${name}, 状态: ${status}`);
+                    console.log(`📍 设备: ${name} (${deviceType}), 状态: ${status}`);
                 }
 
                 switch (status) {
@@ -663,6 +689,36 @@ function calculateDeviceStats() {
     return { onlineCount, warningCount, offlineCount };
 }
 
+// 暴露给HTML使用的全局函数 - 获取设备数据
+window.getDeviceDataFromViewer = function() {
+    const devices = [];
+    if (viewer && viewer.entities) {
+        const entities = viewer.entities.values;
+        entities.forEach(entity => {
+            if (entity.properties && entity.properties.type &&
+                entity.properties.type.getValue() === 'monitoring_device') {
+                try {
+                    const position = entity.position.getValue(Cesium.JulianDate.now());
+                    const cartographic = Cesium.Cartographic.fromCartesian(position);
+                    const longitude = Cesium.Math.toDegrees(cartographic.longitude).toFixed(4);
+                    const latitude = Cesium.Math.toDegrees(cartographic.latitude).toFixed(4);
+
+                    devices.push({
+                        id: entity.id,
+                        name: entity.name,
+                        type: entity.properties.deviceType ? entity.properties.deviceType.getValue() : 'unknown',
+                        status: entity.properties.status.getValue(),
+                        location: `${longitude}°E, ${latitude}°N`
+                    });
+                } catch (error) {
+                    console.error('处理设备数据失败:', entity.name, error);
+                }
+            }
+        });
+    }
+    return devices;
+};
+
 // 更新设备统计显示
 function updateDeviceStatsDisplay() {
     const stats = calculateDeviceStats();
@@ -675,8 +731,8 @@ function updateDeviceStatsDisplay() {
     // 更新tooltip内容
     updateDeviceStatsTooltips();
 
-    // 更新设备列表
-    updateDeviceList();
+    // 更新设备列表 - 现在由HTML中的设备筛选功能管理
+    // updateDeviceList();
 }
 
 // 更新左侧设备列表
@@ -687,16 +743,16 @@ function updateDeviceList() {
     // 清空现有列表
     deviceListContainer.innerHTML = '';
 
-    // 获取所有监测点
+    // 获取所有设备
     if (viewer && viewer.entities) {
         const entities = viewer.entities.values;
-        const monitoringPoints = entities.filter(entity =>
+        const monitoringDevices = entities.filter(entity =>
             entity.properties && entity.properties.type &&
-            entity.properties.type.getValue() === 'monitoring_point'
+            entity.properties.type.getValue() === 'monitoring_device'
         );
 
         // 按状态排序：online -> warning -> offline
-        monitoringPoints.sort((a, b) => {
+        monitoringDevices.sort((a, b) => {
             const statusOrder = { 'online': 0, 'warning': 1, 'offline': 2 };
             const statusA = a.properties.status.getValue();
             const statusB = b.properties.status.getValue();
@@ -704,7 +760,7 @@ function updateDeviceList() {
         });
 
         // 创建设备项
-        monitoringPoints.forEach(entity => {
+        monitoringDevices.forEach(entity => {
             const name = entity.name;
             const status = entity.properties.status.getValue();
             const statusClass = status; // online, warning, offline
@@ -803,15 +859,28 @@ function initMapClickHandler() {
         if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
             const entity = pickedObject.id;
 
-            // 检查是否是监测点
+            // 检查是否是监测设备
             if (entity.properties && entity.properties.type &&
-                entity.properties.type.getValue() === 'monitoring_point') {
+                entity.properties.type.getValue() === 'monitoring_device') {
 
                 const name = entity.name;
                 const status = entity.properties.status.getValue();
+                const deviceType = entity.properties.deviceType ? entity.properties.deviceType.getValue() : '未知';
                 const statusText = status === 'online' ? '正常运行' :
                                  status === 'warning' ? '预警状态' : '离线';
                 const statusClass = status;
+
+                // 设备类型中文名称映射
+                const deviceTypeNames = {
+                    weather: '气象站',
+                    water: '水位计',
+                    camera: '监控摄像头',
+                    displacement: '位移计',
+                    rainfall: '雨量计',
+                    soil: '土壤监测仪'
+                };
+
+                const deviceTypeName = deviceTypeNames[deviceType] || '监测设备';
 
                 // 获取位置信息
                 const position = entity.position.getValue(Cesium.JulianDate.now());
@@ -824,6 +893,12 @@ function initMapClickHandler() {
                 document.getElementById('deviceStatus').textContent = statusText;
                 document.getElementById('deviceStatus').className = `value status ${statusClass}`;
                 document.getElementById('deviceLocation').textContent = `${longitude}°E, ${latitude}°N`;
+
+                // 更新设备类型信息
+                const deviceTypeElement = document.getElementById('deviceType');
+                if (deviceTypeElement) {
+                    deviceTypeElement.textContent = deviceTypeName;
+                }
 
                 // 更新其他设备信息（模拟数据）
                 const currentTime = new Date().toLocaleString('zh-CN');
@@ -987,6 +1062,279 @@ function sendNotification() {
 
 function updateWarning() {
     showToast('success', '状态更新', '预警状态已更新');
+}
+
+// 设备操作函数
+function deviceControl() {
+    showToast('info', '设备控制', '设备控制指令已发送');
+}
+
+function deviceMaintenance() {
+    showToast('warning', '维护模式', '设备已切换到维护模式');
+}
+
+function exportDeviceData() {
+    showToast('success', '数据导出', '设备数据导出任务已启动');
+}
+
+// 任务操作函数
+function acceptTask() {
+    showToast('success', '任务接受', '任务已接受，请按时完成');
+    closeModal('taskModal');
+}
+
+function updateTaskStatus() {
+    showToast('info', '状态更新', '任务状态已更新');
+}
+
+function viewTaskDetails() {
+    showToast('info', '查看详情', '正在加载任务详细信息');
+}
+
+// 任务数据管理
+const taskData = {
+    pending: [
+        {
+            id: 'task001',
+            title: '监测点数据采集',
+            description: '前往XX监测点进行例行数据采集，检查设备运行状态',
+            type: '数据采集',
+            priority: 'high',
+            assignee: '张三',
+            assignTime: '2025-07-24 09:00',
+            deadline: '2025-07-24 18:00',
+            location: '成都市武侯区XX监测点',
+            status: 'pending'
+        },
+        {
+            id: 'task002',
+            title: '设备维护检查',
+            description: '对雨量监测设备进行定期维护和校准',
+            type: '设备维护',
+            priority: 'medium',
+            assignee: '李四',
+            assignTime: '2025-07-24 10:00',
+            deadline: '2025-07-24 16:00',
+            location: '成都市锦江区YY监测站',
+            status: 'pending'
+        },
+        {
+            id: 'task003',
+            title: '异常情况调查',
+            description: '调查昨日监测数据异常的原因，提交调查报告',
+            type: '异常调查',
+            priority: 'high',
+            assignee: '王五',
+            assignTime: '2025-07-24 08:30',
+            deadline: '2025-07-24 20:00',
+            location: '成都市青羊区ZZ监测点',
+            status: 'pending'
+        }
+    ],
+    processing: [
+        {
+            id: 'task004',
+            title: '预警信息核实',
+            description: '核实当前红色预警区域的实际情况',
+            type: '预警核实',
+            priority: 'high',
+            assignee: '赵六',
+            assignTime: '2025-07-24 07:00',
+            deadline: '2025-07-24 12:00',
+            location: '成都市成华区AA监测区域',
+            status: 'processing'
+        },
+        {
+            id: 'task005',
+            title: '应急设备部署',
+            description: '在指定区域部署临时监测设备',
+            type: '设备部署',
+            priority: 'medium',
+            assignee: '孙七',
+            assignTime: '2025-07-24 06:00',
+            deadline: '2025-07-24 14:00',
+            location: '成都市金牛区BB应急点',
+            status: 'processing'
+        }
+    ],
+    completed: [
+        {
+            id: 'task006',
+            title: '日常巡检任务',
+            description: '完成本周例行巡检，所有设备运行正常',
+            type: '日常巡检',
+            priority: 'low',
+            assignee: '周八',
+            assignTime: '2025-07-23 09:00',
+            deadline: '2025-07-23 17:00',
+            location: '成都市高新区CC监测线路',
+            status: 'completed'
+        },
+        {
+            id: 'task007',
+            title: '数据备份任务',
+            description: '完成本月监测数据的备份工作',
+            type: '数据备份',
+            priority: 'medium',
+            assignee: '吴九',
+            assignTime: '2025-07-23 14:00',
+            deadline: '2025-07-23 18:00',
+            location: '数据中心',
+            status: 'completed'
+        }
+    ]
+};
+
+// 初始化任务面板
+function initializeTaskPanel() {
+    console.log('🔄 初始化任务面板...');
+
+    // 更新任务统计
+    updateTaskStats();
+
+    // 渲染任务列表
+    renderTaskList('pending');
+    renderTaskList('processing');
+    renderTaskList('completed');
+
+    // 绑定页卡切换事件
+    bindTaskTabEvents();
+
+    console.log('✅ 任务面板初始化完成');
+}
+
+// 更新任务统计
+function updateTaskStats() {
+    document.getElementById('pendingCount').textContent = taskData.pending.length;
+    document.getElementById('processingCount').textContent = taskData.processing.length;
+    document.getElementById('completedCount').textContent = taskData.completed.length;
+}
+
+// 渲染任务列表
+function renderTaskList(status) {
+    const container = document.getElementById(`${status}TaskList`);
+    if (!container) return;
+
+    const tasks = taskData[status] || [];
+
+    container.innerHTML = tasks.map(task => `
+        <div class="task-item" onclick="openTaskModal('${task.id}')">
+            <div class="task-header">
+                <div class="task-title">${task.title}</div>
+                <div class="task-priority ${task.priority}">${getPriorityText(task.priority)}</div>
+            </div>
+            <div class="task-description">${task.description}</div>
+            <div class="task-meta">
+                <div class="task-assignee">
+                    <span>👤</span>
+                    <span>${task.assignee}</span>
+                </div>
+                <div class="task-deadline ${isUrgent(task.deadline) ? 'urgent' : ''}">
+                    <span>⏰</span>
+                    <span>${formatDeadline(task.deadline)}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 获取优先级文本
+function getPriorityText(priority) {
+    const priorityMap = {
+        'high': '高',
+        'medium': '中',
+        'low': '低'
+    };
+    return priorityMap[priority] || '中';
+}
+
+// 判断是否紧急
+function isUrgent(deadline) {
+    const deadlineTime = new Date(deadline).getTime();
+    const now = new Date().getTime();
+    const hoursDiff = (deadlineTime - now) / (1000 * 60 * 60);
+    return hoursDiff <= 2; // 2小时内截止为紧急
+}
+
+// 格式化截止时间
+function formatDeadline(deadline) {
+    const date = new Date(deadline);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const taskDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    if (taskDate.getTime() === today.getTime()) {
+        return `今天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    } else {
+        return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+}
+
+// 绑定任务页卡事件
+function bindTaskTabEvents() {
+    const tabItems = document.querySelectorAll('.task-panel .panel-tab');
+
+    tabItems.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+
+            // 移除所有active类
+            tabItems.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.task-panel .tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            // 添加active类
+            this.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+
+            showToast('info', '页卡切换', `已切换到${this.querySelector('.tab-text').textContent}`);
+        });
+    });
+}
+
+// 打开任务详情弹窗
+function openTaskModal(taskId) {
+    const task = findTaskById(taskId);
+    if (!task) return;
+
+    // 设置基本信息
+    document.getElementById('taskModalTitle').textContent = task.title;
+    document.getElementById('taskModalDescription').textContent = task.description;
+
+    // 设置状态徽章
+    const statusBadge = document.getElementById('taskStatusBadge');
+    statusBadge.textContent = getStatusText(task.status);
+    statusBadge.className = `task-status-badge ${task.status}`;
+
+    // 设置详细信息
+    document.getElementById('taskType').textContent = task.type;
+    document.getElementById('taskPriority').textContent = getPriorityText(task.priority);
+    document.getElementById('taskPriority').className = `value priority-${task.priority}`;
+    document.getElementById('taskAssignTime').textContent = task.assignTime;
+    document.getElementById('taskDeadline').textContent = task.deadline;
+    document.getElementById('taskAssignee').textContent = task.assignee;
+    document.getElementById('taskLocation').textContent = task.location;
+
+    // 显示弹窗
+    openModal('taskModal');
+}
+
+// 根据ID查找任务
+function findTaskById(taskId) {
+    for (const status in taskData) {
+        const task = taskData[status].find(t => t.id === taskId);
+        if (task) return task;
+    }
+    return null;
+}
+
+// 获取状态文本
+function getStatusText(status) {
+    const statusMap = {
+        'pending': '待处理',
+        'processing': '处理中',
+        'completed': '已处理'
+    };
+    return statusMap[status] || '未知';
 }
 
 
@@ -1780,21 +2128,22 @@ function updateSystemData() {
     }
 }
 
-// 模拟监测点状态变化
+// 模拟设备状态变化
 function simulateStatusChange() {
     if (!viewer || !viewer.entities) return;
 
     const entities = viewer.entities.values;
     const monitoringEntities = entities.filter(entity =>
         entity.properties && entity.properties.type &&
-        entity.properties.type.getValue() === 'monitoring_point'
+        entity.properties.type.getValue() === 'monitoring_device'
     );
 
     if (monitoringEntities.length === 0) return;
 
-    // 随机选择一个监测点
+    // 随机选择一个设备
     const randomEntity = monitoringEntities[Math.floor(Math.random() * monitoringEntities.length)];
     const currentStatus = randomEntity.properties.status.getValue();
+    const deviceType = randomEntity.properties.deviceType ? randomEntity.properties.deviceType.getValue() : '未知';
 
     // 状态转换逻辑
     let newStatus = currentStatus;
@@ -1847,7 +2196,7 @@ function simulateStatusChange() {
         updateDeviceStatsDisplay();
 
         if (window.DEBUG_MODE) {
-            console.log(`监测点状态变化: ${randomEntity.name} ${currentStatus} → ${newStatus}`);
+            console.log(`设备状态变化: ${randomEntity.name} (${deviceType}) ${currentStatus} → ${newStatus}`);
         }
     }
 }
@@ -1860,9 +2209,9 @@ function initTabSwitching() {
         console.log('🔄 初始化页卡切换功能...');
     }
 
-    // 获取所有页卡按钮
-    const tabButtons = document.querySelectorAll('.panel-tab');
-    const tabContents = document.querySelectorAll('.tab-content');
+    // 获取预警通知面板的页卡按钮
+    const tabButtons = document.querySelectorAll('.warning-notification-panel .panel-tab');
+    const tabContents = document.querySelectorAll('.warning-notification-panel .tab-content');
 
     if (tabButtons.length === 0) {
         console.warn('⚠️ 未找到页卡按钮，跳过页卡功能初始化');

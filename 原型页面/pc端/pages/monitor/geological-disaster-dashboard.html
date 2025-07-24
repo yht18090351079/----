@@ -14,6 +14,153 @@
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     
     <link rel="stylesheet" href="css/geological-disaster-dashboard.css">
+
+    <style>
+        /* 天气信息样式 */
+        .weather-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .weather-info:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+            border-color: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .weather-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .weather-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .weather-temp {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1;
+        }
+
+        .weather-desc {
+            font-size: 11px;
+            color: rgba(255,255,255,0.8);
+            line-height: 1;
+        }
+
+        /* 设备面板容器样式 */
+        .device-panel-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            width: 100%;
+            height: 100%;
+        }
+
+        .device-panel {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* 气象按钮容器样式 */
+        .weather-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 50px;
+        }
+
+        .weather-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            background: linear-gradient(135deg, rgba(0,30,60,0.8), rgba(0,15,40,0.9));
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 16px;
+            line-height: 1;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .weather-btn:hover {
+            background: linear-gradient(135deg, rgba(0,40,80,0.9), rgba(0,20,50,0.95));
+            border-color: rgba(0,255,255,0.5);
+            color: rgba(255,255,255,1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,255,255,0.2);
+        }
+
+        .weather-btn.active {
+            background: linear-gradient(135deg, rgba(0,255,255,0.2), rgba(0,200,200,0.3));
+            border-color: rgba(0,255,255,0.8);
+            color: #00ffff;
+            box-shadow: 0 0 15px rgba(0,255,255,0.4);
+            transform: scale(1.05);
+        }
+
+        /* 天气时间控制面板样式已移至外部CSS文件 */
+
+
+
+        /* 气象数据显示面板样式 */
+        .weather-data-panel {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(0,20,40,0.95), rgba(0,10,25,0.98));
+            border: 2px solid rgba(0,255,255,0.4);
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 200px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .data-panel-header {
+            color: #00ffff;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,255,255,0.3);
+            padding-bottom: 8px;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .data-label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .data-item span:last-child {
+            color: #ffffff;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
     <!-- 地图作为全屏背景 -->
@@ -51,6 +198,13 @@
         </nav>
 
         <div class="header-right">
+            <div class="weather-info">
+                <div class="weather-icon">☀️</div>
+                <div class="weather-details">
+                    <div class="weather-temp">23°C</div>
+                    <div class="weather-desc">晴</div>
+                </div>
+            </div>
             <div class="status-indicator">
                 <div class="status-dot"></div>
                 <span>系统正常</span>
@@ -71,7 +225,6 @@
                 <button class="toolbar-btn active" id="terrainBtn">▲ 关闭地形</button>
                 <button class="toolbar-btn" id="boundaryBtn">◇ 行政区划</button>
                 <button class="toolbar-btn" id="imageryBtn">◈ 切换影像</button>
-                <button class="toolbar-btn" id="addPointBtn">● 添加监测点</button>
                 <button class="toolbar-btn" id="addAreaBtn">△ 添加预警区域</button>
                 <button class="toolbar-btn" id="clearBtn">◌ 清除所有</button>
             </div>
@@ -92,71 +245,7 @@
 
         <!-- 左侧面板容器 -->
         <div class="left-panels-container">
-
-
-            <!-- 设备状态面板 -->
-            <div class="panel-wrapper">
-                <div class="device-panel">
-                    <div class="panel-header">
-                        <div class="device-header">
-                            <h3 class="section-title">
-                                <span>◉</span>
-                                设备状态
-                            </h3>
-                            <div class="device-stats-inline">
-                                <div class="stat-item-inline" data-tooltip="正常 9">
-                                    <div class="stat-dot online"></div>
-                                    <span class="stat-value-inline" id="onlineCount">9</span>
-                                </div>
-                                <div class="stat-item-inline" data-tooltip="预警 2">
-                                    <div class="stat-dot warning"></div>
-                                    <span class="stat-value-inline" id="warningCount">2</span>
-                                </div>
-                                <div class="stat-item-inline" data-tooltip="离线 1">
-                                    <div class="stat-dot offline"></div>
-                                    <span class="stat-value-inline" id="offlineCount">1</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-content">
-                        <div id="deviceList">
-                            <!-- 设备列表将由JavaScript动态生成 -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 右侧面板容器 -->
-        <div class="right-panels-container">
-            <!-- KPI指标卡片面板 -->
-            <div class="panel-wrapper">
-                <div class="kpi-panel">
-                    <div class="panel-content">
-                        <div class="kpi-cards">
-                            <div class="kpi-card">
-                                <div class="kpi-value" id="onlineDevices">98.5%</div>
-                                <div class="kpi-label">在线设备率</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value" id="dataIntegrity">95.2%</div>
-                                <div class="kpi-label">数据完整性</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value" id="todayWarnings">3</div>
-                                <div class="kpi-label">当日预警</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value" id="processingEvents">1</div>
-                                <div class="kpi-label">处理中事件</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 预警通知合并面板 -->
+            <!-- 左侧上部：预警通知面板 -->
             <div class="panel-wrapper">
                 <div class="warning-notification-panel">
                     <!-- 页卡头部直接在看板顶部，横向充满 -->
@@ -231,10 +320,170 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 左侧下部：设备状态面板 -->
+            <div class="panel-wrapper">
+                <div class="device-panel">
+                    <div class="panel-header">
+                        <div class="device-header">
+                            <div class="device-title-section">
+                                <h3 class="section-title">
+                                    <span>◉</span>
+                                    设备状态
+                                </h3>
+                                <div class="device-type-selector">
+                                    <select id="deviceTypeFilter" class="device-type-dropdown">
+                                        <option value="all">全部设备</option>
+                                        <option value="weather">气象站</option>
+                                        <option value="water">水位计</option>
+                                        <option value="camera">摄像头</option>
+                                        <option value="displacement">位移计</option>
+                                        <option value="rainfall">雨量计</option>
+                                        <option value="soil">土壤监测</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="device-stats-inline">
+                                <div class="stat-item-inline" data-tooltip="正常 9">
+                                    <div class="stat-dot online"></div>
+                                    <span class="stat-value-inline" id="onlineCount">9</span>
+                                </div>
+                                <div class="stat-item-inline" data-tooltip="预警 2">
+                                    <div class="stat-dot warning"></div>
+                                    <span class="stat-value-inline" id="warningCount">2</span>
+                                </div>
+                                <div class="stat-item-inline" data-tooltip="离线 1">
+                                    <div class="stat-dot offline"></div>
+                                    <span class="stat-value-inline" id="offlineCount">1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="deviceList">
+                            <!-- 设备列表将由JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 气象热力图按钮容器 - 放在左侧面板右边 -->
+        <div class="weather-buttons-container">
+            <button class="weather-btn" id="temperatureBtn" title="温度热力图">
+                🌡️
+            </button>
+            <button class="weather-btn" id="rainfallBtn" title="降雨热力图">
+                🌧️
+            </button>
+            <button class="weather-btn" id="windBtn" title="风速热力图">
+                💨
+            </button>
+        </div>
+
+        <!-- 右侧面板容器 -->
+        <div class="right-panels-container">
+            <!-- 任务面板 -->
+            <div class="panel-wrapper">
+                <div class="task-panel">
+                    <div class="panel-tabs-header">
+                        <button class="panel-tab active" data-tab="pending">
+                            <span class="tab-icon">⏳</span>
+                            <span class="tab-text">待处理任务</span>
+                            <span class="tab-badge" id="pendingCount">5</span>
+                        </button>
+                        <button class="panel-tab" data-tab="processing">
+                            <span class="tab-icon">⚡</span>
+                            <span class="tab-text">处理中任务</span>
+                            <span class="tab-badge" id="processingCount">4</span>
+                        </button>
+                        <button class="panel-tab" data-tab="completed">
+                            <span class="tab-icon">✓</span>
+                            <span class="tab-text">已处理任务</span>
+                            <span class="tab-badge" id="completedCount">3</span>
+                        </button>
+                    </div>
+                    <div class="panel-content">
+                        <!-- 待处理任务 -->
+                        <div id="pending" class="tab-pane active">
+                            <div class="task-list" id="pendingTaskList">
+                                <!-- 任务项将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        <!-- 处理中任务 -->
+                        <div id="processing" class="tab-pane">
+                            <div class="task-list" id="processingTaskList">
+                                <!-- 任务项将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        <!-- 已处理任务 -->
+                        <div id="completed" class="tab-pane">
+                            <div class="task-list" id="completedTaskList">
+                                <!-- 任务项将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
     </div>
 
     <!-- 弹窗模态框 -->
+    <!-- 任务详情弹窗 -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>任务详情</h3>
+                <span class="close" data-modal="taskModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="task-details">
+                    <div class="task-status-badge" id="taskStatusBadge">待处理</div>
+                    <div class="task-title" id="taskModalTitle">数据采集任务</div>
+                    <div class="task-description" id="taskModalDescription">
+                        前往XX监测点进行例行数据采集，检查设备运行状态，记录相关数据并上传系统。
+                    </div>
+                    <div class="task-info-grid" id="taskInfoGrid">
+                        <div class="info-item">
+                            <span class="label">任务类型:</span>
+                            <span class="value" id="taskType">数据采集</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">优先级:</span>
+                            <span class="value priority-high" id="taskPriority">高</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">分配时间:</span>
+                            <span class="value" id="taskAssignTime">2025-07-24 09:00</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">截止时间:</span>
+                            <span class="value" id="taskDeadline">2025-07-24 18:00</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">执行人员:</span>
+                            <span class="value" id="taskAssignee">张三</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">任务地点:</span>
+                            <span class="value" id="taskLocation">成都市武侯区XX监测点</span>
+                        </div>
+                    </div>
+                    <div class="task-content-section" id="taskModalContent">
+                        <!-- 任务特定内容将在这里生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="acceptTask()">接受任务</button>
+                <button class="btn btn-warning" onclick="updateTaskStatus()">更新状态</button>
+                <button class="btn btn-secondary" onclick="viewTaskDetails()">查看详情</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 设备详情弹窗 -->
     <div id="deviceModal" class="modal">
         <div class="modal-content">
@@ -277,6 +526,36 @@
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="controlDevice()">设备控制</button>
                 <button class="btn btn-secondary" onclick="exportData()">导出数据</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新的设备详情弹窗 -->
+    <div id="deviceDetailModal" class="modal">
+        <div class="modal-content device-modal-content">
+            <div class="modal-header">
+                <h3 id="deviceModalTitle">设备详情</h3>
+                <span class="close" data-modal="deviceDetailModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="device-details">
+                    <div class="device-status-badge" id="deviceStatusBadge">在线</div>
+                    <div class="device-title" id="deviceModalName">设备名称</div>
+                    <div class="device-description" id="deviceModalDescription">
+                        设备运行正常，各项指标正常，数据传输稳定。
+                    </div>
+                    <div class="device-info-grid" id="deviceInfoGrid">
+                        <!-- 设备基本信息将在这里动态生成 -->
+                    </div>
+                    <div class="device-content-section" id="deviceModalContent">
+                        <!-- 设备特定内容将在这里生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="deviceControl()">设备控制</button>
+                <button class="btn btn-warning" onclick="deviceMaintenance()">维护模式</button>
+                <button class="btn btn-secondary" onclick="exportDeviceData()">导出数据</button>
             </div>
         </div>
     </div>
@@ -487,6 +766,1537 @@
     <!-- 全局Tooltip容器 -->
     <div id="globalTooltip" class="global-tooltip"></div>
 
+    <!-- 气象数据时间播放控制面板 -->
+    <div id="weatherTimeControl" class="weather-time-control" style="display: none; position: fixed !important; bottom: 70px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 1500 !important;">
+        <div class="time-control-header">
+            <span id="weatherDataType">温度热力图</span>
+        </div>
+        <div class="time-control-content">
+            <div class="time-display">
+                <span id="currentTime">2025-07-24 12:00</span>
+            </div>
+            <div class="time-slider-container">
+                <input type="range" id="timeSlider" min="0" max="23" value="12" step="1">
+                <div class="time-labels">
+                    <span>00:00</span>
+                    <span>06:00</span>
+                    <span>12:00</span>
+                    <span>18:00</span>
+                    <span>24:00</span>
+                </div>
+            </div>
+            <div class="playback-controls">
+                <button id="playBtn" class="control-btn">▶️</button>
+                <button id="pauseBtn" class="control-btn" style="display: none;">⏸️</button>
+                <button id="resetBtn" class="control-btn">⏮️</button>
+                <button class="close-btn" id="closeWeatherControl">×</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 气象数据显示面板 -->
+    <div id="weatherDataPanel" class="weather-data-panel" style="display: none;">
+        <div class="data-panel-header">
+            <span>气象数据</span>
+        </div>
+        <div class="data-panel-content">
+            <div class="data-item">
+                <span class="data-label">位置:</span>
+                <span id="dataLocation">--</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">温度:</span>
+                <span id="dataTemperature">--</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">降雨量:</span>
+                <span id="dataRainfall">--</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">风速:</span>
+                <span id="dataWindSpeed">--</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">时间:</span>
+                <span id="dataTime">--</span>
+            </div>
+        </div>
+    </div>
+
     <script src="js/geological-disaster-dashboard.js"></script>
+
+    <script>
+        // 天气信息更新
+        function updateWeatherInfo() {
+            const weatherData = [
+                { icon: '☀️', temp: '23°C', desc: '晴' },
+                { icon: '⛅', temp: '21°C', desc: '多云' },
+                { icon: '🌧️', temp: '18°C', desc: '小雨' },
+                { icon: '🌦️', temp: '19°C', desc: '阵雨' },
+                { icon: '☁️', temp: '20°C', desc: '阴' },
+                { icon: '🌤️', temp: '22°C', desc: '晴转多云' }
+            ];
+
+            const randomWeather = weatherData[Math.floor(Math.random() * weatherData.length)];
+
+            const weatherIcon = document.querySelector('.weather-icon');
+            const weatherTemp = document.querySelector('.weather-temp');
+            const weatherDesc = document.querySelector('.weather-desc');
+
+            if (weatherIcon && weatherTemp && weatherDesc) {
+                weatherIcon.textContent = randomWeather.icon;
+                weatherTemp.textContent = randomWeather.temp;
+                weatherDesc.textContent = randomWeather.desc;
+            }
+        }
+
+        // 气象热力图管理
+        const WeatherHeatmap = {
+            currentType: null,
+            isPlaying: false,
+            currentHour: 12,
+            playInterval: null,
+            heatmapLayer: null,
+
+            // 初始化
+            init() {
+                this.currentHour = 12;
+                this.isPlaying = false;
+                this.playInterval = null;
+                this.currentType = null;
+                this.heatmapLayer = null;
+                this.groundPrimitives = []; // 存储GroundPrimitive引用
+                this.useGroundPrimitive = true; // 使用GroundPrimitive实现完全地形贴合
+                this.bindEvents();
+                console.log('气象数据控制器初始化完成 - 启用GroundPrimitive地形贴合');
+            },
+
+            // 绑定事件
+            bindEvents() {
+                // 热力图按钮事件
+                document.getElementById('temperatureBtn').addEventListener('click', () => {
+                    console.log('🌡️ 点击温度热力图按钮');
+                    this.showHeatmap('temperature', '温度热力图');
+                });
+
+                document.getElementById('rainfallBtn').addEventListener('click', () => {
+                    console.log('🌧️ 点击降雨热力图按钮');
+                    this.showHeatmap('rainfall', '降雨热力图');
+                });
+
+                document.getElementById('windBtn').addEventListener('click', () => {
+                    console.log('💨 点击风速热力图按钮');
+                    this.showHeatmap('wind', '风速热力图');
+                });
+
+                // 时间控制事件
+                document.getElementById('closeWeatherControl').addEventListener('click', () => {
+                    this.hideHeatmap();
+                });
+
+                document.getElementById('timeSlider').addEventListener('input', (e) => {
+                    this.currentHour = parseInt(e.target.value);
+                    this.updateTimeDisplay();
+                    this.updateHeatmap();
+                    // 更新滑块进度条效果
+                    const progress = (this.currentHour / 23) * 100;
+                    e.target.style.setProperty('--progress', progress + '%');
+                });
+
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.startPlay();
+                    document.getElementById('playBtn').classList.add('playing');
+                });
+
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.pausePlay();
+                    document.getElementById('playBtn').classList.remove('playing');
+                });
+
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetTime();
+                    document.getElementById('playBtn').classList.remove('playing');
+                });
+            },
+
+            // 显示热力图
+            showHeatmap(type, title) {
+                console.log(`🔄 开始切换热力图: ${type} (${title})`);
+
+                // 如果点击的是当前激活的按钮，则关闭热力图
+                if (this.currentType === type) {
+                    console.log('❌ 点击相同按钮，关闭热力图');
+                    this.hideHeatmap();
+                    return;
+                }
+
+                // 步骤1：关闭之前的热力图（如果存在）
+                if (this.currentType !== null) {
+                    console.log(`🧹 关闭之前的热力图: ${this.currentType}`);
+                    this.clearCurrentHeatmap();
+                }
+
+                // 步骤2：清除状态
+                console.log('🔄 清除所有状态');
+                this.clearAllStates();
+
+                // 步骤3：打开新的热力图
+                console.log(`✅ 打开新的热力图: ${type}`);
+                this.currentType = type;
+                document.getElementById('weatherDataType').textContent = title;
+                const weatherControl = document.getElementById('weatherTimeControl');
+                weatherControl.style.display = 'block';
+                setTimeout(() => weatherControl.classList.add('show'), 10);
+                document.getElementById('weatherDataPanel').style.display = 'block';
+
+                // 激活当前选中的按钮
+                document.getElementById(type + 'Btn').classList.add('active');
+
+                this.updateTimeDisplay();
+                this.updateHeatmap();
+                this.bindMapEvents();
+
+                console.log(`🎯 热力图切换完成: ${type}`);
+            },
+
+            // 清除当前热力图
+            clearCurrentHeatmap() {
+                // 清除地图上的热力图实体
+                if (this.heatmapLayer && viewer) {
+                    viewer.entities.removeAll();
+                }
+
+                // 清除GroundPrimitive热力图
+                if (this.groundPrimitives && viewer) {
+                    this.groundPrimitives.forEach(primitive => {
+                        viewer.scene.groundPrimitives.remove(primitive);
+                    });
+                    this.groundPrimitives = [];
+                }
+
+                // 解绑地图事件
+                this.unbindMapEvents();
+
+                // 暂停播放
+                this.pausePlay();
+
+                console.log('已清除当前热力图（包括GroundPrimitive）');
+            },
+
+            // 清除所有状态
+            clearAllStates() {
+                // 移除所有气象按钮的激活状态
+                document.querySelectorAll('.weather-btn').forEach(btn => btn.classList.remove('active'));
+
+                // 重置当前类型
+                this.currentType = null;
+
+                // 重置播放状态
+                this.isPlaying = false;
+
+                // 重置时间到默认值
+                this.currentHour = 12;
+
+                // 清除播放间隔
+                if (this.playInterval) {
+                    clearInterval(this.playInterval);
+                    this.playInterval = null;
+                }
+
+                // 重置播放按钮状态
+                document.getElementById('playBtn').style.display = 'inline-block';
+                document.getElementById('pauseBtn').style.display = 'none';
+                document.getElementById('playBtn').classList.remove('playing');
+
+                console.log('已清除所有状态');
+            },
+
+            // 隐藏热力图
+            hideHeatmap() {
+                // 使用统一的清理逻辑
+                this.clearCurrentHeatmap();
+                this.clearAllStates();
+
+                // 隐藏控制面板
+                const weatherControl = document.getElementById('weatherTimeControl');
+                weatherControl.classList.remove('show');
+                setTimeout(() => weatherControl.style.display = 'none', 400);
+                document.getElementById('weatherDataPanel').style.display = 'none';
+
+                console.log('已隐藏热力图');
+            },
+
+            // 更新时间显示
+            updateTimeDisplay() {
+                const timeStr = `2025-07-24 ${this.currentHour.toString().padStart(2, '0')}:00`;
+                document.getElementById('currentTime').textContent = timeStr;
+                document.getElementById('timeSlider').value = this.currentHour;
+            },
+
+            // 更新热力图
+            updateHeatmap() {
+                if (!this.currentType || !viewer) return;
+
+                // 清除现有热力图
+                if (this.heatmapLayer) {
+                    viewer.entities.removeAll();
+                }
+
+                // 生成模拟数据并创建热力图
+                this.generateHeatmapData();
+            },
+
+            // 生成网格化热力图数据
+            generateHeatmapData() {
+                console.log(`🌡️ 生成${this.currentType}网格热力图数据`);
+                const centerLon = 104.0668;
+                const centerLat = 30.5728;
+                const gridSize = 0.005; // 网格大小（度）- 保持细致的网格
+                const gridCount = 200; // 网格数量 - 进一步扩大范围
+
+                // 创建网格数据
+                const gridData = [];
+                for (let i = 0; i < gridCount; i++) {
+                    gridData[i] = [];
+                    for (let j = 0; j < gridCount; j++) {
+                        const lon = centerLon + (i - gridCount/2) * gridSize;
+                        const lat = centerLat + (j - gridCount/2) * gridSize;
+
+                        // 根据时间和位置生成数据值
+                        const timeEffect = Math.sin(this.currentHour * Math.PI / 12);
+                        const distanceFromCenter = Math.sqrt((i - gridCount/2)**2 + (j - gridCount/2)**2);
+                        // 调整距离效应，适应更大范围
+                        const distanceEffect = Math.exp(-distanceFromCenter / 35);
+
+                        // 添加多个热点中心，创建更复杂的分布，适应更大范围
+                        const hotspot1 = Math.exp(-((i - gridCount*0.25)**2 + (j - gridCount*0.25)**2) / 200);
+                        const hotspot2 = Math.exp(-((i - gridCount*0.75)**2 + (j - gridCount*0.75)**2) / 250);
+                        const hotspot3 = Math.exp(-((i - gridCount*0.5)**2 + (j - gridCount*0.15)**2) / 150);
+                        const hotspot4 = Math.exp(-((i - gridCount*0.15)**2 + (j - gridCount*0.8)**2) / 180);
+                        const hotspot5 = Math.exp(-((i - gridCount*0.85)**2 + (j - gridCount*0.4)**2) / 220);
+                        const combinedEffect = distanceEffect + 0.4 * (hotspot1 + hotspot2 + hotspot3 + hotspot4 + hotspot5);
+
+                        let value;
+                        if (this.currentType === 'temperature') {
+                            value = 20 + 15 * timeEffect * combinedEffect + Math.random() * 5;
+                        } else if (this.currentType === 'rainfall') {
+                            value = Math.max(0, 10 * timeEffect * combinedEffect + Math.random() * 5);
+                        } else if (this.currentType === 'wind') {
+                            value = Math.max(0, 8 * timeEffect * combinedEffect + Math.random() * 3);
+                        }
+
+                        gridData[i][j] = {
+                            lon: lon,
+                            lat: lat,
+                            value: value
+                        };
+                    }
+                }
+
+                // 创建网格热力图
+                this.createGridHeatmap(gridData, gridSize);
+                console.log(`✅ 高密度贴合地形热力图生成完成: ${gridCount}x${gridCount} = ${gridCount*gridCount}个网格，覆盖范围: ${(gridCount*gridSize).toFixed(2)}°x${(gridCount*gridSize).toFixed(2)}°`);
+            },
+
+            // 创建网格热力图
+            createGridHeatmap(gridData, gridSize) {
+                const gridCount = gridData.length;
+                const totalGrids = gridCount * gridCount;
+                const coverageArea = (gridCount * gridSize).toFixed(2);
+                console.log(`🎨 开始创建高密度贴合地形热力图: ${gridCount}x${gridCount}=${totalGrids}个网格，覆盖${coverageArea}°x${coverageArea}°区域`);
+
+                // 尝试使用GroundPrimitive实现更好的地形贴合
+                if (this.useGroundPrimitive) {
+                    this.createGroundPrimitiveHeatmap(gridData, gridSize);
+                } else {
+                    // 使用多边形实体方法
+                    for (let i = 0; i < gridCount; i++) {
+                        for (let j = 0; j < gridCount; j++) {
+                            const data = gridData[i][j];
+                            const color = this.getColorForValue(data.value);
+                            this.createTerrainClampedPolygon(data, gridSize, color);
+                        }
+                    }
+                }
+            },
+
+            // 使用GroundPrimitive创建完全贴合地形的热力图（像布一样）
+            createGroundPrimitiveHeatmap(gridData, gridSize) {
+                const gridCount = gridData.length;
+                const instances = [];
+
+                for (let i = 0; i < gridCount; i++) {
+                    for (let j = 0; j < gridCount; j++) {
+                        const data = gridData[i][j];
+                        const color = this.getColorForValue(data.value);
+
+                        // 创建矩形几何体
+                        const rectangleGeometry = new Cesium.RectangleGeometry({
+                            rectangle: Cesium.Rectangle.fromDegrees(
+                                data.lon - gridSize/2,
+                                data.lat - gridSize/2,
+                                data.lon + gridSize/2,
+                                data.lat + gridSize/2
+                            ),
+                            granularity: Cesium.Math.RADIANS_PER_DEGREE / 128 // 超高精度贴合，适应细网格
+                        });
+
+                        // 创建几何体实例
+                        instances.push(new Cesium.GeometryInstance({
+                            geometry: rectangleGeometry,
+                            attributes: {
+                                color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+                                    color.withAlpha(0.5)
+                                )
+                            },
+                            id: `heatmap_${i}_${j}_${this.currentType}_${this.currentHour}`
+                        }));
+                    }
+                }
+
+                // 创建GroundPrimitive - 这是最佳的地形贴合方案
+                const groundPrimitive = new Cesium.GroundPrimitive({
+                    geometryInstances: instances,
+                    appearance: new Cesium.PerInstanceColorAppearance({
+                        translucent: true,
+                        closed: false
+                    }),
+                    // 关键：完全贴合地形
+                    classificationType: Cesium.ClassificationType.TERRAIN,
+                    // 异步加载以提高性能
+                    asynchronous: true
+                });
+
+                // 添加到场景
+                viewer.scene.groundPrimitives.add(groundPrimitive);
+
+                // 保存引用以便后续清理
+                if (!this.groundPrimitives) {
+                    this.groundPrimitives = [];
+                }
+                this.groundPrimitives.push(groundPrimitive);
+
+                console.log(`✅ 高密度GroundPrimitive热力图创建完成，${instances.length}个网格完全贴合地形`);
+            },
+
+            // 创建贴合地形的多边形
+            createTerrainClampedPolygon(data, gridSize, color) {
+                // 创建网格四个角的坐标
+                const positions = [
+                    Cesium.Cartesian3.fromDegrees(data.lon - gridSize/2, data.lat - gridSize/2),
+                    Cesium.Cartesian3.fromDegrees(data.lon + gridSize/2, data.lat - gridSize/2),
+                    Cesium.Cartesian3.fromDegrees(data.lon + gridSize/2, data.lat + gridSize/2),
+                    Cesium.Cartesian3.fromDegrees(data.lon - gridSize/2, data.lat + gridSize/2)
+                ];
+
+                try {
+                    // 创建完全贴合地形的多边形（像布一样）
+                    viewer.entities.add({
+                        polygon: {
+                            hierarchy: positions,
+                            material: color.withAlpha(0.5),
+                            // 关键：完全贴合地形，像布一样随地形起伏
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            // 不设置extrudedHeight，让它完全贴合地形表面
+                            outline: false,
+                            // 只贴合地形，不贴合3D瓦片
+                            classificationType: Cesium.ClassificationType.TERRAIN,
+                            // 禁用阴影以获得更好的贴合效果
+                            shadows: Cesium.ShadowMode.DISABLED,
+                            fill: true,
+                            // 设置为地面级别
+                            zIndex: 1,
+                            // 确保完全贴合地形
+                            perPositionHeight: false
+                        },
+                        properties: {
+                            type: 'heatmap',
+                            dataType: this.currentType,
+                            value: data.value,
+                            lon: data.lon,
+                            lat: data.lat,
+                            time: this.currentHour
+                        }
+                    });
+                } catch (error) {
+                    console.warn('多边形创建失败，使用备用方案:', error);
+                    // 备用方案：使用矩形
+                    this.createFallbackRectangle(data, gridSize, color);
+                }
+            },
+
+            // 备用方案：创建矩形（如果多边形失败）
+            createFallbackRectangle(data, gridSize, color) {
+                viewer.entities.add({
+                    rectangle: {
+                        coordinates: Cesium.Rectangle.fromDegrees(
+                            data.lon - gridSize/2,
+                            data.lat - gridSize/2,
+                            data.lon + gridSize/2,
+                            data.lat + gridSize/2
+                        ),
+                        material: color.withAlpha(0.5),
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                        extrudedHeight: 1,
+                        outline: false
+                    },
+                    properties: {
+                        type: 'heatmap',
+                        dataType: this.currentType,
+                        value: data.value,
+                        lon: data.lon,
+                        lat: data.lat,
+                        time: this.currentHour
+                    }
+                });
+            },
+
+            // 根据数值和类型获取颜色
+            getColorForValue(value) {
+                if (this.currentType === 'temperature') {
+                    return this.getTemperatureColor(value);
+                } else if (this.currentType === 'rainfall') {
+                    return this.getRainfallColor(value);
+                } else if (this.currentType === 'wind') {
+                    return this.getWindColor(value);
+                }
+                return Cesium.Color.WHITE;
+            },
+
+            // 获取温度颜色 (气象标准: 蓝色->青色->绿色->黄色->橙色->红色)
+            getTemperatureColor(temp) {
+                // 温度范围: -10 到 40°C
+                const normalizedTemp = Math.max(-10, Math.min(40, temp));
+                const tempRange = (normalizedTemp + 10) / 50; // 归一化到0-1
+
+                if (tempRange < 0.2) {
+                    // 深蓝到蓝色 (-10 到 0°C)
+                    const factor = tempRange / 0.2;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(0 + factor * 30),
+                        Math.floor(0 + factor * 100),
+                        Math.floor(139 + factor * 116),
+                        255
+                    );
+                } else if (tempRange < 0.4) {
+                    // 蓝色到青色 (0 到 10°C)
+                    const factor = (tempRange - 0.2) / 0.2;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(30 + factor * 70),
+                        Math.floor(100 + factor * 155),
+                        Math.floor(255),
+                        255
+                    );
+                } else if (tempRange < 0.6) {
+                    // 青色到绿色 (10 到 20°C)
+                    const factor = (tempRange - 0.4) / 0.2;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(100 - factor * 100),
+                        Math.floor(255),
+                        Math.floor(255 - factor * 155),
+                        255
+                    );
+                } else if (tempRange < 0.8) {
+                    // 绿色到黄色 (20 到 30°C)
+                    const factor = (tempRange - 0.6) / 0.2;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(0 + factor * 255),
+                        Math.floor(255),
+                        Math.floor(100 - factor * 100),
+                        255
+                    );
+                } else if (tempRange < 0.9) {
+                    // 黄色到橙色 (30 到 35°C)
+                    const factor = (tempRange - 0.8) / 0.1;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(255),
+                        Math.floor(255 - factor * 90),
+                        Math.floor(0),
+                        255
+                    );
+                } else {
+                    // 橙色到红色 (35 到 40°C)
+                    const factor = (tempRange - 0.9) / 0.1;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(255),
+                        Math.floor(165 - factor * 165),
+                        Math.floor(0),
+                        255
+                    );
+                }
+            },
+
+            // 获取降雨颜色 (气象标准: 蓝色->绿色->黄色->橙色->红色)
+            getRainfallColor(rainfall) {
+                // 降雨范围: 0-20mm/h
+                const normalizedRain = Math.max(0, Math.min(20, rainfall)) / 20;
+
+                if (normalizedRain < 0.25) {
+                    // 浅蓝到蓝色 (0-5mm/h)
+                    const factor = normalizedRain / 0.25;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(173 - factor * 73),
+                        Math.floor(216 - factor * 16),
+                        Math.floor(230),
+                        255
+                    );
+                } else if (normalizedRain < 0.5) {
+                    // 蓝色到绿色 (5-10mm/h)
+                    const factor = (normalizedRain - 0.25) / 0.25;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(100 - factor * 100),
+                        Math.floor(200 + factor * 55),
+                        Math.floor(230 - factor * 130),
+                        255
+                    );
+                } else if (normalizedRain < 0.75) {
+                    // 绿色到黄色 (10-15mm/h)
+                    const factor = (normalizedRain - 0.5) / 0.25;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(0 + factor * 255),
+                        Math.floor(255),
+                        Math.floor(100 - factor * 100),
+                        255
+                    );
+                } else {
+                    // 黄色到橙红色 (15-20mm/h)
+                    const factor = (normalizedRain - 0.75) / 0.25;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(255),
+                        Math.floor(255 - factor * 155),
+                        Math.floor(0),
+                        255
+                    );
+                }
+            },
+
+            // 获取风速颜色 (气象标准: 白色->浅蓝->蓝色->绿色->黄色->橙色->红色->紫色)
+            getWindColor(wind) {
+                // 风速范围: 0-15m/s (按蒲福风级)
+                const normalizedWind = Math.max(0, Math.min(15, wind)) / 15;
+
+                if (normalizedWind < 0.15) {
+                    // 白色到浅蓝 (0-2.25m/s 微风)
+                    const factor = normalizedWind / 0.15;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(255 - factor * 80),
+                        Math.floor(255 - factor * 30),
+                        Math.floor(255),
+                        255
+                    );
+                } else if (normalizedWind < 0.3) {
+                    // 浅蓝到蓝色 (2.25-4.5m/s 轻风)
+                    const factor = (normalizedWind - 0.15) / 0.15;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(175 - factor * 75),
+                        Math.floor(225 - factor * 125),
+                        Math.floor(255),
+                        255
+                    );
+                } else if (normalizedWind < 0.5) {
+                    // 蓝色到绿色 (4.5-7.5m/s 和风)
+                    const factor = (normalizedWind - 0.3) / 0.2;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(100 - factor * 100),
+                        Math.floor(100 + factor * 155),
+                        Math.floor(255 - factor * 155),
+                        255
+                    );
+                } else if (normalizedWind < 0.7) {
+                    // 绿色到黄色 (7.5-10.5m/s 清风)
+                    const factor = (normalizedWind - 0.5) / 0.2;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(0 + factor * 255),
+                        Math.floor(255),
+                        Math.floor(100 - factor * 100),
+                        255
+                    );
+                } else if (normalizedWind < 0.85) {
+                    // 黄色到橙色 (10.5-12.75m/s 强风)
+                    const factor = (normalizedWind - 0.7) / 0.15;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(255),
+                        Math.floor(255 - factor * 90),
+                        Math.floor(0),
+                        255
+                    );
+                } else {
+                    // 橙色到红紫色 (12.75-15m/s 疾风)
+                    const factor = (normalizedWind - 0.85) / 0.15;
+                    return Cesium.Color.fromBytes(
+                        Math.floor(255),
+                        Math.floor(165 - factor * 65),
+                        Math.floor(0 + factor * 100),
+                        255
+                    );
+                }
+            },
+
+            // 开始播放
+            startPlay() {
+                this.isPlaying = true;
+                document.getElementById('playBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'inline-block';
+
+                this.playInterval = setInterval(() => {
+                    this.currentHour++;
+                    if (this.currentHour > 23) {
+                        this.currentHour = 0;
+                    }
+                    this.updateTimeDisplay();
+                    this.updateHeatmap();
+                }, 1000); // 固定1秒间隔
+            },
+
+            // 暂停播放
+            pausePlay() {
+                this.isPlaying = false;
+                document.getElementById('playBtn').style.display = 'inline-block';
+                document.getElementById('pauseBtn').style.display = 'none';
+
+                if (this.playInterval) {
+                    clearInterval(this.playInterval);
+                    this.playInterval = null;
+                }
+            },
+
+            // 重置时间
+            resetTime() {
+                this.pausePlay();
+                this.currentHour = 0;
+                this.updateTimeDisplay();
+                this.updateHeatmap();
+            },
+
+            // 绑定地图事件
+            bindMapEvents() {
+                if (!viewer) return;
+
+                this.mapClickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+                this.mapClickHandler.setInputAction((event) => {
+                    const pickedObject = viewer.scene.pick(event.position);
+                    if (pickedObject && pickedObject.id && pickedObject.id.properties) {
+                        const props = pickedObject.id.properties;
+                        if (props.type && props.type.getValue() === 'heatmap') {
+                            this.showWeatherData(props);
+                        }
+                    }
+                }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+                this.mapMoveHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+                this.mapMoveHandler.setInputAction((event) => {
+                    const pickedObject = viewer.scene.pick(event.endPosition);
+                    if (pickedObject && pickedObject.id && pickedObject.id.properties) {
+                        const props = pickedObject.id.properties;
+                        if (props.type && props.type.getValue() === 'heatmap') {
+                            this.showWeatherData(props);
+                        }
+                    }
+                }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+            },
+
+            // 解绑地图事件
+            unbindMapEvents() {
+                if (this.mapClickHandler) {
+                    this.mapClickHandler.destroy();
+                    this.mapClickHandler = null;
+                }
+                if (this.mapMoveHandler) {
+                    this.mapMoveHandler.destroy();
+                    this.mapMoveHandler = null;
+                }
+            },
+
+            // 显示气象数据
+            showWeatherData(props) {
+                const lon = props.lon.getValue().toFixed(4);
+                const lat = props.lat.getValue().toFixed(4);
+                const value = props.value.getValue().toFixed(1);
+                const dataType = props.dataType.getValue();
+                const time = props.time.getValue();
+
+                document.getElementById('dataLocation').textContent = `${lon}°E, ${lat}°N`;
+                document.getElementById('dataTime').textContent = `${time.toString().padStart(2, '0')}:00`;
+
+                // 根据数据类型显示相应数值
+                if (dataType === 'temperature') {
+                    document.getElementById('dataTemperature').textContent = `${value}°C`;
+                    document.getElementById('dataRainfall').textContent = '--';
+                    document.getElementById('dataWindSpeed').textContent = '--';
+                } else if (dataType === 'rainfall') {
+                    document.getElementById('dataTemperature').textContent = '--';
+                    document.getElementById('dataRainfall').textContent = `${value}mm/h`;
+                    document.getElementById('dataWindSpeed').textContent = '--';
+                } else if (dataType === 'wind') {
+                    document.getElementById('dataTemperature').textContent = '--';
+                    document.getElementById('dataRainfall').textContent = '--';
+                    document.getElementById('dataWindSpeed').textContent = `${value}m/s`;
+                }
+            }
+        };
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateWeatherInfo();
+            WeatherHeatmap.init();
+
+            // 初始化设备类型筛选功能
+            initDeviceTypeFilter();
+
+            // 每30分钟更新一次天气信息
+            setInterval(updateWeatherInfo, 30 * 60 * 1000);
+        });
+
+        // 获取状态文本 - 全局函数
+        function getStatusText(status) {
+            const statusMap = {
+                'online': '正常',
+                'warning': '预警',
+                'offline': '离线'
+            };
+            return statusMap[status] || '未知';
+        }
+
+        // 获取设备类型中文名称 - 全局函数
+        function getDeviceTypeName(type) {
+            const typeMap = {
+                'weather': '气象站',
+                'water': '水位计',
+                'camera': '监控摄像头',
+                'displacement': '位移计',
+                'rainfall': '雨量计',
+                'soil': '土壤监测仪'
+            };
+            return typeMap[type] || '监测设备';
+        }
+
+        // 设备类型筛选功能
+        function initDeviceTypeFilter() {
+            const deviceTypeFilter = document.getElementById('deviceTypeFilter');
+
+            // 直接使用JavaScript中的设备数据
+            function getDeviceDataFromMap() {
+                console.log('🔍 开始获取设备数据...');
+
+                // 使用与地图相同的设备数据源
+                const sampleDevices = [
+                    // 气象站设备
+                    { id: 1, name: '锦江气象站', type: 'weather', status: 'online', location: '锦江区春熙路' },
+                    { id: 2, name: '双流气象站', type: 'weather', status: 'warning', location: '双流机场附近' },
+                    { id: 3, name: '新都气象站', type: 'weather', status: 'online', location: '新都区宝光寺' },
+
+                    // 水位计设备
+                    { id: 4, name: '府河水位计', type: 'water', status: 'online', location: '府河大桥下游' },
+                    { id: 5, name: '沱江水位计', type: 'water', status: 'online', location: '沱江金堂段' },
+                    { id: 6, name: '岷江水位计', type: 'water', status: 'warning', location: '岷江彭山段' },
+
+                    // 摄像头设备
+                    { id: 7, name: '龙泉山摄像头', type: 'camera', status: 'warning', location: '龙泉山脉观测点' },
+                    { id: 8, name: '彭州监控摄像头', type: 'camera', status: 'online', location: '彭州山区' },
+                    { id: 9, name: '大邑监控摄像头', type: 'camera', status: 'online', location: '大邑县西岭雪山' },
+
+                    // 位移计设备
+                    { id: 10, name: '青城山位移计', type: 'displacement', status: 'online', location: '青城山后山' },
+                    { id: 11, name: '汶川位移计', type: 'displacement', status: 'online', location: '汶川县映秀镇' },
+
+                    // 雨量计设备
+                    { id: 12, name: '都江堰雨量计', type: 'rainfall', status: 'offline', location: '都江堰景区' },
+                    { id: 13, name: '天府新区雨量计', type: 'rainfall', status: 'online', location: '天府新区兴隆湖' },
+                    { id: 14, name: '金堂雨量计', type: 'rainfall', status: 'online', location: '金堂县淮口镇' },
+
+                    // 土壤监测设备
+                    { id: 15, name: '温江土壤监测仪', type: 'soil', status: 'online', location: '温江区农科院' },
+                    { id: 16, name: '邛崃土壤监测仪', type: 'soil', status: 'online', location: '邛崃山区' },
+                    { id: 17, name: '崇州土壤监测仪', type: 'soil', status: 'offline', location: '崇州市区' }
+                ];
+
+                console.log('获取到设备数量:', sampleDevices.length);
+                return sampleDevices;
+            }
+
+            // 渲染设备列表
+            function renderDeviceList(devices) {
+                const deviceList = document.getElementById('deviceList');
+                if (!deviceList) return;
+
+                deviceList.innerHTML = '';
+
+                if (devices.length === 0) {
+                    deviceList.innerHTML = '<div style="text-align: center; color: #99ccff; padding: 20px;">暂无设备数据</div>';
+                    return;
+                }
+
+                devices.forEach(device => {
+                    const deviceItem = document.createElement('div');
+                    deviceItem.className = 'device-item';
+                    deviceItem.style.cursor = 'pointer';
+                    deviceItem.innerHTML = `
+                        <div class="device-info">
+                            <div class="device-name">${device.name}</div>
+                            <div class="device-location">${device.location}</div>
+                        </div>
+                        <div class="device-status ${device.status}">
+                            <div class="status-dot ${device.status}"></div>
+                            <span class="status-text">${getStatusText(device.status)}</span>
+                        </div>
+                    `;
+
+                    // 添加点击事件，根据设备类型打开不同弹窗
+                    deviceItem.addEventListener('click', () => {
+                        openDeviceModal(device);
+                    });
+
+                    deviceList.appendChild(deviceItem);
+                });
+
+                // 更新统计数据
+                updateDeviceStats(devices);
+            }
+
+
+
+            // 更新设备统计
+            function updateDeviceStats(devices) {
+                const stats = devices.reduce((acc, device) => {
+                    acc[device.status] = (acc[device.status] || 0) + 1;
+                    return acc;
+                }, {});
+
+                document.getElementById('onlineCount').textContent = stats.online || 0;
+                document.getElementById('warningCount').textContent = stats.warning || 0;
+                document.getElementById('offlineCount').textContent = stats.offline || 0;
+            }
+
+            // 筛选设备
+            function filterDevices(type, allDevices) {
+                if (type === 'all') {
+                    return allDevices;
+                }
+                return allDevices.filter(device => device.type === type);
+            }
+
+            // 设备类型筛选事件
+            deviceTypeFilter.addEventListener('change', function() {
+                const selectedType = this.value;
+                const allDevices = getDeviceDataFromMap();
+                const filteredDevices = filterDevices(selectedType, allDevices);
+                renderDeviceList(filteredDevices);
+            });
+
+            // 初始化显示所有设备（延迟执行，等待地图数据加载）
+            let initRetryCount = 0;
+            const maxRetries = 10;
+
+            function initializeDeviceList() {
+                console.log(`🔄 尝试初始化设备列表 (第${initRetryCount + 1}次)`);
+                const allDevices = getDeviceDataFromMap();
+
+                if (allDevices.length > 0) {
+                    console.log('✅ 设备数据加载成功，渲染设备列表');
+                    renderDeviceList(allDevices);
+                } else {
+                    initRetryCount++;
+                    if (initRetryCount < maxRetries) {
+                        console.log(`⏳ 暂无设备数据，2000ms后重试...`);
+                        setTimeout(initializeDeviceList, 2000);
+                    } else {
+                        console.warn('❌ 达到最大重试次数，设备数据加载失败');
+                        const deviceList = document.getElementById('deviceList');
+                        if (deviceList) {
+                            deviceList.innerHTML = '<div style="text-align: center; color: #ff6666; padding: 20px;">设备数据加载失败，请刷新页面重试</div>';
+                        }
+                    }
+                }
+            }
+
+            // 直接初始化设备列表（现在使用静态数据，无需等待）
+            function initializeDeviceList() {
+                console.log('🔄 初始化设备列表');
+                const allDevices = getDeviceDataFromMap();
+                console.log('✅ 设备数据加载成功，渲染设备列表');
+                renderDeviceList(allDevices);
+            }
+
+            // 立即初始化
+            initializeDeviceList();
+
+            // 由于使用静态数据，无需定期刷新
+            // 如果将来需要实时数据，可以启用以下代码：
+            /*
+            setInterval(() => {
+                const currentFilter = deviceTypeFilter.value;
+                const allDevices = getDeviceDataFromMap();
+                const filteredDevices = filterDevices(currentFilter, allDevices);
+                renderDeviceList(filteredDevices);
+            }, 5000);
+            */
+        }
+
+        // 打开设备详情弹窗
+        function openDeviceModal(device) {
+            const modal = document.getElementById('deviceDetailModal');
+            const modalTitle = document.getElementById('deviceModalTitle');
+            const modalName = document.getElementById('deviceModalName');
+            const modalDescription = document.getElementById('deviceModalDescription');
+            const statusBadge = document.getElementById('deviceStatusBadge');
+            const infoGrid = document.getElementById('deviceInfoGrid');
+            const modalContent = document.getElementById('deviceModalContent');
+
+            // 设置基本信息
+            modalTitle.textContent = device.name;
+            modalName.textContent = device.name;
+
+            // 设置状态徽章
+            statusBadge.textContent = getStatusText(device.status);
+            statusBadge.className = `device-status-badge ${device.status}`;
+
+            // 设置描述
+            modalDescription.textContent = getDeviceDescription(device);
+
+            // 生成基本信息网格
+            infoGrid.innerHTML = generateDeviceInfoGrid(device);
+
+            // 根据设备类型生成特定内容
+            switch(device.type) {
+                case 'camera':
+                    modalContent.innerHTML = generateCameraContent(device);
+                    break;
+                case 'weather':
+                    modalContent.innerHTML = generateWeatherContent(device);
+                    break;
+                case 'rainfall':
+                    modalContent.innerHTML = generateRainfallContent(device);
+                    break;
+                case 'water':
+                    modalContent.innerHTML = generateWaterContent(device);
+                    break;
+                case 'displacement':
+                    modalContent.innerHTML = generateDisplacementContent(device);
+                    break;
+                case 'soil':
+                    modalContent.innerHTML = generateSoilContent(device);
+                    break;
+                default:
+                    modalContent.innerHTML = generateDefaultContent(device);
+            }
+
+            modal.style.display = 'block';
+
+            // 如果是有图表的设备类型，初始化图表
+            if (['weather', 'rainfall', 'water', 'displacement', 'soil'].includes(device.type)) {
+                setTimeout(() => initDeviceChart(device.type), 100);
+            }
+        }
+
+        // 获取设备描述
+        function getDeviceDescription(device) {
+            const descriptions = {
+                'camera': '高清监控摄像头，提供24小时实时监控，支持远程控制和录像回放功能。',
+                'weather': '多功能气象监测站，实时监测温度、湿度、风速、气压等气象参数。',
+                'rainfall': '高精度雨量监测设备，实时监测降雨量变化，为预警提供关键数据。',
+                'water': '水位监测传感器，实时监测水位变化，预防洪涝灾害。',
+                'displacement': '地表位移监测设备，高精度监测地表微小位移变化。',
+                'soil': '土壤墒情监测站，监测土壤温度、湿度、pH值等关键参数。'
+            };
+            return descriptions[device.type] || '专业监测设备，为地质灾害预警提供重要数据支持。';
+        }
+
+        // 生成设备基本信息网格
+        function generateDeviceInfoGrid(device) {
+            return `
+                <div class="info-item">
+                    <span class="label">设备位置:</span>
+                    <span class="value">${device.location}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">设备状态:</span>
+                    <span class="value status-${device.status}">${getStatusText(device.status)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">设备类型:</span>
+                    <span class="value">${getDeviceTypeName(device.type)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">安装时间:</span>
+                    <span class="value">${device.installDate || '2024-01-15'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">最后通信:</span>
+                    <span class="value">${device.lastContact || '2分钟前'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">数据完整性:</span>
+                    <span class="value">${device.dataIntegrity || '98.5%'}</span>
+                </div>
+            `;
+        }
+
+        // 获取设备类型名称
+        function getDeviceTypeName(type) {
+            const typeNames = {
+                'camera': '高清监控摄像头',
+                'weather': '气象监测站',
+                'rainfall': '雨量监测器',
+                'water': '水位监测器',
+                'displacement': '位移监测器',
+                'soil': '土壤监测站'
+            };
+            return typeNames[type] || '监测设备';
+        }
+
+        // 生成摄像头设备内容
+        function generateCameraContent(device) {
+            return `
+                <div class="camera-video-section">
+                    <div class="video-tabs">
+                        <button class="video-tab active" onclick="switchVideoTab('live')">实时视频</button>
+                        <button class="video-tab" onclick="switchVideoTab('history')">历史回放</button>
+                    </div>
+
+                    <div class="video-content">
+                        <div id="liveVideo" class="video-panel active">
+                            <div class="video-player">
+                                <div class="video-placeholder">
+                                    <div class="video-icon">📹</div>
+                                    <div class="video-text">实时视频流</div>
+                                    <div class="video-status">● 正在直播</div>
+                                </div>
+                            </div>
+                            <div class="video-controls">
+                                <button class="control-btn">📷 截图</button>
+                                <button class="control-btn">🎥 录制</button>
+                                <button class="control-btn">🔍 放大</button>
+                            </div>
+                        </div>
+
+                        <div id="historyVideo" class="video-panel">
+                            <div class="history-controls">
+                                <input type="date" id="historyDate" class="date-input">
+                                <input type="time" id="historyTime" class="time-input">
+                                <button class="control-btn">🔍 查找</button>
+                            </div>
+                            <div class="video-player">
+                                <div class="video-placeholder">
+                                    <div class="video-icon">📼</div>
+                                    <div class="video-text">历史视频回放</div>
+                                    <div class="video-status">请选择日期和时间</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成气象站设备内容
+        function generateWeatherContent(device) {
+            return `
+                <div class="device-basic-info">
+                    <div class="info-row">
+                        <span class="label">设备名称:</span>
+                        <span class="value">${device.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备位置:</span>
+                        <span class="value">${device.location}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备状态:</span>
+                        <span class="value status-${device.status}">${getStatusText(device.status)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备类型:</span>
+                        <span class="value">自动气象观测设备</span>
+                    </div>
+                </div>
+
+                <div class="weather-data-section">
+                    <h4>实时气象数据</h4>
+                    <div class="weather-grid">
+                        <div class="weather-item">
+                            <div class="weather-icon">🌡️</div>
+                            <div class="weather-label">温度</div>
+                            <div class="weather-value">23.5°C</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-icon">💧</div>
+                            <div class="weather-label">湿度</div>
+                            <div class="weather-value">68%</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-icon">💨</div>
+                            <div class="weather-label">风速</div>
+                            <div class="weather-value">3.2m/s</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-icon">🧭</div>
+                            <div class="weather-label">风向</div>
+                            <div class="weather-value">东南风</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-icon">📊</div>
+                            <div class="weather-label">气压</div>
+                            <div class="weather-value">1013hPa</div>
+                        </div>
+                        <div class="weather-item">
+                            <div class="weather-icon">☀️</div>
+                            <div class="weather-label">光照</div>
+                            <div class="weather-value">45000Lux</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h4>24小时历史趋势</h4>
+                    <div class="chart-container">
+                        <canvas id="weatherChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成雨量计设备内容
+        function generateRainfallContent(device) {
+            return `
+                <div class="device-basic-info">
+                    <div class="info-row">
+                        <span class="label">设备名称:</span>
+                        <span class="value">${device.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备位置:</span>
+                        <span class="value">${device.location}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备状态:</span>
+                        <span class="value status-${device.status}">${getStatusText(device.status)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备类型:</span>
+                        <span class="value">自动雨量计</span>
+                    </div>
+                </div>
+
+                <div class="rainfall-data-section">
+                    <div class="current-data">
+                        <div class="data-card">
+                            <div class="data-title">当前降雨强度</div>
+                            <div class="data-value">12.5 mm/h</div>
+                            <div class="data-status normal">正常范围</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">今日累计降雨</div>
+                            <div class="data-value">36.8 mm</div>
+                            <div class="data-status warning">接近警戒值</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">本周累计降雨</div>
+                            <div class="data-value">128.5 mm</div>
+                            <div class="data-status">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h4>降雨量历史趋势</h4>
+                    <div class="chart-container">
+                        <canvas id="rainfallChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成水位计设备内容
+        function generateWaterContent(device) {
+            return `
+                <div class="device-basic-info">
+                    <div class="info-row">
+                        <span class="label">设备名称:</span>
+                        <span class="value">${device.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备位置:</span>
+                        <span class="value">${device.location}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备状态:</span>
+                        <span class="value status-${device.status}">${getStatusText(device.status)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备类型:</span>
+                        <span class="value">自动水位监测站</span>
+                    </div>
+                </div>
+
+                <div class="water-data-section">
+                    <div class="current-data">
+                        <div class="data-card">
+                            <div class="data-title">当前水位</div>
+                            <div class="data-value">3.25 m</div>
+                            <div class="data-status normal">正常水位</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">警戒水位</div>
+                            <div class="data-value">4.50 m</div>
+                            <div class="data-status">距警戒线 1.25m</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">24小时变化</div>
+                            <div class="data-value">+0.15 m</div>
+                            <div class="data-status normal">缓慢上升</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h4>水位历史趋势</h4>
+                    <div class="chart-container">
+                        <canvas id="waterChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成位移计设备内容
+        function generateDisplacementContent(device) {
+            return `
+                <div class="device-basic-info">
+                    <div class="info-row">
+                        <span class="label">设备名称:</span>
+                        <span class="value">${device.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备位置:</span>
+                        <span class="value">${device.location}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备状态:</span>
+                        <span class="value status-${device.status}">${getStatusText(device.status)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备类型:</span>
+                        <span class="value">地表位移监测仪</span>
+                    </div>
+                </div>
+
+                <div class="displacement-data-section">
+                    <div class="current-data">
+                        <div class="data-card">
+                            <div class="data-title">当前位移</div>
+                            <div class="data-value">2.8 mm</div>
+                            <div class="data-status normal">安全范围</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">位移速率</div>
+                            <div class="data-value">0.3 mm/天</div>
+                            <div class="data-status normal">稳定</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">累计位移</div>
+                            <div class="data-value">15.6 mm</div>
+                            <div class="data-status normal">正常范围</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h4>位移历史趋势</h4>
+                    <div class="chart-container">
+                        <canvas id="displacementChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成土壤监测设备内容
+        function generateSoilContent(device) {
+            return `
+                <div class="device-basic-info">
+                    <div class="info-row">
+                        <span class="label">设备名称:</span>
+                        <span class="value">${device.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备位置:</span>
+                        <span class="value">${device.location}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备状态:</span>
+                        <span class="value status-${device.status}">${getStatusText(device.status)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备类型:</span>
+                        <span class="value">土壤环境监测站</span>
+                    </div>
+                </div>
+
+                <div class="soil-data-section">
+                    <div class="current-data">
+                        <div class="data-card">
+                            <div class="data-title">土壤湿度</div>
+                            <div class="data-value">45.2%</div>
+                            <div class="data-status normal">适中</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">土壤温度</div>
+                            <div class="data-value">18.5°C</div>
+                            <div class="data-status normal">正常</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-title">土壤pH值</div>
+                            <div class="data-value">6.8</div>
+                            <div class="data-status normal">中性</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h4>土壤参数历史趋势</h4>
+                    <div class="chart-container">
+                        <canvas id="soilChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成默认设备内容
+        function generateDefaultContent(device) {
+            return `
+                <div class="device-basic-info">
+                    <div class="info-row">
+                        <span class="label">设备名称:</span>
+                        <span class="value">${device.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备位置:</span>
+                        <span class="value">${device.location}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备状态:</span>
+                        <span class="value status-${device.status}">${getStatusText(device.status)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">设备类型:</span>
+                        <span class="value">监测设备</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">最后更新:</span>
+                        <span class="value">${new Date().toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 视频标签切换函数
+        function switchVideoTab(tabType) {
+            document.querySelectorAll('.video-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.video-panel').forEach(panel => panel.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabType + 'Video').classList.add('active');
+        }
+
+        // 初始化设备图表
+        function initDeviceChart(deviceType) {
+            const chartId = deviceType + 'Chart';
+            const canvas = document.getElementById(chartId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 清除画布
+            ctx.clearRect(0, 0, width, height);
+
+            // 生成模拟数据
+            const data = generateChartData(deviceType);
+
+            // 绘制图表
+            drawChart(ctx, data, width, height, deviceType);
+        }
+
+        // 生成图表数据
+        function generateChartData(deviceType) {
+            const hours = 24;
+            const data = [];
+
+            for (let i = 0; i < hours; i++) {
+                let value;
+                switch(deviceType) {
+                    case 'weather':
+                        value = 20 + Math.sin(i * Math.PI / 12) * 5 + Math.random() * 3;
+                        break;
+                    case 'rainfall':
+                        value = Math.max(0, Math.sin(i * Math.PI / 8) * 10 + Math.random() * 5);
+                        break;
+                    case 'water':
+                        value = 3 + Math.sin(i * Math.PI / 16) * 0.5 + Math.random() * 0.2;
+                        break;
+                    case 'displacement':
+                        value = 2 + i * 0.05 + Math.random() * 0.3;
+                        break;
+                    case 'soil':
+                        value = 45 + Math.sin(i * Math.PI / 12) * 10 + Math.random() * 5;
+                        break;
+                    default:
+                        value = Math.random() * 100;
+                }
+                data.push(value);
+            }
+
+            return data;
+        }
+
+        // 绘制图表
+        function drawChart(ctx, data, width, height, deviceType) {
+            const padding = 40;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2;
+
+            // 设置样式
+            ctx.strokeStyle = '#00ffff';
+            ctx.fillStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            ctx.font = '12px Roboto Mono';
+
+            // 绘制坐标轴
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+
+            // 绘制数据线
+            ctx.beginPath();
+            const maxValue = Math.max(...data);
+            const minValue = Math.min(...data);
+            const valueRange = maxValue - minValue || 1;
+
+            data.forEach((value, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = height - padding - ((value - minValue) / valueRange) * chartHeight;
+
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+
+            // 绘制数据点
+            ctx.fillStyle = '#00ffff';
+            data.forEach((value, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = height - padding - ((value - minValue) / valueRange) * chartHeight;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+    </script>
 </body>
 </html>

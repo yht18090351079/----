@@ -1,0 +1,857 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>数据统计</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 402
+                const height = 874
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login': '登录页面',
+    'password_recovery': '密码找回',
+    'home_dashboard': '首页',
+    'warnings_list': '预警列表',
+    'warning_detail': '预警详情',
+    'map_page': '地图页面',
+    'monitoring_point_detail': '监测点详情',
+    'field_work': '现场作业',
+    'emergency_home': '应急功能',
+    'emergency_contacts': '紧急联系人',
+    'sos_help': '求救功能',
+    'safe_navigation': '安全导航',
+    'profile_main': '个人中心',
+    'profile_info': '用户信息',
+    'profile_settings': '系统设置',
+    'profile_stats': '数据统计'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="zh" data-theme="light"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据统计</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+    /* daisyUI Theme Variables Customization */
+    :root {
+      /* Corporate theme customization based on UI guidance */
+      --color-primary: rgba(26, 39, 50, 1);        /* Deep Navy #1A2732 */
+      --color-primary-content: rgba(255, 255, 255, 1);
+      --color-secondary: rgba(74, 85, 104, 1);     /* Graphite Gray #4A5568 */
+      --color-secondary-content: rgba(255, 255, 255, 1);
+      --color-accent: rgba(46, 58, 70, 1);         /* Charcoal Gray #2E3A46 */
+      --color-accent-content: rgba(255, 255, 255, 1);
+      --color-neutral: rgba(122, 130, 138, 1);     /* Mid Gray #7A828A */
+      --color-neutral-content: rgba(255, 255, 255, 1);
+      --color-base-100: rgba(255, 255, 255, 1);    /* Off-White card surface */
+      --color-base-200: rgba(245, 245, 245, 1);    /* Light Gray background */
+      --color-base-300: rgba(229, 229, 229, 1);
+      --color-base-content: rgba(46, 58, 70, 1);   /* Headings color */
+      --color-success: rgba(40, 167, 69, 1);       /* Success #28A745 */
+      --color-warning: rgba(255, 193, 7, 1);       /* Warning #FFC107 */
+      --color-error: rgba(220, 53, 69, 1);         /* Error #DC3545 */
+      --color-info: rgba(23, 162, 184, 1);         /* Info #17A2B8 */
+      --radius-box: 0.5rem;                        /* 4-8px corner radius */
+      --radius-btn: 0.5rem;
+      --border: 1px;
+    }
+
+    /* Mobile-specific optimizations */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background-color: var(--color-base-200);
+      overflow-x: hidden;
+    }
+
+    /* Touch target minimum size */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Safe area handling */
+    .safe-area-top {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Subtle card shadows as per UI guidance */
+    .card-subtle-shadow {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Matte texture for corporate theme */
+    .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(245,245,245,0.9));
+      backdrop-filter: blur(10px);
+    }
+
+    /* Typography scale from UI guidance */
+    .text-h1 { font-size: 24px; line-height: 1.3; font-weight: 600; }
+    .text-h2 { font-size: 20px; line-height: 1.3; font-weight: 500; }
+    .text-h3 { font-size: 18px; line-height: 1.4; font-weight: 500; }
+    .text-body { font-size: 16px; line-height: 1.5; font-weight: 400; }
+    .text-caption { font-size: 12px; line-height: 1.4; font-weight: 400; }
+
+    /* Disable text selection for UI elements */
+    .no-select {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Touch feedback */
+    .touch-feedback:active {
+      transform: scale(0.95);
+      transition: transform 150ms ease;
+    }
+  </style>
+    <style>
+/* 页面特定样式 */
+.stats-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.9));
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(229, 229, 229, 0.3);
+}
+
+.chart-container {
+    min-height: 200px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.9));
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(229, 229, 229, 0.3);
+}
+
+.skeleton-chart {
+    background: linear-gradient(90deg, rgba(245,245,245,0.8) 25%, rgba(229,229,229,0.8) 50%, rgba(245,245,245,0.8) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.refresh-button:active {
+    transform: scale(0.95) rotate(180deg);
+    transition: transform 200ms ease;
+}
+
+.metric-card:active {
+    transform: scale(0.98);
+    transition: transform 150ms ease;
+}
+
+.chart-card.collapsed .chart-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 300ms ease;
+}
+
+.chart-card:not(.collapsed) .chart-content {
+    max-height: 300px;
+    transition: max-height 300ms ease;
+}
+
+.collapse-icon {
+    transition: transform 200ms ease;
+}
+
+.chart-card.collapsed .collapse-icon {
+    transform: rotate(180deg);
+}
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="bg-base-200">
+    <div data-section-id="common_header" data-section-type="common_header" class="sticky top-0 z-30 safe-area-top">
+    <div class="navbar bg-base-100 shadow-sm h-14 min-h-14 px-4 matte-surface">
+      <!-- Left side - Back button or menu -->
+      <div class="navbar-start">
+        <button class="btn btn-ghost btn-sm touch-target no-select" id="headerBackBtn" onclick="handleBackNavigation()">
+          <span class="iconify text-base-content" data-icon="heroicons:arrow-left" data-width="20"></span>
+        </button>
+      </div>
+      
+      <!-- Center - Title -->
+      <div class="navbar-center">
+        <h1 class="text-h3 font-semibold text-base-content truncate max-w-48" id="headerTitle" data-type="text">首页</h1>
+      </div>
+      
+      <!-- Right side - Action buttons -->
+      <div class="navbar-end">
+        <div class="flex items-center gap-2">
+          <!-- Search button -->
+          <button class="btn btn-ghost btn-sm touch-target no-select" id="headerSearchBtn" onclick="toggleSearch()" style="display: none;">
+            <span class="iconify text-base-content" data-icon="heroicons:magnifying-glass" data-width="20"></span>
+          </button>
+          
+          <!-- Settings/Options button -->
+          <button class="btn btn-ghost btn-sm touch-target no-select" id="headerOptionsBtn" onclick="showHeaderOptions()" style="display: none;">
+            <span class="iconify text-base-content" data-icon="heroicons:ellipsis-vertical" data-width="20"></span>
+          </button>
+          
+          <!-- Connection status indicator -->
+          <div class="flex items-center" id="connectionStatus">
+            <div class="w-2 h-2 rounded-full bg-success" id="connectionDot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    [data-section-id="common_header"] .navbar {
+      border-bottom: var(--border) solid rgba(229, 229, 229, 0.5);
+    }
+    
+    [data-section-id="common_header"] .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+      backdrop-filter: blur(10px);
+    }
+    
+    [data-section-id="common_header"] #connectionDot.offline {
+      background-color: var(--color-error);
+    }
+    
+    [data-section-id="common_header"] #connectionDot.online {
+      background-color: var(--color-success);
+    }
+  </style>
+  
+  <script>
+    (function() {
+      let headerConfig = {
+        showBack: true,
+        showSearch: false,
+        showOptions: false,
+        title: &apos;首页&apos;
+      };
+
+      // Configure header for different pages
+      window.configureHeader = function(config) {
+        headerConfig = { ...headerConfig, ...config };
+        updateHeaderUI();
+      };
+
+      function updateHeaderUI() {
+        const backBtn = document.getElementById(&apos;headerBackBtn&apos;);
+        const searchBtn = document.getElementById(&apos;headerSearchBtn&apos;);
+        const optionsBtn = document.getElementById(&apos;headerOptionsBtn&apos;);
+        const title = document.getElementById(&apos;headerTitle&apos;);
+
+        if (backBtn) {
+          backBtn.style.display = headerConfig.showBack ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (searchBtn) {
+          searchBtn.style.display = headerConfig.showSearch ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (optionsBtn) {
+          optionsBtn.style.display = headerConfig.showOptions ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (title) {
+          title.textContent = headerConfig.title;
+        }
+      }
+
+      window.handleBackNavigation = function() {
+        if (headerConfig.onBack) {
+          headerConfig.onBack();
+        } else {
+          // Default back behavior
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            navigateTo(&apos;home_dashboard&apos;);
+          }
+        }
+      };
+
+      window.toggleSearch = function() {
+        if (headerConfig.onSearch) {
+          headerConfig.onSearch();
+        }
+      };
+
+      window.showHeaderOptions = function() {
+        if (headerConfig.onOptions) {
+          headerConfig.onOptions();
+        }
+      };
+
+      // Update connection status
+      function updateConnectionStatus() {
+        const dot = document.getElementById(&apos;connectionDot&apos;);
+        if (dot) {
+          dot.className = `w-2 h-2 rounded-full ${window.isOnline ? &apos;bg-success online&apos; : &apos;bg-error offline&apos;}`;
+        }
+      }
+
+      // Monitor connection status
+      window.addEventListener(&apos;online&apos;, updateConnectionStatus);
+      window.addEventListener(&apos;offline&apos;, updateConnectionStatus);
+      
+      // Initial setup
+      document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+        updateConnectionStatus();
+        updateHeaderUI();
+      });
+      
+    })();
+  </script>
+    
+    <div class="flex flex-col min-h-screen pt-14 pb-16">
+        <div class="flex-1 px-4">
+            <div data-section-id="StatsRefreshSection" data-section-type="section" class="py-4">
+    <div class="flex justify-between items-center bg-base-100 rounded-lg p-4 matte-surface card-subtle-shadow">
+        <div class="flex flex-col">
+            <span data-type="text" class="text-caption text-neutral">上次更新</span>
+            <span data-type="text" class="text-body text-base-content font-medium" id="lastUpdateTime">2025-07-24 14:32</span>
+        </div>
+        <button data-type="button" class="btn btn-ghost btn-sm touch-target refresh-button" onclick="refreshData()">
+            <span class="iconify text-primary" data-icon="heroicons:arrow-path" data-width="20"></span>
+        </button>
+    </div>
+</div><div data-section-id="KeyMetricsSection" data-section-type="section" class="py-4">
+    <div class="grid grid-cols-2 gap-4">
+        <!-- 今日操作次数 -->
+        <div data-type="container" data-repeatable="true" class="stats-card rounded-lg p-4 card-subtle-shadow metric-card">
+            <div class="stat">
+                <div class="stat-figure text-primary">
+                    <span data-type="icon" class="iconify" data-icon="heroicons:cursor-arrow-rays" data-width="24"></span>
+                </div>
+                <div class="stat-title text-caption">今日操作</div>
+                <div class="stat-value text-h2 text-primary">127</div>
+                <div class="stat-desc text-caption text-success">↗︎ 12% 较昨日</div>
+            </div>
+        </div>
+
+        <!-- 本周预警数 -->
+        <div data-type="container" data-repeatable="true" class="stats-card rounded-lg p-4 card-subtle-shadow metric-card">
+            <div class="stat">
+                <div class="stat-figure text-warning">
+                    <span data-type="icon" class="iconify" data-icon="heroicons:exclamation-triangle" data-width="24"></span>
+                </div>
+                <div class="stat-title text-caption">本周预警</div>
+                <div class="stat-value text-h2 text-warning">23</div>
+                <div class="stat-desc text-caption text-error">↗︎ 8% 较上周</div>
+            </div>
+        </div>
+
+        <!-- 监测点数量 -->
+        <div data-type="container" data-repeatable="true" class="stats-card rounded-lg p-4 card-subtle-shadow metric-card">
+            <div class="stat">
+                <div class="stat-figure text-info">
+                    <span data-type="icon" class="iconify" data-icon="heroicons:map-pin" data-width="24"></span>
+                </div>
+                <div class="stat-title text-caption">监测点</div>
+                <div class="stat-value text-h2 text-info">45</div>
+                <div class="stat-desc text-caption text-neutral">活跃状态</div>
+            </div>
+        </div>
+
+        <!-- 数据完整率 -->
+        <div data-type="container" data-repeatable="true" class="stats-card rounded-lg p-4 card-subtle-shadow metric-card">
+            <div class="stat">
+                <div class="stat-figure text-success">
+                    <span data-type="icon" class="iconify" data-icon="heroicons:chart-bar" data-width="24"></span>
+                </div>
+                <div class="stat-title text-caption">完整率</div>
+                <div class="stat-value text-h2 text-success">98.5%</div>
+                <div class="stat-desc text-caption text-success">优秀水平</div>
+            </div>
+        </div>
+    </div>
+</div><div data-section-id="ChartsSection" data-section-type="section" class="py-4 space-y-4">
+    <!-- 操作频率图表 -->
+    <div data-type="container" class="chart-card bg-base-100 rounded-lg card-subtle-shadow">
+        <div class="flex justify-between items-center p-4 border-b border-base-300">
+            <h3 data-type="text" class="text-h3 text-base-content">操作频率</h3>
+            <button data-type="button" class="btn btn-ghost btn-sm touch-target" onclick="toggleChart(&apos;operationChart&apos;)">
+                <span class="iconify collapse-icon text-neutral" data-icon="heroicons:chevron-up" data-width="20"></span>
+            </button>
+        </div>
+        <div class="chart-content p-4" id="operationChartContent">
+            <div class="chart-container rounded-lg p-4 flex items-center justify-center">
+                <!-- 图表占位区域 -->
+                <div class="w-full h-48 skeleton-chart rounded flex items-center justify-center">
+                    <div class="text-center">
+                        <span data-type="icon" class="iconify text-neutral mb-2" data-icon="heroicons:chart-bar" data-width="32"></span>
+                        <p data-type="text" class="text-caption text-neutral">操作频率趋势图</p>
+                        <p data-type="text" class="text-caption text-neutral/70">显示最近7天的操作频率变化</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 预警趋势图表 -->
+    <div data-type="container" class="chart-card bg-base-100 rounded-lg card-subtle-shadow">
+        <div class="flex justify-between items-center p-4 border-b border-base-300">
+            <h3 data-type="text" class="text-h3 text-base-content">预警趋势</h3>
+            <button data-type="button" class="btn btn-ghost btn-sm touch-target" onclick="toggleChart(&apos;warningChart&apos;)">
+                <span class="iconify collapse-icon text-neutral" data-icon="heroicons:chevron-up" data-width="20"></span>
+            </button>
+        </div>
+        <div class="chart-content p-4" id="warningChartContent">
+            <div class="chart-container rounded-lg p-4 flex items-center justify-center">
+                <!-- 图表占位区域 -->
+                <div class="w-full h-48 skeleton-chart rounded flex items-center justify-center">
+                    <div class="text-center">
+                        <span data-type="icon" class="iconify text-warning mb-2" data-icon="heroicons:exclamation-triangle" data-width="32"></span>
+                        <p data-type="text" class="text-caption text-neutral">预警趋势分析</p>
+                        <p data-type="text" class="text-caption text-neutral/70">显示最近30天的预警数量变化</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据质量图表 -->
+    <div data-type="container" class="chart-card bg-base-100 rounded-lg card-subtle-shadow">
+        <div class="flex justify-between items-center p-4 border-b border-base-300">
+            <h3 data-type="text" class="text-h3 text-base-content">数据质量</h3>
+            <button data-type="button" class="btn btn-ghost btn-sm touch-target" onclick="toggleChart(&apos;qualityChart&apos;)">
+                <span class="iconify collapse-icon text-neutral" data-icon="heroicons:chevron-up" data-width="20"></span>
+            </button>
+        </div>
+        <div class="chart-content p-4" id="qualityChartContent">
+            <div class="chart-container rounded-lg p-4 flex items-center justify-center">
+                <!-- 图表占位区域 -->
+                <div class="w-full h-48 skeleton-chart rounded flex items-center justify-center">
+                    <div class="text-center">
+                        <span data-type="icon" class="iconify text-success mb-2" data-icon="heroicons:shield-check" data-width="32"></span>
+                        <p data-type="text" class="text-caption text-neutral">数据质量监控</p>
+                        <p data-type="text" class="text-caption text-neutral/70">显示数据完整性和准确性指标</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        </div>
+    </div>
+    
+    <div data-section-id="common_footer" data-section-type="common_footer" class="fixed bottom-0 left-0 right-0 z-30 safe-area-bottom">
+    <div class="bg-base-100 border-t border-base-300 px-2 pt-2 matte-surface">
+      <div class="flex justify-around items-center">
+        <!-- Home -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="home_dashboard" onclick="navigateToPage(&apos;home_dashboard&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:home" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">首页</span>
+        </button>
+        
+        <!-- Map -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="map_page" onclick="navigateToPage(&apos;map_page&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:map" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">地图</span>
+        </button>
+        
+        <!-- Warnings -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select relative" data-route="warnings_list" onclick="navigateToPage(&apos;warnings_list&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:exclamation-triangle" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">预警</span>
+          <div class="badge badge-error badge-sm absolute -top-1 -right-1" id="warningsBadge" style="display: none;">
+            <span data-type="text">3</span>
+          </div>
+        </button>
+        
+        <!-- Field Work -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="field_work" onclick="navigateToPage(&apos;field_work&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:wrench-screwdriver" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">作业</span>
+        </button>
+        
+        <!-- Profile -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="profile_main" onclick="navigateToPage(&apos;profile_main&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:user" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">我的</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    [data-section-id="common_footer"] .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+      backdrop-filter: blur(10px);
+    }
+    
+    [data-section-id="common_footer"] .nav-item {
+      transition: color 0.2s ease;
+    }
+    
+    [data-section-id="common_footer"] .nav-item.active .nav-icon {
+      color: var(--color-primary);
+    }
+    
+    [data-section-id="common_footer"] .nav-item.active .nav-label {
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+    
+    [data-section-id="common_footer"] .nav-item:not(.active) .nav-icon {
+      color: var(--color-neutral);
+    }
+    
+    [data-section-id="common_footer"] .nav-item:not(.active) .nav-label {
+      color: var(--color-neutral);
+    }
+    
+    [data-section-id="common_footer"] .nav-item:active {
+      transform: scale(0.95);
+    }
+  </style>
+  
+  <script>
+    (function() {
+      let currentPage = &apos;home_dashboard&apos;;
+
+      window.navigateToPage = function(pageId) {
+        // Update active state
+        setActiveNavItem(pageId);
+        
+        // Navigate to page
+        navigateTo(pageId);
+      };
+
+      function setActiveNavItem(pageId) {
+        currentPage = pageId;
+        
+        // Remove active class from all nav items
+        const navItems = document.querySelectorAll(&apos;[data-section-id="common_footer"] .nav-item&apos;);
+        navItems.forEach(item => {
+          item.classList.remove(&apos;active&apos;);
+        });
+        
+        // Add active class to current nav item
+        const activeItem = document.querySelector(`[data-section-id="common_footer"] .nav-item[data-route="${pageId}"]`);
+        if (activeItem) {
+          activeItem.classList.add(&apos;active&apos;);
+        }
+      }
+
+      // Update badge count for warnings
+      window.updateWarningsBadge = function(count) {
+        const badge = document.getElementById(&apos;warningsBadge&apos;);
+        if (badge) {
+          if (count > 0) {
+            badge.style.display = &apos;flex&apos;;
+            badge.querySelector(&apos;span&apos;).textContent = count > 99 ? &apos;99+&apos; : count.toString();
+          } else {
+            badge.style.display = &apos;none&apos;;
+          }
+        }
+      };
+
+      // Set active page from outside
+      window.setActiveFooterTab = function(pageId) {
+        setActiveNavItem(pageId);
+      };
+
+      // Initialize with current page detection
+      document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+        // Try to detect current page from URL or other means
+        const path = window.location.pathname;
+        const pageName = path.split(&apos;/&apos;).pop().replace(&apos;.html&apos;, &apos;&apos;);
+        
+        if (pageName && pageName !== &apos;index&apos;) {
+          setActiveNavItem(pageName);
+        } else {
+          setActiveNavItem(&apos;home_dashboard&apos;);
+        }
+        
+        // Add touch feedback to nav items
+        const navItems = document.querySelectorAll(&apos;[data-section-id="common_footer"] .nav-item&apos;);
+        navItems.forEach(item => {
+          addTouchFeedback(item);
+        });
+      });
+      
+    })();
+  </script>
+    
+    <script>
+    (function() {
+      // Global navigation function for iframe and standalone usage
+      window.navigateTo = function(targetPageId) {
+        const isInIframe = window.self !== window.top;
+        const targetFileName = `${targetPageId}.html`;
+        
+        if (isInIframe) {
+          window.parent.postMessage({
+            type: &apos;iframeNavigation&apos;,
+            targetPageId: targetPageId
+          }, &apos;*&apos;);
+        } else {
+          window.location.href = targetFileName;
+        }
+      };
+
+      // Global toast notification system
+      window.showToast = function(type, title, message, duration = 3000) {
+        const toast = document.createElement(&apos;div&apos;);
+        toast.className = `alert alert-${type} fixed top-4 right-4 z-50 w-80 opacity-0 transition-opacity duration-300`;
+        toast.innerHTML = `
+          <span class="iconify" data-icon="heroicons:${getToastIcon(type)}" data-width="20"></span>
+          <div>
+            <div class="font-bold">${title}</div>
+            <div class="text-sm">${message}</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">
+            <span class="iconify" data-icon="heroicons:x-mark" data-width="16"></span>
+          </button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => toast.style.opacity = &apos;1&apos;, 100);
+        
+        // Auto remove
+        setTimeout(() => {
+          toast.style.opacity = &apos;0&apos;;
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      };
+
+      function getToastIcon(type) {
+        const icons = {
+          &apos;info&apos;: &apos;information-circle&apos;,
+          &apos;success&apos;: &apos;check-circle&apos;, 
+          &apos;warning&apos;: &apos;exclamation-triangle&apos;,
+          &apos;error&apos;: &apos;x-circle&apos;
+        };
+        return icons[type] || &apos;information-circle&apos;;
+      }
+
+      // Global modal management
+      window.showModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.showModal) {
+          modal.showModal();
+        }
+      };
+
+      window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.close) {
+          modal.close();
+        }
+      };
+
+      // Mobile-specific utilities
+      window.addTouchFeedback = function(element) {
+        element.addEventListener(&apos;touchstart&apos;, () => {
+          element.classList.add(&apos;touch-feedback&apos;);
+        });
+        
+        element.addEventListener(&apos;touchend&apos;, () => {
+          setTimeout(() => {
+            element.classList.remove(&apos;touch-feedback&apos;);
+          }, 150);
+        });
+      };
+
+      // Network status monitoring
+      window.isOnline = navigator.onLine;
+      
+      window.addEventListener(&apos;online&apos;, () => {
+        window.isOnline = true;
+        window.showToast(&apos;success&apos;, &apos;网络恢复&apos;, &apos;连接已恢复，正在同步数据...&apos;);
+        // Trigger data sync if needed
+        if (window.syncOfflineData) {
+          window.syncOfflineData();
+        }
+      });
+
+      window.addEventListener(&apos;offline&apos;, () => {
+        window.isOnline = false;
+        window.showToast(&apos;warning&apos;, &apos;网络断开&apos;, &apos;已切换到离线模式&apos;);
+      });
+      
+    })();
+  </script>
+    <script>
+document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+    // 配置页面头部
+    configureHeader({
+        title: &apos;数据统计&apos;,
+        showBack: true,
+        onBack: () => navigateTo(&apos;profile_main&apos;)
+    });
+
+    // 设置底部导航激活状态
+    setActiveFooterTab(&apos;profile_main&apos;);
+
+    // 初始化图表折叠状态
+    initializeCharts();
+});
+
+// 刷新数据功能
+function refreshData() {
+    const button = document.querySelector(&apos;.refresh-button&apos;);
+    const timeElement = document.getElementById(&apos;lastUpdateTime&apos;);
+    
+    // 添加旋转动画
+    button.style.transform = &apos;scale(0.95) rotate(180deg)&apos;;
+    
+    // 模拟数据刷新
+    setTimeout(() => {
+        const now = new Date();
+        const timeString = now.getFullYear() + &apos;-&apos; + 
+                          String(now.getMonth() + 1).padStart(2, &apos;0&apos;) + &apos;-&apos; + 
+                          String(now.getDate()).padStart(2, &apos;0&apos;) + &apos; &apos; +
+                          String(now.getHours()).padStart(2, &apos;0&apos;) + &apos;:&apos; + 
+                          String(now.getMinutes()).padStart(2, &apos;0&apos;);
+        
+        timeElement.textContent = timeString;
+        
+        // 重置按钮状态
+        button.style.transform = &apos;&apos;;
+        
+        // 显示刷新成功提示
+        showToast(&apos;success&apos;, &apos;刷新成功&apos;, &apos;数据已更新到最新状态&apos;);
+    }, 800);
+}
+
+// 初始化图表
+function initializeCharts() {
+    // 所有图表默认展开状态
+    const chartCards = document.querySelectorAll(&apos;.chart-card&apos;);
+    chartCards.forEach(card => {
+        card.classList.remove(&apos;collapsed&apos;);
+    });
+}
+
+// 切换图表显示/隐藏
+function toggleChart(chartId) {
+    const chartCard = document.querySelector(`#${chartId}Content`).closest(&apos;.chart-card&apos;);
+    const icon = chartCard.querySelector(&apos;.collapse-icon&apos;);
+    
+    chartCard.classList.toggle(&apos;collapsed&apos;);
+    
+    // 更新图标旋转状态
+    if (chartCard.classList.contains(&apos;collapsed&apos;)) {
+        icon.style.transform = &apos;rotate(180deg)&apos;;
+    } else {
+        icon.style.transform = &apos;rotate(0deg)&apos;;
+    }
+}
+
+// 返回导航处理
+function handleBackNavigation() {
+    navigateTo(&apos;profile_main&apos;);
+}
+
+// 添加触摸反馈到所有交互元素
+document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+    const interactiveElements = document.querySelectorAll(&apos;.metric-card, .refresh-button, .btn&apos;);
+    interactiveElements.forEach(element => {
+        addTouchFeedback(element);
+    });
+});
+</script>
+
+<script>
+      Holder.run({
+        domain: "placehold.co"
+      })
+    </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

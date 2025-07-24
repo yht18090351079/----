@@ -1,0 +1,1054 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>预警列表</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 402
+                const height = 874
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login': '登录页面',
+    'password_recovery': '密码找回',
+    'home_dashboard': '首页',
+    'warnings_list': '预警列表',
+    'warning_detail': '预警详情',
+    'map_page': '地图页面',
+    'monitoring_point_detail': '监测点详情',
+    'field_work': '现场作业',
+    'emergency_home': '应急功能',
+    'emergency_contacts': '紧急联系人',
+    'sos_help': '求救功能',
+    'safe_navigation': '安全导航',
+    'profile_main': '个人中心',
+    'profile_info': '用户信息',
+    'profile_settings': '系统设置',
+    'profile_stats': '数据统计'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="zh" data-theme="light"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预警列表</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+    /* daisyUI Theme Variables Customization */
+    :root {
+      /* Corporate theme customization based on UI guidance */
+      --color-primary: rgba(26, 39, 50, 1);        /* Deep Navy #1A2732 */
+      --color-primary-content: rgba(255, 255, 255, 1);
+      --color-secondary: rgba(74, 85, 104, 1);     /* Graphite Gray #4A5568 */
+      --color-secondary-content: rgba(255, 255, 255, 1);
+      --color-accent: rgba(46, 58, 70, 1);         /* Charcoal Gray #2E3A46 */
+      --color-accent-content: rgba(255, 255, 255, 1);
+      --color-neutral: rgba(122, 130, 138, 1);     /* Mid Gray #7A828A */
+      --color-neutral-content: rgba(255, 255, 255, 1);
+      --color-base-100: rgba(255, 255, 255, 1);    /* Off-White card surface */
+      --color-base-200: rgba(245, 245, 245, 1);    /* Light Gray background */
+      --color-base-300: rgba(229, 229, 229, 1);
+      --color-base-content: rgba(46, 58, 70, 1);   /* Headings color */
+      --color-success: rgba(40, 167, 69, 1);       /* Success #28A745 */
+      --color-warning: rgba(255, 193, 7, 1);       /* Warning #FFC107 */
+      --color-error: rgba(220, 53, 69, 1);         /* Error #DC3545 */
+      --color-info: rgba(23, 162, 184, 1);         /* Info #17A2B8 */
+      --radius-box: 0.5rem;                        /* 4-8px corner radius */
+      --radius-btn: 0.5rem;
+      --border: 1px;
+    }
+
+    /* Mobile-specific optimizations */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background-color: var(--color-base-200);
+      overflow-x: hidden;
+    }
+
+    /* Touch target minimum size */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Safe area handling */
+    .safe-area-top {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Subtle card shadows as per UI guidance */
+    .card-subtle-shadow {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Matte texture for corporate theme */
+    .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(245,245,245,0.9));
+      backdrop-filter: blur(10px);
+    }
+
+    /* Typography scale from UI guidance */
+    .text-h1 { font-size: 24px; line-height: 1.3; font-weight: 600; }
+    .text-h2 { font-size: 20px; line-height: 1.3; font-weight: 500; }
+    .text-h3 { font-size: 18px; line-height: 1.4; font-weight: 500; }
+    .text-body { font-size: 16px; line-height: 1.5; font-weight: 400; }
+    .text-caption { font-size: 12px; line-height: 1.4; font-weight: 400; }
+
+    /* Disable text selection for UI elements */
+    .no-select {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Touch feedback */
+    .touch-feedback:active {
+      transform: scale(0.95);
+      transition: transform 150ms ease;
+    }
+  </style>
+    <style>
+/* 筛选区粘性定位 */
+.filter-sticky {
+    position: sticky;
+    top: 56px; /* 头部高度 */
+    z-index: 20;
+    backdrop-filter: blur(10px);
+}
+
+/* 卡片微纹理效果 */
+.warning-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+    backdrop-filter: blur(5px);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.warning-card:active {
+    transform: scale(0.98);
+}
+
+/* 卡片滑动操作 */
+.card-swipe-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-swipe-content {
+    transition: transform 300ms ease;
+}
+
+.card-swipe-action {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    background: var(--color-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(100%);
+    transition: transform 300ms ease;
+}
+
+.card-swipe-container.swiped .card-swipe-content {
+    transform: translateX(-80px);
+}
+
+.card-swipe-container.swiped .card-swipe-action {
+    transform: translateX(0);
+}
+
+/* 下拉刷新进度条 */
+.refresh-progress {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 300ms ease;
+    z-index: 25;
+}
+
+.refresh-progress.active {
+    transform: scaleX(1);
+}
+
+/* 预警等级颜色 */
+.warning-severe {
+    border-left: 4px solid var(--color-error);
+}
+
+.warning-warning {
+    border-left: 4px solid var(--color-warning);
+}
+
+.warning-info {
+    border-left: 4px solid var(--color-info);
+}
+
+/* 空状态样式 */
+.empty-state {
+    background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(245,245,245,0.9));
+}
+
+/* 筛选按钮激活状态 */
+.filter-btn.active {
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+    border-color: var(--color-primary);
+}
+
+.filter-btn {
+    transition: all 200ms ease;
+}
+
+/* 确认按钮渐变效果 */
+.confirm-btn {
+    background: linear-gradient(135deg, var(--color-success), rgba(40, 167, 69, 0.8));
+    transition: all 200ms ease;
+}
+
+.confirm-btn:active {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), var(--color-success));
+}
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="bg-base-200">
+    <!-- Header -->
+    <div data-section-id="common_header" data-section-type="common_header" class="sticky top-0 z-30 safe-area-top">
+    <div class="navbar bg-base-100 shadow-sm h-14 min-h-14 px-4 matte-surface">
+      <!-- Left side - Back button or menu -->
+      <div class="navbar-start">
+        <button class="btn btn-ghost btn-sm touch-target no-select" id="headerBackBtn" onclick="handleBackNavigation()">
+          <span class="iconify text-base-content" data-icon="heroicons:arrow-left" data-width="20"></span>
+        </button>
+      </div>
+      
+      <!-- Center - Title -->
+      <div class="navbar-center">
+        <h1 class="text-h3 font-semibold text-base-content truncate max-w-48" id="headerTitle" data-type="text">首页</h1>
+      </div>
+      
+      <!-- Right side - Action buttons -->
+      <div class="navbar-end">
+        <div class="flex items-center gap-2">
+          <!-- Search button -->
+          <button class="btn btn-ghost btn-sm touch-target no-select" id="headerSearchBtn" onclick="toggleSearch()" style="display: none;">
+            <span class="iconify text-base-content" data-icon="heroicons:magnifying-glass" data-width="20"></span>
+          </button>
+          
+          <!-- Settings/Options button -->
+          <button class="btn btn-ghost btn-sm touch-target no-select" id="headerOptionsBtn" onclick="showHeaderOptions()" style="display: none;">
+            <span class="iconify text-base-content" data-icon="heroicons:ellipsis-vertical" data-width="20"></span>
+          </button>
+          
+          <!-- Connection status indicator -->
+          <div class="flex items-center" id="connectionStatus">
+            <div class="w-2 h-2 rounded-full bg-success" id="connectionDot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    [data-section-id="common_header"] .navbar {
+      border-bottom: var(--border) solid rgba(229, 229, 229, 0.5);
+    }
+    
+    [data-section-id="common_header"] .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+      backdrop-filter: blur(10px);
+    }
+    
+    [data-section-id="common_header"] #connectionDot.offline {
+      background-color: var(--color-error);
+    }
+    
+    [data-section-id="common_header"] #connectionDot.online {
+      background-color: var(--color-success);
+    }
+  </style>
+  
+  <script>
+    (function() {
+      let headerConfig = {
+        showBack: true,
+        showSearch: false,
+        showOptions: false,
+        title: &apos;首页&apos;
+      };
+
+      // Configure header for different pages
+      window.configureHeader = function(config) {
+        headerConfig = { ...headerConfig, ...config };
+        updateHeaderUI();
+      };
+
+      function updateHeaderUI() {
+        const backBtn = document.getElementById(&apos;headerBackBtn&apos;);
+        const searchBtn = document.getElementById(&apos;headerSearchBtn&apos;);
+        const optionsBtn = document.getElementById(&apos;headerOptionsBtn&apos;);
+        const title = document.getElementById(&apos;headerTitle&apos;);
+
+        if (backBtn) {
+          backBtn.style.display = headerConfig.showBack ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (searchBtn) {
+          searchBtn.style.display = headerConfig.showSearch ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (optionsBtn) {
+          optionsBtn.style.display = headerConfig.showOptions ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (title) {
+          title.textContent = headerConfig.title;
+        }
+      }
+
+      window.handleBackNavigation = function() {
+        if (headerConfig.onBack) {
+          headerConfig.onBack();
+        } else {
+          // Default back behavior
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            navigateTo(&apos;home_dashboard&apos;);
+          }
+        }
+      };
+
+      window.toggleSearch = function() {
+        if (headerConfig.onSearch) {
+          headerConfig.onSearch();
+        }
+      };
+
+      window.showHeaderOptions = function() {
+        if (headerConfig.onOptions) {
+          headerConfig.onOptions();
+        }
+      };
+
+      // Update connection status
+      function updateConnectionStatus() {
+        const dot = document.getElementById(&apos;connectionDot&apos;);
+        if (dot) {
+          dot.className = `w-2 h-2 rounded-full ${window.isOnline ? &apos;bg-success online&apos; : &apos;bg-error offline&apos;}`;
+        }
+      }
+
+      // Monitor connection status
+      window.addEventListener(&apos;online&apos;, updateConnectionStatus);
+      window.addEventListener(&apos;offline&apos;, updateConnectionStatus);
+      
+      // Initial setup
+      document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+        updateConnectionStatus();
+        updateHeaderUI();
+      });
+      
+    })();
+  </script>
+    
+    <!-- Main Content -->
+    <div class="flex-1 pb-20">
+        <div data-section-id="FilterSection" data-section-type="section" class="filter-sticky bg-base-100/90 px-4 py-3 border-b border-base-300">
+    <div class="flex gap-3 justify-between">
+        <button data-type="button" class="filter-btn btn btn-sm flex-1 touch-target active" data-filter="all" onclick="filterWarnings(&apos;all&apos;)">
+            <span data-type="text">全部</span>
+        </button>
+        <button data-type="button" class="filter-btn btn btn-sm btn-outline flex-1 touch-target" data-filter="severe" onclick="filterWarnings(&apos;severe&apos;)">
+            <span data-type="text">严重</span>
+        </button>
+        <button data-type="button" class="filter-btn btn btn-sm btn-outline flex-1 touch-target" data-filter="warning" onclick="filterWarnings(&apos;warning&apos;)">
+            <span data-type="text">警告</span>
+        </button>
+        <button data-type="button" class="filter-btn btn btn-sm btn-outline flex-1 touch-target" data-filter="info" onclick="filterWarnings(&apos;info&apos;)">
+            <span data-type="text">提示</span>
+        </button>
+    </div>
+</div><div data-section-id="WarningsListSection" data-section-type="section" class="px-4 pt-4 min-h-screen">
+    <!-- 下拉刷新进度条 -->
+    <div class="refresh-progress" id="refreshProgress"></div>
+    
+    <!-- 预警统计摘要 -->
+    <div data-type="container" class="bg-base-100 rounded-lg p-4 mb-4 card-subtle-shadow matte-surface">
+        <h3 data-type="text" class="text-h3 text-base-content mb-3">预警统计</h3>
+        <div class="grid grid-cols-4 gap-2">
+            <div data-type="container" class="text-center">
+                <div data-type="text" class="text-h2 text-error font-bold">3</div>
+                <div data-type="text" class="text-caption text-base-content/70">严重</div>
+            </div>
+            <div data-type="container" class="text-center">
+                <div data-type="text" class="text-h2 text-warning font-bold">5</div>
+                <div data-type="text" class="text-caption text-base-content/70">警告</div>
+            </div>
+            <div data-type="container" class="text-center">
+                <div data-type="text" class="text-h2 text-info font-bold">8</div>
+                <div data-type="text" class="text-caption text-base-content/70">提示</div>
+            </div>
+            <div data-type="container" class="text-center">
+                <div data-type="text" class="text-h2 text-base-content font-bold">16</div>
+                <div data-type="text" class="text-caption text-base-content/70">总计</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 预警卡片列表 -->
+    <div class="space-y-4" id="warningsList">
+        <!-- 严重预警卡片 -->
+        <div data-type="container" data-repeatable="true" class="card-swipe-container warning-card rounded-lg card-subtle-shadow warning-severe" data-level="severe" onclick="navigateTo(&apos;warning_detail&apos;)">
+            <div class="card-swipe-content p-4">
+                <div class="flex items-start gap-3">
+                    <span data-type="icon" class="iconify text-error mt-1" data-icon="heroicons:exclamation-triangle" data-width="24"></span>
+                    <div class="flex-1">
+                        <h4 data-type="text" class="text-h3 text-base-content font-medium mb-1">地质灾害严重预警</h4>
+                        <p data-type="text" class="text-body text-base-content/80 mb-2">监测点A区域发现异常地质活动，存在滑坡风险，请立即撤离相关区域人员。</p>
+                        <div class="flex justify-between items-center">
+                            <span data-type="text" class="text-caption text-base-content/60">2小时前</span>
+                            <div class="badge badge-error badge-sm">
+                                <span data-type="text">严重</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-swipe-action">
+                <button data-type="button" class="confirm-btn btn btn-sm text-white border-none" onclick="confirmWarning(event, &apos;warning-1&apos;)">
+                    <span data-type="text">确认</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 警告预警卡片 -->
+        <div data-type="container" data-repeatable="true" class="card-swipe-container warning-card rounded-lg card-subtle-shadow warning-warning" data-level="warning" onclick="navigateTo(&apos;warning_detail&apos;)">
+            <div class="card-swipe-content p-4">
+                <div class="flex items-start gap-3">
+                    <span data-type="icon" class="iconify text-warning mt-1" data-icon="heroicons:exclamation-circle" data-width="24"></span>
+                    <div class="flex-1">
+                        <h4 data-type="text" class="text-h3 text-base-content font-medium mb-1">降雨量超标预警</h4>
+                        <p data-type="text" class="text-body text-base-content/80 mb-2">B区域24小时降雨量已达到警戒线，请注意防范可能的次生灾害。</p>
+                        <div class="flex justify-between items-center">
+                            <span data-type="text" class="text-caption text-base-content/60">4小时前</span>
+                            <div class="badge badge-warning badge-sm">
+                                <span data-type="text">警告</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-swipe-action">
+                <button data-type="button" class="confirm-btn btn btn-sm text-white border-none" onclick="confirmWarning(event, &apos;warning-2&apos;)">
+                    <span data-type="text">确认</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 提示预警卡片 -->
+        <div data-type="container" data-repeatable="true" class="card-swipe-container warning-card rounded-lg card-subtle-shadow warning-info" data-level="info" onclick="navigateTo(&apos;warning_detail&apos;)">
+            <div class="card-swipe-content p-4">
+                <div class="flex items-start gap-3">
+                    <span data-type="icon" class="iconify text-info mt-1" data-icon="heroicons:information-circle" data-width="24"></span>
+                    <div class="flex-1">
+                        <h4 data-type="text" class="text-h3 text-base-content font-medium mb-1">设备维护提醒</h4>
+                        <p data-type="text" class="text-body text-base-content/80 mb-2">C区域监测设备需要进行定期维护检查，请安排相关人员处理。</p>
+                        <div class="flex justify-between items-center">
+                            <span data-type="text" class="text-caption text-base-content/60">6小时前</span>
+                            <div class="badge badge-info badge-sm">
+                                <span data-type="text">提示</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-swipe-action">
+                <button data-type="button" class="confirm-btn btn btn-sm text-white border-none" onclick="confirmWarning(event, &apos;warning-3&apos;)">
+                    <span data-type="text">确认</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 更多预警卡片... -->
+        <div data-type="container" data-repeatable="true" class="card-swipe-container warning-card rounded-lg card-subtle-shadow warning-severe" data-level="severe" onclick="navigateTo(&apos;warning_detail&apos;)">
+            <div class="card-swipe-content p-4">
+                <div class="flex items-start gap-3">
+                    <span data-type="icon" class="iconify text-error mt-1" data-icon="heroicons:exclamation-triangle" data-width="24"></span>
+                    <div class="flex-1">
+                        <h4 data-type="text" class="text-h3 text-base-content font-medium mb-1">泥石流风险预警</h4>
+                        <p data-type="text" class="text-body text-base-content/80 mb-2">D区域地质条件不稳定，结合近期降雨情况，存在泥石流发生风险。</p>
+                        <div class="flex justify-between items-center">
+                            <span data-type="text" class="text-caption text-base-content/60">8小时前</span>
+                            <div class="badge badge-error badge-sm">
+                                <span data-type="text">严重</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-swipe-action">
+                <button data-type="button" class="confirm-btn btn btn-sm text-white border-none" onclick="confirmWarning(event, &apos;warning-4&apos;)">
+                    <span data-type="text">确认</span>
+                </button>
+            </div>
+        </div>
+
+        <div data-type="container" data-repeatable="true" class="card-swipe-container warning-card rounded-lg card-subtle-shadow warning-warning" data-level="warning" onclick="navigateTo(&apos;warning_detail&apos;)">
+            <div class="card-swipe-content p-4">
+                <div class="flex items-start gap-3">
+                    <span data-type="icon" class="iconify text-warning mt-1" data-icon="heroicons:exclamation-circle" data-width="24"></span>
+                    <div class="flex-1">
+                        <h4 data-type="text" class="text-h3 text-base-content font-medium mb-1">水位上涨预警</h4>
+                        <p data-type="text" class="text-body text-base-content/80 mb-2">E区域河道水位持续上涨，请密切关注水情变化并做好应急准备。</p>
+                        <div class="flex justify-between items-center">
+                            <span data-type="text" class="text-caption text-base-content/60">12小时前</span>
+                            <div class="badge badge-warning badge-sm">
+                                <span data-type="text">警告</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-swipe-action">
+                <button data-type="button" class="confirm-btn btn btn-sm text-white border-none" onclick="confirmWarning(event, &apos;warning-5&apos;)">
+                    <span data-type="text">确认</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-state rounded-lg p-8 text-center hidden" id="emptyState">
+        <img data-type="image" alt="无预警信息的插画" class="mx-auto mb-4 opacity-60" data-src="placehold.co/200x150.png?text=No+Warnings">
+        <h3 data-type="text" class="text-h3 text-base-content/70 mb-2">暂无预警信息</h3>
+        <p data-type="text" class="text-body text-base-content/50">当前没有符合筛选条件的预警信息</p>
+    </div>
+</div>
+    </div>
+    
+    <!-- Footer -->
+    <div data-section-id="common_footer" data-section-type="common_footer" class="fixed bottom-0 left-0 right-0 z-30 safe-area-bottom">
+    <div class="bg-base-100 border-t border-base-300 px-2 pt-2 matte-surface">
+      <div class="flex justify-around items-center">
+        <!-- Home -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="home_dashboard" onclick="navigateToPage(&apos;home_dashboard&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:home" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">首页</span>
+        </button>
+        
+        <!-- Map -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="map_page" onclick="navigateToPage(&apos;map_page&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:map" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">地图</span>
+        </button>
+        
+        <!-- Warnings -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select relative" data-route="warnings_list" onclick="navigateToPage(&apos;warnings_list&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:exclamation-triangle" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">预警</span>
+          <div class="badge badge-error badge-sm absolute -top-1 -right-1" id="warningsBadge" style="display: none;">
+            <span data-type="text">3</span>
+          </div>
+        </button>
+        
+        <!-- Field Work -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="field_work" onclick="navigateToPage(&apos;field_work&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:wrench-screwdriver" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">作业</span>
+        </button>
+        
+        <!-- Profile -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="profile_main" onclick="navigateToPage(&apos;profile_main&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:user" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">我的</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    [data-section-id="common_footer"] .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+      backdrop-filter: blur(10px);
+    }
+    
+    [data-section-id="common_footer"] .nav-item {
+      transition: color 0.2s ease;
+    }
+    
+    [data-section-id="common_footer"] .nav-item.active .nav-icon {
+      color: var(--color-primary);
+    }
+    
+    [data-section-id="common_footer"] .nav-item.active .nav-label {
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+    
+    [data-section-id="common_footer"] .nav-item:not(.active) .nav-icon {
+      color: var(--color-neutral);
+    }
+    
+    [data-section-id="common_footer"] .nav-item:not(.active) .nav-label {
+      color: var(--color-neutral);
+    }
+    
+    [data-section-id="common_footer"] .nav-item:active {
+      transform: scale(0.95);
+    }
+  </style>
+  
+  <script>
+    (function() {
+      let currentPage = &apos;home_dashboard&apos;;
+
+      window.navigateToPage = function(pageId) {
+        // Update active state
+        setActiveNavItem(pageId);
+        
+        // Navigate to page
+        navigateTo(pageId);
+      };
+
+      function setActiveNavItem(pageId) {
+        currentPage = pageId;
+        
+        // Remove active class from all nav items
+        const navItems = document.querySelectorAll(&apos;[data-section-id="common_footer"] .nav-item&apos;);
+        navItems.forEach(item => {
+          item.classList.remove(&apos;active&apos;);
+        });
+        
+        // Add active class to current nav item
+        const activeItem = document.querySelector(`[data-section-id="common_footer"] .nav-item[data-route="${pageId}"]`);
+        if (activeItem) {
+          activeItem.classList.add(&apos;active&apos;);
+        }
+      }
+
+      // Update badge count for warnings
+      window.updateWarningsBadge = function(count) {
+        const badge = document.getElementById(&apos;warningsBadge&apos;);
+        if (badge) {
+          if (count > 0) {
+            badge.style.display = &apos;flex&apos;;
+            badge.querySelector(&apos;span&apos;).textContent = count > 99 ? &apos;99+&apos; : count.toString();
+          } else {
+            badge.style.display = &apos;none&apos;;
+          }
+        }
+      };
+
+      // Set active page from outside
+      window.setActiveFooterTab = function(pageId) {
+        setActiveNavItem(pageId);
+      };
+
+      // Initialize with current page detection
+      document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+        // Try to detect current page from URL or other means
+        const path = window.location.pathname;
+        const pageName = path.split(&apos;/&apos;).pop().replace(&apos;.html&apos;, &apos;&apos;);
+        
+        if (pageName && pageName !== &apos;index&apos;) {
+          setActiveNavItem(pageName);
+        } else {
+          setActiveNavItem(&apos;home_dashboard&apos;);
+        }
+        
+        // Add touch feedback to nav items
+        const navItems = document.querySelectorAll(&apos;[data-section-id="common_footer"] .nav-item&apos;);
+        navItems.forEach(item => {
+          addTouchFeedback(item);
+        });
+      });
+      
+    })();
+  </script>
+    
+    <script>
+    (function() {
+      // Global navigation function for iframe and standalone usage
+      window.navigateTo = function(targetPageId) {
+        const isInIframe = window.self !== window.top;
+        const targetFileName = `${targetPageId}.html`;
+        
+        if (isInIframe) {
+          window.parent.postMessage({
+            type: &apos;iframeNavigation&apos;,
+            targetPageId: targetPageId
+          }, &apos;*&apos;);
+        } else {
+          window.location.href = targetFileName;
+        }
+      };
+
+      // Global toast notification system
+      window.showToast = function(type, title, message, duration = 3000) {
+        const toast = document.createElement(&apos;div&apos;);
+        toast.className = `alert alert-${type} fixed top-4 right-4 z-50 w-80 opacity-0 transition-opacity duration-300`;
+        toast.innerHTML = `
+          <span class="iconify" data-icon="heroicons:${getToastIcon(type)}" data-width="20"></span>
+          <div>
+            <div class="font-bold">${title}</div>
+            <div class="text-sm">${message}</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">
+            <span class="iconify" data-icon="heroicons:x-mark" data-width="16"></span>
+          </button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => toast.style.opacity = &apos;1&apos;, 100);
+        
+        // Auto remove
+        setTimeout(() => {
+          toast.style.opacity = &apos;0&apos;;
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      };
+
+      function getToastIcon(type) {
+        const icons = {
+          &apos;info&apos;: &apos;information-circle&apos;,
+          &apos;success&apos;: &apos;check-circle&apos;, 
+          &apos;warning&apos;: &apos;exclamation-triangle&apos;,
+          &apos;error&apos;: &apos;x-circle&apos;
+        };
+        return icons[type] || &apos;information-circle&apos;;
+      }
+
+      // Global modal management
+      window.showModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.showModal) {
+          modal.showModal();
+        }
+      };
+
+      window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.close) {
+          modal.close();
+        }
+      };
+
+      // Mobile-specific utilities
+      window.addTouchFeedback = function(element) {
+        element.addEventListener(&apos;touchstart&apos;, () => {
+          element.classList.add(&apos;touch-feedback&apos;);
+        });
+        
+        element.addEventListener(&apos;touchend&apos;, () => {
+          setTimeout(() => {
+            element.classList.remove(&apos;touch-feedback&apos;);
+          }, 150);
+        });
+      };
+
+      // Network status monitoring
+      window.isOnline = navigator.onLine;
+      
+      window.addEventListener(&apos;online&apos;, () => {
+        window.isOnline = true;
+        window.showToast(&apos;success&apos;, &apos;网络恢复&apos;, &apos;连接已恢复，正在同步数据...&apos;);
+        // Trigger data sync if needed
+        if (window.syncOfflineData) {
+          window.syncOfflineData();
+        }
+      });
+
+      window.addEventListener(&apos;offline&apos;, () => {
+        window.isOnline = false;
+        window.showToast(&apos;warning&apos;, &apos;网络断开&apos;, &apos;已切换到离线模式&apos;);
+      });
+      
+    })();
+  </script>
+    <script>
+document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+    // 配置页面头部
+    configureHeader({
+        title: &apos;预警列表&apos;,
+        showBack: true,
+        onBack: () => navigateTo(&apos;home_dashboard&apos;)
+    });
+
+    // 设置底部导航激活状态
+    setActiveFooterTab(&apos;warnings_list&apos;);
+
+    let currentFilter = &apos;all&apos;;
+    let isRefreshing = false;
+
+    // 筛选功能
+    window.filterWarnings = function(level) {
+        currentFilter = level;
+        
+        // 更新筛选按钮状态
+        const filterBtns = document.querySelectorAll(&apos;.filter-btn&apos;);
+        filterBtns.forEach(btn => {
+            btn.classList.remove(&apos;active&apos;);
+            btn.classList.add(&apos;btn-outline&apos;);
+        });
+        
+        const activeBtn = document.querySelector(`[data-filter="${level}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add(&apos;active&apos;);
+            activeBtn.classList.remove(&apos;btn-outline&apos;);
+        }
+
+        // 筛选卡片
+        const cards = document.querySelectorAll(&apos;#warningsList .card-swipe-container&apos;);
+        const emptyState = document.getElementById(&apos;emptyState&apos;);
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const cardLevel = card.getAttribute(&apos;data-level&apos;);
+            if (level === &apos;all&apos; || cardLevel === level) {
+                card.style.display = &apos;block&apos;;
+                visibleCount++;
+            } else {
+                card.style.display = &apos;none&apos;;
+            }
+        });
+
+        // 显示/隐藏空状态
+        if (visibleCount === 0) {
+            emptyState.classList.remove(&apos;hidden&apos;);
+        } else {
+            emptyState.classList.add(&apos;hidden&apos;);
+        }
+    };
+
+    // 确认预警
+    window.confirmWarning = function(event, warningId) {
+        event.stopPropagation(); // 阻止卡片点击事件
+        
+        // 隐藏滑动操作
+        const container = event.target.closest(&apos;.card-swipe-container&apos;);
+        if (container) {
+            container.classList.remove(&apos;swiped&apos;);
+        }
+        
+        // 显示成功提示
+        showToast(&apos;success&apos;, &apos;确认成功&apos;, &apos;已确认收到预警信息&apos;);
+        
+        // 可以在这里添加更多确认逻辑，如发送到服务器等
+    };
+
+    // 卡片滑动功能
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    let activeCard = null;
+
+    document.addEventListener(&apos;touchstart&apos;, function(e) {
+        const card = e.target.closest(&apos;.card-swipe-container&apos;);
+        if (card) {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            activeCard = card;
+        }
+    });
+
+    document.addEventListener(&apos;touchmove&apos;, function(e) {
+        if (!isDragging || !activeCard) return;
+        
+        currentX = e.touches[0].clientX;
+        const diffX = startX - currentX;
+        
+        if (diffX > 50) { // 向左滑动超过50px
+            activeCard.classList.add(&apos;swiped&apos;);
+        } else if (diffX < -20) { // 向右滑动
+            activeCard.classList.remove(&apos;swiped&apos;);
+        }
+    });
+
+    document.addEventListener(&apos;touchend&apos;, function(e) {
+        isDragging = false;
+        activeCard = null;
+    });
+
+    // 点击其他地方关闭滑动操作
+    document.addEventListener(&apos;click&apos;, function(e) {
+        if (!e.target.closest(&apos;.card-swipe-action&apos;)) {
+            const swipedCards = document.querySelectorAll(&apos;.card-swipe-container.swiped&apos;);
+            swipedCards.forEach(card => {
+                card.classList.remove(&apos;swiped&apos;);
+            });
+        }
+    });
+
+    // 下拉刷新功能
+    let startY = 0;
+    let pullDistance = 0;
+    let isPulling = false;
+    const refreshProgress = document.getElementById(&apos;refreshProgress&apos;);
+    const warningsSection = document.getElementById(&apos;WarningsListSection&apos;);
+
+    document.addEventListener(&apos;touchstart&apos;, function(e) {
+        if (window.scrollY === 0) {
+            startY = e.touches[0].clientY;
+            isPulling = true;
+        }
+    });
+
+    document.addEventListener(&apos;touchmove&apos;, function(e) {
+        if (!isPulling || isRefreshing) return;
+        
+        const currentY = e.touches[0].clientY;
+        pullDistance = currentY - startY;
+        
+        if (pullDistance > 0 && pullDistance < 100) {
+            e.preventDefault();
+            const progress = Math.min(pullDistance / 80, 1);
+            refreshProgress.style.transform = `scaleX(${progress})`;
+        }
+    });
+
+    document.addEventListener(&apos;touchend&apos;, function(e) {
+        if (!isPulling) return;
+        
+        isPulling = false;
+        
+        if (pullDistance > 80 && !isRefreshing) {
+            triggerRefresh();
+        } else {
+            refreshProgress.style.transform = &apos;scaleX(0)&apos;;
+        }
+        
+        pullDistance = 0;
+    });
+
+    function triggerRefresh() {
+        if (isRefreshing) return;
+        
+        isRefreshing = true;
+        refreshProgress.classList.add(&apos;active&apos;);
+        
+        // 模拟刷新过程
+        setTimeout(() => {
+            isRefreshing = false;
+            refreshProgress.classList.remove(&apos;active&apos;);
+            refreshProgress.style.transform = &apos;scaleX(0)&apos;;
+            
+            showToast(&apos;success&apos;, &apos;刷新完成&apos;, &apos;预警信息已更新&apos;);
+        }, 1500);
+    }
+
+    // 添加触控反馈
+    const touchElements = document.querySelectorAll(&apos;.touch-target&apos;);
+    touchElements.forEach(element => {
+        addTouchFeedback(element);
+    });
+});
+</script>
+
+<script>
+      Holder.run({
+        domain: "placehold.co"
+      })
+    </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

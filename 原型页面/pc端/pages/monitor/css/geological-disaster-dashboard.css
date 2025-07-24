@@ -767,7 +767,7 @@ body::before {
     left: 20px;
     top: 100px;
     bottom: 95px;
-    width: 380px;
+    width: 450px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -779,7 +779,7 @@ body::before {
     right: 20px;
     top: 100px;
     bottom: 95px;
-    width: 380px;
+    width: 420px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -1365,8 +1365,12 @@ body::before {
 
 /* 响应式设计 */
 @media (max-width: 1366px) {
-    .left-panels-container, .right-panels-container {
-        width: 320px;
+    .left-panels-container {
+        width: 380px;
+    }
+
+    .right-panels-container {
+        width: 350px;
     }
 
     .kpi-cards {
@@ -1388,8 +1392,12 @@ body::before {
         font-size: 24px;
     }
 
-    .left-panels-container, .right-panels-container {
-        width: 280px;
+    .left-panels-container {
+        width: 320px;
+    }
+
+    .right-panels-container {
+        width: 290px;
     }
 }
 
@@ -1401,7 +1409,7 @@ body::before {
 
     .right-panels-container {
         right: 10px;
-        width: calc(50vw - 25px);
+        width: calc(50vw - 40px);
     }
 
     .kpi-cards {
@@ -1444,6 +1452,10 @@ body::before {
     background-color: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
     animation: modalFadeIn 0.3s ease;
+    /* 确保背景固定不滚动 */
+    overflow: hidden;
+    /* 创建新的层叠上下文 */
+    transform: translateZ(0);
 }
 
 @keyframes modalFadeIn {
@@ -1456,7 +1468,10 @@ body::before {
         radial-gradient(ellipse at top left, rgba(0,255,255,0.15) 0%, transparent 50%),
         radial-gradient(ellipse at bottom right, rgba(0,150,255,0.12) 0%, transparent 50%),
         linear-gradient(135deg, rgba(0,30,60,0.3) 0%, rgba(0,15,40,0.5) 50%, rgba(0,8,25,0.7) 100%);
-    margin: 5% auto;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
     padding: 0;
     border: 2px solid rgba(0,255,255,0.3);
     border-radius: 20px;
@@ -1470,7 +1485,10 @@ body::before {
         0 0 40px rgba(0,255,255,0.2),
         inset 0 2px 0 rgba(255,255,255,0.15);
     animation: modalSlideIn 0.3s ease;
-    position: relative;
+    /* 为伪元素提供定位上下文 */
+    z-index: 1;
+    /* 强制固定位置 */
+    margin: 0 !important;
 }
 
 /* 隐藏弹窗滚动条 */
@@ -1488,8 +1506,8 @@ body::before {
 }
 
 @keyframes modalSlideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
 .modal-content::before {
@@ -1507,7 +1525,8 @@ body::before {
         rgba(0,255,255,0.4) 100%);
     border-radius: 22px;
     z-index: -1;
-    animation: modalBorderGlow 3s linear infinite;
+    /* 暂时禁用动画，避免位置问题 */
+    /* animation: modalBorderGlow 3s linear infinite; */
 }
 
 @keyframes modalBorderGlow {
@@ -2060,6 +2079,285 @@ body::before {
     color: #ff4444;
 }
 
+/* 天气时间控制弹窗 - 系统统一风格 */
+.weather-time-control {
+    position: fixed !important;
+    bottom: 70px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 1000px;
+    background:
+        radial-gradient(ellipse at top left, rgba(0,255,255,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at top right, rgba(0,150,255,0.08) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(0,30,60,0.25) 0%, rgba(0,15,40,0.45) 50%, rgba(0,8,25,0.65) 100%);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    background-clip: padding-box;
+    box-shadow:
+        0 12px 35px rgba(0,0,0,0.4),
+        0 4px 20px rgba(0,255,255,0.1),
+        inset 0 2px 0 rgba(255,255,255,0.15),
+        inset 0 -2px 0 rgba(0,255,255,0.1);
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(20px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    font-family: 'Roboto Mono', monospace;
+    padding: 10px 40px;
+}
+
+.weather-time-control::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(180deg,
+        rgba(0,255,255,0.4) 0%,
+        rgba(0,150,255,0.3) 25%,
+        rgba(0,100,200,0.2) 50%,
+        rgba(0,150,255,0.3) 75%,
+        rgba(0,255,255,0.4) 100%);
+    border-radius: 22px;
+    z-index: -1;
+    animation: weatherControlBorderFlow 6s linear infinite;
+}
+
+@keyframes weatherControlBorderFlow {
+    0% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.5; }
+}
+
+.weather-time-control.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0) scale(1) !important;
+}
+
+.time-control-header {
+    display: none;
+}
+
+.time-control-content {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 0;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.time-display {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 20px;
+    background: linear-gradient(135deg, rgba(0,30,60,0.2) 0%, rgba(0,15,40,0.3) 100%);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    min-width: 180px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-display span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #00ffff;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px rgba(0,255,255,0.5);
+    white-space: nowrap;
+}
+
+.time-slider-container {
+    flex: 1;
+    margin: 0;
+    position: relative;
+    width: 450px;
+    max-width: 450px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+#timeSlider {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, rgba(0,30,60,0.5) 0%, rgba(0,15,40,0.7) 100%);
+    border-radius: 4px;
+    outline: none;
+    border: 1px solid rgba(0,255,255,0.2);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+#timeSlider::-webkit-slider-track {
+    height: 8px;
+    background: linear-gradient(90deg, rgba(0,30,60,0.5) 0%, rgba(0,15,40,0.7) 100%);
+    border-radius: 4px;
+    border: 1px solid rgba(0,255,255,0.2);
+}
+
+#timeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background:
+        conic-gradient(from 0deg, #00ffff 0%, #0099ff 30%, #0066cc 60%, #00aaff 90%, #00ffff 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow:
+        0 4px 12px rgba(0,255,255,0.4),
+        0 0 20px rgba(0,255,255,0.3),
+        inset 0 2px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#timeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow:
+        0 6px 20px rgba(0,255,255,0.6),
+        0 0 30px rgba(0,255,255,0.5),
+        inset 0 2px 0 rgba(255,255,255,0.4);
+}
+
+#timeSlider::-moz-range-track {
+    height: 6px;
+    background: linear-gradient(90deg, rgba(0,30,60,0.5) 0%, rgba(0,15,40,0.7) 100%);
+    border-radius: 3px;
+    border: 1px solid rgba(0,255,255,0.2);
+}
+
+#timeSlider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle, #00ffff 0%, #0099ff 70%, #006699 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow:
+        0 2px 8px rgba(0,255,255,0.4),
+        0 0 12px rgba(0,255,255,0.3);
+}
+
+.time-labels {
+    display: none;
+}
+
+.playback-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 200px;
+}
+
+.control-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: linear-gradient(135deg, rgba(0,30,60,0.2) 0%, rgba(0,15,40,0.3) 100%);
+    color: #00ffff;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0,255,255,0.2);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 4px 15px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+
+.control-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.control-btn:hover::before {
+    left: 100%;
+}
+
+.control-btn:hover {
+    background: linear-gradient(135deg, rgba(0,255,255,0.15) 0%, rgba(0,150,255,0.12) 100%);
+    border-color: rgba(0,255,255,0.5);
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 25px rgba(0,255,255,0.2),
+        0 4px 15px rgba(0,0,0,0.3),
+        inset 0 2px 0 rgba(255,255,255,0.2);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+
+
+.close-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: linear-gradient(135deg, rgba(0,30,60,0.2) 0%, rgba(0,15,40,0.3) 100%);
+    color: #ff6b6b;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255,68,68,0.2);
+    margin-left: 0;
+    flex-shrink: 0;
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 4px 15px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.close-btn:hover {
+    background: linear-gradient(135deg, rgba(255,68,68,0.15) 0%, rgba(255,68,68,0.1) 100%);
+    border-color: rgba(255,68,68,0.5);
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 25px rgba(255,68,68,0.3),
+        0 4px 15px rgba(0,0,0,0.3),
+        inset 0 2px 0 rgba(255,255,255,0.2);
+}
+
 /* 隐藏所有滚动条 - 通用样式 */
 * {
     scrollbar-width: none; /* Firefox */
@@ -2082,6 +2380,40 @@ textarea::-webkit-scrollbar,
 select[multiple]::-webkit-scrollbar,
 .scrollable::-webkit-scrollbar {
     display: none;
+}
+
+
+
+
+
+
+
+
+
+/* 播放状态动画 */
+@keyframes playingPulse {
+    0%, 100% {
+        box-shadow: 0 6px 20px rgba(0,255,255,0.3), 0 0 25px rgba(0,255,255,0.2);
+    }
+    50% {
+        box-shadow: 0 8px 30px rgba(0,255,255,0.5), 0 0 35px rgba(0,255,255,0.4);
+    }
+}
+
+.control-btn.playing {
+    animation: playingPulse 2s ease-in-out infinite;
+    background: linear-gradient(135deg, rgba(0,255,136,0.2) 0%, rgba(0,200,100,0.15) 100%);
+    border-color: rgba(0,255,136,0.4);
+    color: #00ff88;
+}
+
+/* 时间滑块进度条效果 */
+#timeSlider {
+    background: linear-gradient(90deg,
+        rgba(0,255,255,0.3) 0%,
+        rgba(0,255,255,0.3) var(--progress, 50%),
+        rgba(0,30,60,0.5) var(--progress, 50%),
+        rgba(0,15,40,0.7) 100%);
 }
 
 /* 响应式调整 */
@@ -2301,5 +2633,912 @@ select[multiple]::-webkit-scrollbar,
 
     .panel-tab:last-child {
         border-bottom: none;
+    }
+}
+
+/* 重新布局后的气象按钮样式 */
+.weather-buttons-container {
+    position: fixed;
+    left: 480px; /* 左侧面板宽度 + 间距 */
+    top: 120px; /* 头部高度 + 工具栏高度 + 间距 */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
+}
+
+.weather-btn {
+    width: 60px;
+    height: 60px;
+    border: none;
+    background: linear-gradient(135deg, rgba(0,30,60,0.8) 0%, rgba(0,15,40,0.9) 100%);
+    border: 2px solid rgba(0,255,255,0.3);
+    border-radius: 15px;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.weather-btn:hover::before {
+    left: 100%;
+}
+
+.weather-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    border-color: rgba(0,255,255,0.6);
+    box-shadow:
+        0 12px 35px rgba(0,0,0,0.4),
+        0 0 25px rgba(0,255,255,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.weather-btn.active {
+    background: linear-gradient(135deg, rgba(0,255,255,0.2) 0%, rgba(0,150,255,0.3) 100%);
+    border-color: rgba(0,255,255,0.8);
+    box-shadow:
+        0 0 30px rgba(0,255,255,0.5),
+        0 8px 25px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    transform: scale(1.1);
+}
+
+.weather-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* 设备类型选择器样式 */
+.device-title-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.device-type-selector {
+    margin-left: 15px;
+}
+
+.device-type-dropdown {
+    background: linear-gradient(135deg, rgba(0,30,60,0.8) 0%, rgba(0,15,40,0.9) 100%);
+    border: 1px solid rgba(0,255,255,0.3);
+    border-radius: 8px;
+    color: #00ffff;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    min-width: 100px;
+    outline: none;
+}
+
+.device-type-dropdown:hover {
+    border-color: rgba(0,255,255,0.5);
+    box-shadow: 0 0 15px rgba(0,255,255,0.2);
+}
+
+.device-type-dropdown:focus {
+    border-color: rgba(0,255,255,0.7);
+    box-shadow: 0 0 20px rgba(0,255,255,0.3);
+}
+
+.device-type-dropdown option {
+    background: rgba(0,15,30,0.95);
+    color: #00ffff;
+    padding: 8px;
+}
+
+.device-type-dropdown option:hover {
+    background: rgba(0,30,60,0.9);
+}
+
+/* 设备列表项样式 */
+.device-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, rgba(0,30,60,0.3) 0%, rgba(0,15,40,0.4) 100%);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.device-item:hover {
+    border-color: rgba(0,255,255,0.4);
+    background: linear-gradient(135deg, rgba(0,30,60,0.4) 0%, rgba(0,15,40,0.5) 100%);
+    transform: translateX(3px);
+}
+
+.device-info {
+    flex: 1;
+}
+
+.device-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.device-location {
+    font-size: 12px;
+    color: #99ccff;
+    opacity: 0.8;
+}
+
+.device-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.device-status .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.device-status .status-text {
+    white-space: nowrap;
+}
+
+.device-status.online .status-text {
+    color: #00ff88;
+}
+
+.device-status.warning .status-text {
+    color: #ffaa00;
+}
+
+.device-status.offline .status-text {
+    color: #ff6666;
+}
+
+/* 设备详情弹窗样式 */
+.device-modal-content {
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    /* 确保使用固定定位，不被margin覆盖 */
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+}
+
+/* 为设备弹窗创建固定的背景效果，使用box-shadow避免滚动问题 */
+.device-modal-content {
+    /* 使用多层box-shadow创建发光边框效果，完全固定不会滚动 */
+    box-shadow:
+        /* 基础阴影 */
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 40px rgba(0,255,255,0.2),
+        inset 0 2px 0 rgba(255,255,255,0.15),
+        /* 发光边框效果 - 多层叠加 */
+        0 0 0 2px rgba(0,255,255,0.4),
+        0 0 20px rgba(0,255,255,0.3),
+        0 0 40px rgba(0,150,255,0.2),
+        0 0 60px rgba(0,100,200,0.1) !important;
+    /* 添加呼吸灯动画到整个元素 */
+    animation: deviceModalGlow 3s ease-in-out infinite;
+}
+
+/* 禁用设备弹窗的::before伪元素，避免滚动问题 */
+.device-modal-content::before {
+    display: none !important;
+}
+
+/* 设备弹窗专用呼吸灯动画 */
+@keyframes deviceModalGlow {
+    0%, 100% {
+        box-shadow:
+            0 20px 60px rgba(0,0,0,0.5),
+            0 0 40px rgba(0,255,255,0.2),
+            inset 0 2px 0 rgba(255,255,255,0.15),
+            0 0 0 2px rgba(0,255,255,0.3),
+            0 0 20px rgba(0,255,255,0.2),
+            0 0 40px rgba(0,150,255,0.15),
+            0 0 60px rgba(0,100,200,0.08);
+    }
+    50% {
+        box-shadow:
+            0 20px 60px rgba(0,0,0,0.5),
+            0 0 40px rgba(0,255,255,0.3),
+            inset 0 2px 0 rgba(255,255,255,0.15),
+            0 0 0 2px rgba(0,255,255,0.5),
+            0 0 20px rgba(0,255,255,0.4),
+            0 0 40px rgba(0,150,255,0.3),
+            0 0 60px rgba(0,100,200,0.15);
+    }
+}
+
+/* 任务面板样式 */
+.task-panel {
+    background: linear-gradient(135deg, rgba(0,25,50,0.8) 0%, rgba(0,15,35,0.9) 100%);
+    border: 2px solid rgba(0,255,255,0.3);
+    border-radius: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.3),
+        0 0 40px rgba(0,255,255,0.1),
+        inset 0 2px 0 rgba(255,255,255,0.1);
+}
+
+.task-panel::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(180deg,
+        rgba(0,255,255,0.4) 0%,
+        rgba(0,150,255,0.3) 25%,
+        rgba(0,100,200,0.2) 50%,
+        rgba(0,150,255,0.3) 75%,
+        rgba(0,255,255,0.4) 100%);
+    border-radius: 22px;
+    z-index: -1;
+    animation: panelBorderFlow 6s linear infinite;
+}
+
+.task-stats {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00ffff;
+    font-family: 'Orbitron', monospace;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #99ccff;
+    font-family: 'Roboto Mono', monospace;
+}
+
+/* 任务列表样式 */
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0;
+}
+
+.task-item {
+    background: linear-gradient(135deg, rgba(0,30,60,0.3) 0%, rgba(0,15,40,0.4) 100%);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.task-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,255,0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.task-item:hover::before {
+    left: 100%;
+}
+
+.task-item:hover {
+    border-color: rgba(0,255,255,0.4);
+    background: linear-gradient(135deg, rgba(0,30,60,0.4) 0%, rgba(0,15,40,0.5) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,255,255,0.15);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.task-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 4px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.task-priority {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.task-priority.high {
+    background: rgba(255,68,68,0.2);
+    color: #ff4444;
+    border: 1px solid rgba(255,68,68,0.3);
+}
+
+.task-priority.medium {
+    background: rgba(255,170,0,0.2);
+    color: #ffaa00;
+    border: 1px solid rgba(255,170,0,0.3);
+}
+
+.task-priority.low {
+    background: rgba(0,255,136,0.2);
+    color: #00ff88;
+    border: 1px solid rgba(0,255,136,0.3);
+}
+
+.task-description {
+    font-size: 12px;
+    color: #ccddff;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    opacity: 0.9;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #99ccff;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.task-assignee {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.task-deadline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.task-deadline.urgent {
+    color: #ff4444;
+}
+
+/* 设备详情样式 - 参考预警弹窗设计 */
+.device-details {
+    text-align: center;
+}
+
+.device-status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 16px;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.device-status-badge.online {
+    background: rgba(0,255,136,0.2);
+    color: #00ff88;
+    border: 1px solid rgba(0,255,136,0.3);
+}
+
+.device-status-badge.warning {
+    background: rgba(255,170,0,0.2);
+    color: #ffaa00;
+    border: 1px solid rgba(255,170,0,0.3);
+}
+
+.device-status-badge.offline {
+    background: rgba(255,68,68,0.2);
+    color: #ff4444;
+    border: 1px solid rgba(255,68,68,0.3);
+}
+
+.device-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #00ffff;
+    margin-bottom: 16px;
+    font-family: 'Orbitron', monospace;
+}
+
+.device-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ccddff;
+    margin-bottom: 24px;
+    text-align: left;
+    background: linear-gradient(135deg, rgba(0,30,60,0.1), rgba(0,15,40,0.2));
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,255,255,0.1);
+}
+
+.device-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+.device-content-section {
+    margin-top: 24px;
+    text-align: left;
+}
+
+/* 任务详情样式 - 参考预警弹窗设计 */
+.task-details {
+    text-align: center;
+}
+
+.task-status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 16px;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.task-status-badge.pending {
+    background: rgba(255,170,0,0.2);
+    color: #ffaa00;
+    border: 1px solid rgba(255,170,0,0.3);
+}
+
+.task-status-badge.processing {
+    background: rgba(0,150,255,0.2);
+    color: #0096ff;
+    border: 1px solid rgba(0,150,255,0.3);
+}
+
+.task-status-badge.completed {
+    background: rgba(0,255,136,0.2);
+    color: #00ff88;
+    border: 1px solid rgba(0,255,136,0.3);
+}
+
+.task-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #00ffff;
+    margin-bottom: 16px;
+    font-family: 'Orbitron', monospace;
+}
+
+.task-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ccddff;
+    margin-bottom: 24px;
+    text-align: left;
+    background: linear-gradient(135deg, rgba(0,30,60,0.1), rgba(0,15,40,0.2));
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,255,255,0.1);
+}
+
+.task-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+.task-content-section {
+    margin-top: 24px;
+    text-align: left;
+}
+
+.priority-high {
+    color: #ff4444 !important;
+}
+
+.priority-medium {
+    color: #ffaa00 !important;
+}
+
+.priority-low {
+    color: #00ff88 !important;
+}
+
+.device-basic-info {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(0,30,60,0.2) 0%, rgba(0,15,40,0.3) 100%);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 8px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,255,255,0.1);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row .label {
+    font-weight: 500;
+    color: #99ccff;
+    min-width: 100px;
+}
+
+.info-row .value {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.info-row .value.status-online {
+    color: #00ff88;
+}
+
+.info-row .value.status-warning {
+    color: #ffaa00;
+}
+
+.info-row .value.status-offline {
+    color: #ff6666;
+}
+
+/* 摄像头视频区域样式 */
+.camera-video-section {
+    margin-bottom: 24px;
+}
+
+.video-tabs {
+    display: flex;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(0,255,255,0.2);
+}
+
+.video-tab {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    color: #99ccff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.video-tab.active {
+    color: #00ffff;
+    border-bottom-color: #00ffff;
+}
+
+.video-tab:hover {
+    color: #ffffff;
+}
+
+.video-panel {
+    display: none;
+}
+
+.video-panel.active {
+    display: block;
+}
+
+.video-player {
+    width: 100%;
+    height: 300px;
+    background: #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    border: 1px solid rgba(0,255,255,0.2);
+}
+
+.video-placeholder {
+    text-align: center;
+    color: #99ccff;
+}
+
+.video-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.video-text {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.video-status {
+    font-size: 14px;
+    color: #00ff88;
+}
+
+.video-controls, .history-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.control-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, rgba(0,30,60,0.8) 0%, rgba(0,15,40,0.9) 100%);
+    border: 1px solid rgba(0,255,255,0.3);
+    border-radius: 6px;
+    color: #00ffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
+}
+
+.control-btn:hover {
+    border-color: rgba(0,255,255,0.6);
+    box-shadow: 0 0 15px rgba(0,255,255,0.2);
+}
+
+.date-input, .time-input {
+    padding: 8px 12px;
+    background: linear-gradient(135deg, rgba(0,30,60,0.8) 0%, rgba(0,15,40,0.9) 100%);
+    border: 1px solid rgba(0,255,255,0.3);
+    border-radius: 6px;
+    color: #00ffff;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.date-input:focus, .time-input:focus {
+    outline: none;
+    border-color: rgba(0,255,255,0.6);
+    box-shadow: 0 0 15px rgba(0,255,255,0.2);
+}
+
+/* 气象数据网格样式 */
+.weather-data-section, .rainfall-data-section, .water-data-section,
+.displacement-data-section, .soil-data-section {
+    margin-bottom: 24px;
+}
+
+.weather-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.weather-item {
+    background: linear-gradient(135deg, rgba(0,30,60,0.3) 0%, rgba(0,15,40,0.4) 100%);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.weather-item:hover {
+    border-color: rgba(0,255,255,0.4);
+    transform: translateY(-2px);
+}
+
+.weather-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.weather-label {
+    font-size: 12px;
+    color: #99ccff;
+    margin-bottom: 4px;
+}
+
+.weather-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #00ffff;
+}
+
+/* 数据卡片样式 */
+.current-data {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.data-card {
+    background: linear-gradient(135deg, rgba(0,30,60,0.3) 0%, rgba(0,15,40,0.4) 100%);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.data-card:hover {
+    border-color: rgba(0,255,255,0.4);
+    transform: translateY(-2px);
+}
+
+.data-title {
+    font-size: 12px;
+    color: #99ccff;
+    margin-bottom: 8px;
+}
+
+.data-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #00ffff;
+    margin-bottom: 4px;
+}
+
+.data-status {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.data-status.normal {
+    background: rgba(0,255,136,0.2);
+    color: #00ff88;
+}
+
+.data-status.warning {
+    background: rgba(255,170,0,0.2);
+    color: #ffaa00;
+}
+
+.data-status.danger {
+    background: rgba(255,102,102,0.2);
+    color: #ff6666;
+}
+
+/* 图表区域样式 */
+.chart-section {
+    margin-top: 24px;
+}
+
+.chart-section h4 {
+    color: #00ffff;
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.chart-container {
+    background: linear-gradient(135deg, rgba(0,30,60,0.2) 0%, rgba(0,15,40,0.3) 100%);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .weather-grid, .current-data {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .device-modal-content {
+        max-width: 95vw;
+        /* 移除margin，保持固定定位 */
+        margin: 0 !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-grid, .current-data {
+        grid-template-columns: 1fr;
+    }
+
+    .video-controls, .history-controls {
+        flex-wrap: wrap;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 1400px) {
+    .weather-buttons-container {
+        left: 380px;
+    }
+
+    .weather-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .device-type-dropdown {
+        font-size: 11px;
+        padding: 5px 10px;
+        min-width: 90px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .weather-buttons-container {
+        left: 350px;
+    }
+
+    .weather-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    .device-type-dropdown {
+        font-size: 10px;
+        padding: 4px 8px;
+        min-width: 80px;
     }
 }

@@ -1,0 +1,936 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>系统设置</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 402
+                const height = 874
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login': '登录页面',
+    'password_recovery': '密码找回',
+    'home_dashboard': '首页',
+    'warnings_list': '预警列表',
+    'warning_detail': '预警详情',
+    'map_page': '地图页面',
+    'monitoring_point_detail': '监测点详情',
+    'field_work': '现场作业',
+    'emergency_home': '应急功能',
+    'emergency_contacts': '紧急联系人',
+    'sos_help': '求救功能',
+    'safe_navigation': '安全导航',
+    'profile_main': '个人中心',
+    'profile_info': '用户信息',
+    'profile_settings': '系统设置',
+    'profile_stats': '数据统计'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="zh" data-theme="light"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+    /* daisyUI Theme Variables Customization */
+    :root {
+      /* Corporate theme customization based on UI guidance */
+      --color-primary: rgba(26, 39, 50, 1);        /* Deep Navy #1A2732 */
+      --color-primary-content: rgba(255, 255, 255, 1);
+      --color-secondary: rgba(74, 85, 104, 1);     /* Graphite Gray #4A5568 */
+      --color-secondary-content: rgba(255, 255, 255, 1);
+      --color-accent: rgba(46, 58, 70, 1);         /* Charcoal Gray #2E3A46 */
+      --color-accent-content: rgba(255, 255, 255, 1);
+      --color-neutral: rgba(122, 130, 138, 1);     /* Mid Gray #7A828A */
+      --color-neutral-content: rgba(255, 255, 255, 1);
+      --color-base-100: rgba(255, 255, 255, 1);    /* Off-White card surface */
+      --color-base-200: rgba(245, 245, 245, 1);    /* Light Gray background */
+      --color-base-300: rgba(229, 229, 229, 1);
+      --color-base-content: rgba(46, 58, 70, 1);   /* Headings color */
+      --color-success: rgba(40, 167, 69, 1);       /* Success #28A745 */
+      --color-warning: rgba(255, 193, 7, 1);       /* Warning #FFC107 */
+      --color-error: rgba(220, 53, 69, 1);         /* Error #DC3545 */
+      --color-info: rgba(23, 162, 184, 1);         /* Info #17A2B8 */
+      --radius-box: 0.5rem;                        /* 4-8px corner radius */
+      --radius-btn: 0.5rem;
+      --border: 1px;
+    }
+
+    /* Mobile-specific optimizations */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background-color: var(--color-base-200);
+      overflow-x: hidden;
+    }
+
+    /* Touch target minimum size */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Safe area handling */
+    .safe-area-top {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Subtle card shadows as per UI guidance */
+    .card-subtle-shadow {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Matte texture for corporate theme */
+    .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(245,245,245,0.9));
+      backdrop-filter: blur(10px);
+    }
+
+    /* Typography scale from UI guidance */
+    .text-h1 { font-size: 24px; line-height: 1.3; font-weight: 600; }
+    .text-h2 { font-size: 20px; line-height: 1.3; font-weight: 500; }
+    .text-h3 { font-size: 18px; line-height: 1.4; font-weight: 500; }
+    .text-body { font-size: 16px; line-height: 1.5; font-weight: 400; }
+    .text-caption { font-size: 12px; line-height: 1.4; font-weight: 400; }
+
+    /* Disable text selection for UI elements */
+    .no-select {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Touch feedback */
+    .touch-feedback:active {
+      transform: scale(0.95);
+      transition: transform 150ms ease;
+    }
+  </style>
+    <style>
+/* 设置卡片高亮动画 */
+.setting-card-highlight {
+    border: 2px solid var(--color-primary) !important;
+    transition: border-color 0.3s ease;
+}
+
+/* 磨砂质感增强 */
+.frosted-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.9));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* 切换开关状态动画 */
+.toggle-feedback {
+    transition: all 0.2s ease;
+}
+
+.toggle-feedback:checked {
+    animation: toggleSuccess 0.3s ease;
+}
+
+@keyframes toggleSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* 按钮按压反馈 */
+.btn-press-feedback:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+/* 折叠面板自定义样式 */
+.collapse-custom {
+    border: 1px solid var(--color-base-300);
+    border-radius: var(--radius-box);
+    background: var(--color-base-100);
+}
+
+.collapse-custom .collapse-title {
+    border-bottom: 1px solid var(--color-base-300);
+    font-weight: 500;
+    color: var(--color-base-content);
+}
+
+.collapse-custom .collapse-content {
+    background: rgba(245, 245, 245, 0.5);
+}
+
+/* 设置项间距优化 */
+.setting-item {
+    padding: 16px;
+    border-bottom: 1px solid var(--color-base-300);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+/* 安全区域适配 */
+.action-buttons-safe {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="bg-base-200 min-h-screen">
+    <div data-section-id="common_header" data-section-type="common_header" class="sticky top-0 z-30 safe-area-top">
+    <div class="navbar bg-base-100 shadow-sm h-14 min-h-14 px-4 matte-surface">
+      <!-- Left side - Back button or menu -->
+      <div class="navbar-start">
+        <button class="btn btn-ghost btn-sm touch-target no-select" id="headerBackBtn" onclick="handleBackNavigation()">
+          <span class="iconify text-base-content" data-icon="heroicons:arrow-left" data-width="20"></span>
+        </button>
+      </div>
+      
+      <!-- Center - Title -->
+      <div class="navbar-center">
+        <h1 class="text-h3 font-semibold text-base-content truncate max-w-48" id="headerTitle" data-type="text">首页</h1>
+      </div>
+      
+      <!-- Right side - Action buttons -->
+      <div class="navbar-end">
+        <div class="flex items-center gap-2">
+          <!-- Search button -->
+          <button class="btn btn-ghost btn-sm touch-target no-select" id="headerSearchBtn" onclick="toggleSearch()" style="display: none;">
+            <span class="iconify text-base-content" data-icon="heroicons:magnifying-glass" data-width="20"></span>
+          </button>
+          
+          <!-- Settings/Options button -->
+          <button class="btn btn-ghost btn-sm touch-target no-select" id="headerOptionsBtn" onclick="showHeaderOptions()" style="display: none;">
+            <span class="iconify text-base-content" data-icon="heroicons:ellipsis-vertical" data-width="20"></span>
+          </button>
+          
+          <!-- Connection status indicator -->
+          <div class="flex items-center" id="connectionStatus">
+            <div class="w-2 h-2 rounded-full bg-success" id="connectionDot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    [data-section-id="common_header"] .navbar {
+      border-bottom: var(--border) solid rgba(229, 229, 229, 0.5);
+    }
+    
+    [data-section-id="common_header"] .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+      backdrop-filter: blur(10px);
+    }
+    
+    [data-section-id="common_header"] #connectionDot.offline {
+      background-color: var(--color-error);
+    }
+    
+    [data-section-id="common_header"] #connectionDot.online {
+      background-color: var(--color-success);
+    }
+  </style>
+  
+  <script>
+    (function() {
+      let headerConfig = {
+        showBack: true,
+        showSearch: false,
+        showOptions: false,
+        title: &apos;首页&apos;
+      };
+
+      // Configure header for different pages
+      window.configureHeader = function(config) {
+        headerConfig = { ...headerConfig, ...config };
+        updateHeaderUI();
+      };
+
+      function updateHeaderUI() {
+        const backBtn = document.getElementById(&apos;headerBackBtn&apos;);
+        const searchBtn = document.getElementById(&apos;headerSearchBtn&apos;);
+        const optionsBtn = document.getElementById(&apos;headerOptionsBtn&apos;);
+        const title = document.getElementById(&apos;headerTitle&apos;);
+
+        if (backBtn) {
+          backBtn.style.display = headerConfig.showBack ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (searchBtn) {
+          searchBtn.style.display = headerConfig.showSearch ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (optionsBtn) {
+          optionsBtn.style.display = headerConfig.showOptions ? &apos;flex&apos; : &apos;none&apos;;
+        }
+        
+        if (title) {
+          title.textContent = headerConfig.title;
+        }
+      }
+
+      window.handleBackNavigation = function() {
+        if (headerConfig.onBack) {
+          headerConfig.onBack();
+        } else {
+          // Default back behavior
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            navigateTo(&apos;home_dashboard&apos;);
+          }
+        }
+      };
+
+      window.toggleSearch = function() {
+        if (headerConfig.onSearch) {
+          headerConfig.onSearch();
+        }
+      };
+
+      window.showHeaderOptions = function() {
+        if (headerConfig.onOptions) {
+          headerConfig.onOptions();
+        }
+      };
+
+      // Update connection status
+      function updateConnectionStatus() {
+        const dot = document.getElementById(&apos;connectionDot&apos;);
+        if (dot) {
+          dot.className = `w-2 h-2 rounded-full ${window.isOnline ? &apos;bg-success online&apos; : &apos;bg-error offline&apos;}`;
+        }
+      }
+
+      // Monitor connection status
+      window.addEventListener(&apos;online&apos;, updateConnectionStatus);
+      window.addEventListener(&apos;offline&apos;, updateConnectionStatus);
+      
+      // Initial setup
+      document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+        updateConnectionStatus();
+        updateHeaderUI();
+      });
+      
+    })();
+  </script>
+    
+    <div class="flex-1 overflow-y-auto pb-32">
+        <div data-section-id="SettingsSection" data-section-type="section" style="padding: 16px;">
+    <!-- 推送通知设置组 -->
+    <div class="card frosted-card card-subtle-shadow mb-6" data-type="container">
+        <div class="card-body p-0">
+            <div class="px-4 py-3 border-b border-base-300">
+                <h3 class="text-h3 text-base-content" data-type="text">推送通知</h3>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">系统通知</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="systemNotification">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">预警提醒</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="warningAlert">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">作业提醒</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" data-type="input" id="workReminder">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">消息推送</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="messagePush">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐私设置组 -->
+    <div class="card frosted-card card-subtle-shadow mb-6" data-type="container">
+        <div class="card-body p-0">
+            <div class="px-4 py-3 border-b border-base-300">
+                <h3 class="text-h3 text-base-content" data-type="text">隐私设置</h3>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">位置服务</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="locationService">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">相机权限</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="cameraPermission">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">数据同步</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="dataSync">
+                </div>
+            </div>
+            
+            <!-- 高级隐私选项 - 折叠面板 -->
+            <div class="collapse collapse-arrow collapse-custom">
+                <input type="checkbox" data-type="input" id="advancedPrivacyCollapse">
+                <div class="collapse-title text-body text-base-content flex items-center gap-2">
+                    <span class="iconify text-neutral" data-icon="heroicons:cog-6-tooth" data-width="20" data-type="icon"></span>
+                    <span data-type="text">高级隐私选项</span>
+                </div>
+                <div class="collapse-content">
+                    <div class="setting-item">
+                        <div class="flex items-center justify-between">
+                            <span class="text-body text-base-content" data-type="text">匿名统计</span>
+                            <input type="checkbox" class="toggle toggle-primary toggle-feedback" data-type="input" id="anonymousStats">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="flex items-center justify-between">
+                            <span class="text-body text-base-content" data-type="text">错误报告</span>
+                            <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="errorReporting">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 应用偏好设置组 -->
+    <div class="card frosted-card card-subtle-shadow mb-6" data-type="container">
+        <div class="card-body p-0">
+            <div class="px-4 py-3 border-b border-base-300">
+                <h3 class="text-h3 text-base-content" data-type="text">应用偏好</h3>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">深色模式</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" data-type="input" id="darkMode">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">字体大小</span>
+                    <select class="select select-bordered select-sm w-24" data-type="input" id="fontSize">
+                        <option value="small">小</option>
+                        <option value="medium" selected="">中</option>
+                        <option value="large">大</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">自动刷新</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" checked="" data-type="input" id="autoRefresh">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="flex items-center justify-between">
+                    <span class="text-body text-base-content" data-type="text">离线模式</span>
+                    <input type="checkbox" class="toggle toggle-primary toggle-feedback" data-type="input" id="offlineMode">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 恢复默认设置 -->
+    <div class="flex justify-center mb-8">
+        <button class="btn btn-ghost btn-sm text-neutral touch-target btn-press-feedback" onclick="resetToDefaults()" data-type="button">
+            <span class="iconify" data-icon="heroicons:arrow-path" data-width="16" data-type="icon"></span>
+            <span data-type="text">恢复默认设置</span>
+        </button>
+    </div>
+</div><div data-section-id="ActionButtonsSection" data-section-type="section" style="padding: 16px;" class="action-buttons-safe">
+    <div class="flex gap-4 w-full">
+        <button class="btn btn-outline btn-lg flex-1 touch-target btn-press-feedback" onclick="cancelSettings()" data-type="button">
+            <span data-type="text">取消</span>
+        </button>
+        <button class="btn btn-primary btn-lg flex-1 touch-target btn-press-feedback" onclick="saveSettings()" data-type="button">
+            <span data-type="text">保存</span>
+        </button>
+    </div>
+</div>
+    </div>
+    
+    <div data-section-id="common_footer" data-section-type="common_footer" class="fixed bottom-0 left-0 right-0 z-30 safe-area-bottom">
+    <div class="bg-base-100 border-t border-base-300 px-2 pt-2 matte-surface">
+      <div class="flex justify-around items-center">
+        <!-- Home -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="home_dashboard" onclick="navigateToPage(&apos;home_dashboard&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:home" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">首页</span>
+        </button>
+        
+        <!-- Map -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="map_page" onclick="navigateToPage(&apos;map_page&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:map" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">地图</span>
+        </button>
+        
+        <!-- Warnings -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select relative" data-route="warnings_list" onclick="navigateToPage(&apos;warnings_list&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:exclamation-triangle" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">预警</span>
+          <div class="badge badge-error badge-sm absolute -top-1 -right-1" id="warningsBadge" style="display: none;">
+            <span data-type="text">3</span>
+          </div>
+        </button>
+        
+        <!-- Field Work -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="field_work" onclick="navigateToPage(&apos;field_work&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:wrench-screwdriver" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">作业</span>
+        </button>
+        
+        <!-- Profile -->
+        <button class="nav-item flex flex-col items-center py-2 px-3 touch-target no-select" data-route="profile_main" onclick="navigateToPage(&apos;profile_main&apos;)">
+          <span class="iconify nav-icon" data-icon="heroicons:user" data-width="24"></span>
+          <span class="text-caption nav-label mt-1" data-type="text">我的</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    [data-section-id="common_footer"] .matte-surface {
+      background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+      backdrop-filter: blur(10px);
+    }
+    
+    [data-section-id="common_footer"] .nav-item {
+      transition: color 0.2s ease;
+    }
+    
+    [data-section-id="common_footer"] .nav-item.active .nav-icon {
+      color: var(--color-primary);
+    }
+    
+    [data-section-id="common_footer"] .nav-item.active .nav-label {
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+    
+    [data-section-id="common_footer"] .nav-item:not(.active) .nav-icon {
+      color: var(--color-neutral);
+    }
+    
+    [data-section-id="common_footer"] .nav-item:not(.active) .nav-label {
+      color: var(--color-neutral);
+    }
+    
+    [data-section-id="common_footer"] .nav-item:active {
+      transform: scale(0.95);
+    }
+  </style>
+  
+  <script>
+    (function() {
+      let currentPage = &apos;home_dashboard&apos;;
+
+      window.navigateToPage = function(pageId) {
+        // Update active state
+        setActiveNavItem(pageId);
+        
+        // Navigate to page
+        navigateTo(pageId);
+      };
+
+      function setActiveNavItem(pageId) {
+        currentPage = pageId;
+        
+        // Remove active class from all nav items
+        const navItems = document.querySelectorAll(&apos;[data-section-id="common_footer"] .nav-item&apos;);
+        navItems.forEach(item => {
+          item.classList.remove(&apos;active&apos;);
+        });
+        
+        // Add active class to current nav item
+        const activeItem = document.querySelector(`[data-section-id="common_footer"] .nav-item[data-route="${pageId}"]`);
+        if (activeItem) {
+          activeItem.classList.add(&apos;active&apos;);
+        }
+      }
+
+      // Update badge count for warnings
+      window.updateWarningsBadge = function(count) {
+        const badge = document.getElementById(&apos;warningsBadge&apos;);
+        if (badge) {
+          if (count > 0) {
+            badge.style.display = &apos;flex&apos;;
+            badge.querySelector(&apos;span&apos;).textContent = count > 99 ? &apos;99+&apos; : count.toString();
+          } else {
+            badge.style.display = &apos;none&apos;;
+          }
+        }
+      };
+
+      // Set active page from outside
+      window.setActiveFooterTab = function(pageId) {
+        setActiveNavItem(pageId);
+      };
+
+      // Initialize with current page detection
+      document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+        // Try to detect current page from URL or other means
+        const path = window.location.pathname;
+        const pageName = path.split(&apos;/&apos;).pop().replace(&apos;.html&apos;, &apos;&apos;);
+        
+        if (pageName && pageName !== &apos;index&apos;) {
+          setActiveNavItem(pageName);
+        } else {
+          setActiveNavItem(&apos;home_dashboard&apos;);
+        }
+        
+        // Add touch feedback to nav items
+        const navItems = document.querySelectorAll(&apos;[data-section-id="common_footer"] .nav-item&apos;);
+        navItems.forEach(item => {
+          addTouchFeedback(item);
+        });
+      });
+      
+    })();
+  </script>
+    
+    <script>
+    (function() {
+      // Global navigation function for iframe and standalone usage
+      window.navigateTo = function(targetPageId) {
+        const isInIframe = window.self !== window.top;
+        const targetFileName = `${targetPageId}.html`;
+        
+        if (isInIframe) {
+          window.parent.postMessage({
+            type: &apos;iframeNavigation&apos;,
+            targetPageId: targetPageId
+          }, &apos;*&apos;);
+        } else {
+          window.location.href = targetFileName;
+        }
+      };
+
+      // Global toast notification system
+      window.showToast = function(type, title, message, duration = 3000) {
+        const toast = document.createElement(&apos;div&apos;);
+        toast.className = `alert alert-${type} fixed top-4 right-4 z-50 w-80 opacity-0 transition-opacity duration-300`;
+        toast.innerHTML = `
+          <span class="iconify" data-icon="heroicons:${getToastIcon(type)}" data-width="20"></span>
+          <div>
+            <div class="font-bold">${title}</div>
+            <div class="text-sm">${message}</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">
+            <span class="iconify" data-icon="heroicons:x-mark" data-width="16"></span>
+          </button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => toast.style.opacity = &apos;1&apos;, 100);
+        
+        // Auto remove
+        setTimeout(() => {
+          toast.style.opacity = &apos;0&apos;;
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      };
+
+      function getToastIcon(type) {
+        const icons = {
+          &apos;info&apos;: &apos;information-circle&apos;,
+          &apos;success&apos;: &apos;check-circle&apos;, 
+          &apos;warning&apos;: &apos;exclamation-triangle&apos;,
+          &apos;error&apos;: &apos;x-circle&apos;
+        };
+        return icons[type] || &apos;information-circle&apos;;
+      }
+
+      // Global modal management
+      window.showModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.showModal) {
+          modal.showModal();
+        }
+      };
+
+      window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.close) {
+          modal.close();
+        }
+      };
+
+      // Mobile-specific utilities
+      window.addTouchFeedback = function(element) {
+        element.addEventListener(&apos;touchstart&apos;, () => {
+          element.classList.add(&apos;touch-feedback&apos;);
+        });
+        
+        element.addEventListener(&apos;touchend&apos;, () => {
+          setTimeout(() => {
+            element.classList.remove(&apos;touch-feedback&apos;);
+          }, 150);
+        });
+      };
+
+      // Network status monitoring
+      window.isOnline = navigator.onLine;
+      
+      window.addEventListener(&apos;online&apos;, () => {
+        window.isOnline = true;
+        window.showToast(&apos;success&apos;, &apos;网络恢复&apos;, &apos;连接已恢复，正在同步数据...&apos;);
+        // Trigger data sync if needed
+        if (window.syncOfflineData) {
+          window.syncOfflineData();
+        }
+      });
+
+      window.addEventListener(&apos;offline&apos;, () => {
+        window.isOnline = false;
+        window.showToast(&apos;warning&apos;, &apos;网络断开&apos;, &apos;已切换到离线模式&apos;);
+      });
+      
+    })();
+  </script>
+    <script>
+// 页面初始化
+document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
+    // 配置页面头部
+    if (window.configureHeader) {
+        window.configureHeader({
+            title: &apos;系统设置&apos;,
+            showBack: true,
+            showSearch: false,
+            showOptions: false,
+            onBack: () => navigateTo(&apos;profile_main&apos;)
+        });
+    }
+    
+    // 设置底部导航活跃状态
+    if (window.setActiveFooterTab) {
+        window.setActiveFooterTab(&apos;profile_main&apos;);
+    }
+    
+    // 为所有切换开关添加变更监听
+    const toggles = document.querySelectorAll(&apos;.toggle-feedback&apos;);
+    toggles.forEach(toggle => {
+        toggle.addEventListener(&apos;change&apos;, function() {
+            highlightChangedCard(this);
+        });
+    });
+    
+    // 为选择框添加变更监听
+    const selects = document.querySelectorAll(&apos;select&apos;);
+    selects.forEach(select => {
+        select.addEventListener(&apos;change&apos;, function() {
+            highlightChangedCard(this);
+        });
+    });
+});
+
+// 高亮变更的卡片
+function highlightChangedCard(element) {
+    const card = element.closest(&apos;.card&apos;);
+    if (card) {
+        card.classList.add(&apos;setting-card-highlight&apos;);
+        setTimeout(() => {
+            card.classList.remove(&apos;setting-card-highlight&apos;);
+        }, 1000);
+    }
+}
+
+// 保存设置
+function saveSettings() {
+    // 收集所有设置数据
+    const settings = {
+        notifications: {
+            system: document.getElementById(&apos;systemNotification&apos;).checked,
+            warning: document.getElementById(&apos;warningAlert&apos;).checked,
+            work: document.getElementById(&apos;workReminder&apos;).checked,
+            message: document.getElementById(&apos;messagePush&apos;).checked
+        },
+        privacy: {
+            location: document.getElementById(&apos;locationService&apos;).checked,
+            camera: document.getElementById(&apos;cameraPermission&apos;).checked,
+            dataSync: document.getElementById(&apos;dataSync&apos;).checked,
+            anonymousStats: document.getElementById(&apos;anonymousStats&apos;).checked,
+            errorReporting: document.getElementById(&apos;errorReporting&apos;).checked
+        },
+        preferences: {
+            darkMode: document.getElementById(&apos;darkMode&apos;).checked,
+            fontSize: document.getElementById(&apos;fontSize&apos;).value,
+            autoRefresh: document.getElementById(&apos;autoRefresh&apos;).checked,
+            offlineMode: document.getElementById(&apos;offlineMode&apos;).checked
+        }
+    };
+    
+    // 模拟保存过程
+    console.log(&apos;保存设置:&apos;, settings);
+    
+    // 显示保存成功提示
+    if (window.showToast) {
+        window.showToast(&apos;success&apos;, &apos;保存成功&apos;, &apos;设置已保存&apos;, 2000);
+    }
+    
+    // 延迟跳转以显示toast
+    setTimeout(() => {
+        navigateTo(&apos;profile_main&apos;);
+    }, 500);
+}
+
+// 取消设置
+function cancelSettings() {
+    navigateTo(&apos;profile_main&apos;);
+}
+
+// 恢复默认设置
+function resetToDefaults() {
+    // 推送通知默认设置
+    document.getElementById(&apos;systemNotification&apos;).checked = true;
+    document.getElementById(&apos;warningAlert&apos;).checked = true;
+    document.getElementById(&apos;workReminder&apos;).checked = false;
+    document.getElementById(&apos;messagePush&apos;).checked = true;
+    
+    // 隐私设置默认设置
+    document.getElementById(&apos;locationService&apos;).checked = true;
+    document.getElementById(&apos;cameraPermission&apos;).checked = true;
+    document.getElementById(&apos;dataSync&apos;).checked = true;
+    document.getElementById(&apos;anonymousStats&apos;).checked = false;
+    document.getElementById(&apos;errorReporting&apos;).checked = true;
+    
+    // 应用偏好默认设置
+    document.getElementById(&apos;darkMode&apos;).checked = false;
+    document.getElementById(&apos;fontSize&apos;).value = &apos;medium&apos;;
+    document.getElementById(&apos;autoRefresh&apos;).checked = true;
+    document.getElementById(&apos;offlineMode&apos;).checked = false;
+    
+    // 显示恢复默认提示
+    if (window.showToast) {
+        window.showToast(&apos;info&apos;, &apos;已恢复默认&apos;, &apos;所有设置已恢复到推荐值&apos;, 2000);
+    }
+    
+    // 高亮所有卡片表示变更
+    const cards = document.querySelectorAll(&apos;.card&apos;);
+    cards.forEach(card => {
+        card.classList.add(&apos;setting-card-highlight&apos;);
+        setTimeout(() => {
+            card.classList.remove(&apos;setting-card-highlight&apos;);
+        }, 1000);
+    });
+}
+</script>
+
+<script>
+      Holder.run({
+        domain: "placehold.co"
+      })
+    </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            
