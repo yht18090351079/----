@@ -121,6 +121,84 @@
     transform: scale(1.05);
 }
 
+/* ========== 主导航栏 ========== */
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 24px;
+}
+
+.header-nav .menu-item {
+    padding: 12px 20px;
+    margin: 0 4px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Roboto Mono', monospace;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(0,30,60,0.2) 0%, rgba(0,15,40,0.3) 100%);
+    backdrop-filter: blur(10px);
+    color: #99ccff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-nav .menu-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,255,0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.header-nav .menu-item:hover::before {
+    left: 100%;
+}
+
+.header-nav .menu-item:hover {
+    border-color: rgba(0,255,255,0.4);
+    background: linear-gradient(135deg, rgba(0,30,60,0.3) 0%, rgba(0,15,40,0.4) 100%);
+    color: #00ffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,255,255,0.15);
+}
+
+.header-nav .menu-item.active {
+    border-color: #00ffff;
+    background: linear-gradient(135deg, rgba(0,255,255,0.15) 0%, rgba(0,150,255,0.1) 100%);
+    color: #00ffff;
+    box-shadow:
+        0 0 20px rgba(0,255,255,0.3),
+        inset 0 0 20px rgba(0,255,255,0.1);
+}
+
+.header-nav .menu-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ffff, transparent);
+    border-radius: 1px;
+}
+
+.menu-icon {
+    font-size: 16px;
+    filter: drop-shadow(0 0 8px rgba(0,255,255,0.5));
+}
+
 /* ========== 筛选工具栏 ========== */
 .filter-toolbar {
     display: flex;

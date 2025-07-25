@@ -27,10 +27,13 @@
 ├── pages/                              # 页面目录
 │   ├── monitor/                        # 监控模块
 │   │   ├── geological-disaster-dashboard.html  # 实时监控大屏
+│   │   ├── vr-panorama.html            # VR全景可视化
 │   │   ├── css/
-│   │   │   └── geological-disaster-dashboard.css
+│   │   │   ├── geological-disaster-dashboard.css
+│   │   │   └── vr-panorama.css
 │   │   └── js/
-│   │       └── geological-disaster-dashboard.js
+│   │       ├── geological-disaster-dashboard.js
+│   │       └── vr-panorama.js
 │   ├── warning/                        # 预警模块
 │   │   ├── warning-publish.html        # 预警发布页面
 │   │   ├── warning-monitor.html        # 预警监控页面
@@ -74,7 +77,18 @@
   - 智能预警推送
   - 任务管理面板
 
-### 3. 预警发布系统 (`pages/warning/warning-publish.html`)
+### 3. VR全景可视化 (`pages/monitor/vr-panorama.html`)
+- **功能**: 基于隐患点VR全景影像的沉浸式可视化
+- **特色**:
+  - A-Frame VR框架支持
+  - 多隐患点全景影像切换
+  - 灾害模拟动画叠加（滑坡、泥石流、崩塌、降雨）
+  - 实时监测数据叠加显示
+  - 交互式视角控制和图层管理
+  - 时间轴控制和播放功能
+  - VR模式支持
+
+### 4. 预警发布系统 (`pages/warning/warning-publish.html`)
 - **功能**: 预警信息发布和管理
 - **特色**:
   - 分步骤预警发布流程
@@ -83,7 +97,7 @@
   - 实时预览功能，支持多端预览
   - 表单验证和数据校验
 
-### 4. 预警监控系统 (`pages/warning/warning-monitor.html`)
+### 5. 预警监控系统 (`pages/warning/warning-monitor.html`)
 - **功能**: 预警信息监控和管理
 - **特色**:
   - 预警列表展示和筛选
@@ -92,7 +106,7 @@
   - 处置进展时间轴
   - 预警状态管理
 
-### 5. 数据分析系统 (`pages/data/data-analysis.html`)
+### 6. 数据分析系统 (`pages/data/data-analysis.html`)
 - **功能**: 多维度数据分析和可视化
 - **特色**:
   - 数据筛选和过滤
@@ -101,7 +115,7 @@
   - 数据导出功能
   - 实时数据更新
 
-### 6. 系统设置 (`pages/system/system-settings.html`)
+### 7. 系统设置 (`pages/system/system-settings.html`)
 - **功能**: 系统配置和管理
 - **特色**:
   - 分类设置菜单
@@ -190,10 +204,12 @@ python -m http.server 8000
 ### v1.0.0 (2025-07-24)
 - ✅ 完成系统首页设计和开发
 - ✅ 完成实时监控大屏功能
+- ✅ 完成VR全景可视化系统
 - ✅ 完成预警发布系统
 - ✅ 完成预警监控系统
 - ✅ 完成数据分析系统
 - ✅ 完成系统设置基础功能
+- ✅ 完成全站导航栏统一
 - ✅ 完成响应式设计适配
 - ✅ 完成科技感视觉设计
 

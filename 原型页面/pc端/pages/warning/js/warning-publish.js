@@ -623,3 +623,10 @@ document.addEventListener('keydown', function(event) {
         closeModal();
     }
 });
+
+// ========== 导航功能 ==========
+
+// 显示敬请期待提示
+function showComingSoon(moduleName) {
+    showToast('info', `${moduleName}模块正在开发中，敬请期待！`);
+}

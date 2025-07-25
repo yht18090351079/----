@@ -834,6 +834,13 @@ window.addEventListener('beforeunload', function() {
     });
 });
 
+// ========== 导航功能 ==========
+
+// 显示敬请期待提示
+function showComingSoon(moduleName) {
+    showToast('info', `${moduleName}模块正在开发中，敬请期待！`);
+}
+
 // ========== 页面初始化 ==========
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔄 数据分析页面初始化...');

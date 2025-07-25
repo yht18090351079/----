@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR全景可视化 - 地质灾害预警系统</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+    <!-- A-Frame VR框架 -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- 粒子系统组件 -->
+    <script src="https://cdn.jsdelivr.net/gh/supermedium/superframe@master/components/particle-system/dist/aframe-particle-system-component.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        /* VR场景全屏 */
+        a-scene {
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+        
+        /* 控制面板 */
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            max-width: 250px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #99ccff;
+        }
+        
+        .control-group select,
+        .control-group button {
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 2px;
+            width: 100%;
+        }
+        
+        .control-group button:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+        
+        .simulation-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+        
+        .simulation-buttons button {
+            width: auto;
+        }
+        
+        /* 信息显示 */
+        .info-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            min-width: 200px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .info-label {
+            color: #99ccff;
+        }
+        
+        .info-value {
+            color: #00ffff;
+            font-weight: bold;
+        }
+        
+        /* 底部控制栏 */
+        .bottom-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 10px 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .control-btn {
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            transform: scale(1.05);
+        }
+        
+        .control-btn.active {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: #00ffff;
+        }
+        
+        /* 提示信息 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ffff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            z-index: 2000;
+            font-family: 'Courier New', monospace;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧控制面板 -->
+    <div class="control-panel">
+        <!-- 隐患点选择 -->
+        <div class="control-group">
+            <label>隐患点选择</label>
+            <select id="hazardPointSelect" onchange="switchHazardPoint()">
+                <option value="point1">秀岭村滑坡隐患点 (山区森林)</option>
+                <option value="point2">龙潭沟泥石流隐患点 (河谷沟壑)</option>
+                <option value="point3">石壁山崩塌隐患点 (岩石山体)</option>
+                <option value="point4">绿野平原地陷隐患点 (农田平原)</option>
+            </select>
+        </div>
+
+        <!-- 灾害模拟 -->
+        <div class="control-group">
+            <label>灾害模拟</label>
+            <div class="simulation-buttons">
+                <button onclick="simulateDisaster('landslide')">🏔️ 滑坡</button>
+                <button onclick="simulateDisaster('debris-flow')">🌊 泥石流</button>
+                <button onclick="simulateDisaster('collapse')">⛰️ 崩塌</button>
+                <button onclick="simulateDisaster('rainfall')">🌧️ 降雨</button>
+            </div>
+        </div>
+
+        <!-- 图层控制 -->
+        <div class="control-group">
+            <label>图层显示</label>
+            <button onclick="toggleLayer('monitoring')">📡 监测设备</button>
+            <button onclick="toggleLayer('warning')">⚠️ 预警区域</button>
+            <button onclick="toggleLayer('evacuation')">🚪 疏散路线</button>
+        </div>
+
+        <!-- 全景模式 -->
+        <div class="control-group">
+            <label>全景模式</label>
+            <button onclick="togglePanoramaMode()">🖼️ 切换图片源</button>
+            <button onclick="testAllPanoramas()">🔄 测试全景</button>
+        </div>
+    </div>
+
+    <!-- 右侧信息面板 -->
+    <div class="info-panel">
+        <div class="info-item">
+            <span class="info-label">当前点位:</span>
+            <span class="info-value" id="currentPoint">秀岭村滑坡隐患点</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">风险等级:</span>
+            <span class="info-value" id="riskLevel">橙色预警</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">位移:</span>
+            <span class="info-value" id="displacement">2.3mm</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">降雨:</span>
+            <span class="info-value" id="rainfall">15mm/h</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">倾斜:</span>
+            <span class="info-value" id="tilt">0.5°</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">更新时间:</span>
+            <span class="info-value" id="updateTime">15:30:25</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">环境类型:</span>
+            <span class="info-value" id="environmentType">真实自然环境</span>
+        </div>
+    </div>
+
+    <!-- 底部控制栏 -->
+    <div class="bottom-controls">
+        <button class="control-btn" onclick="resetView()">🎯 重置视角</button>
+        <button class="control-btn" onclick="toggleAutoRotate()">🔄 自动旋转</button>
+        <button class="control-btn" onclick="toggleVRMode()">🥽 VR模式</button>
+        <button class="control-btn" onclick="clearSimulations()">🧹 清除模拟</button>
+        <button class="control-btn" onclick="showEnvironmentInfo()">🌍 环境详情</button>
+        <button class="control-btn" onclick="goBack()">🏠 返回首页</button>
+    </div>
+
+    <!-- VR全景场景 -->
+    <a-scene id="vrScene" embedded background="color: #000000">
+        <!-- 资源定义 -->
+        <a-assets>
+            <!-- 真实自然环境全景图片 -->
+            <!-- 山区森林环境 - 适合滑坡隐患点 -->
+            <img id="panorama1" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous">
+
+            <!-- 河谷沟壑环境 - 适合泥石流隐患点 -->
+            <img id="panorama2" src="https://aframe.io/aframe/examples/boilerplate/panorama/puydesancy.jpg" crossorigin="anonymous">
+
+            <!-- 岩石山体环境 - 适合崩塌隐患点 -->
+            <img id="panorama3" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/city.jpg" crossorigin="anonymous">
+
+            <!-- 平原农田环境 - 适合地陷隐患点 -->
+            <img id="panorama4" src="https://cdn.aframe.io/basic-guide/img/360-degree-photosphere.jpg" crossorigin="anonymous">
+
+            <!-- 备用真实环境图片 -->
+            <img id="panorama5" src="https://cdn.pixabay.com/photo/2017/08/10/02/05/panoramic-2617608_1280.jpg" crossorigin="anonymous">
+            <img id="panorama6" src="https://cdn.pixabay.com/photo/2016/11/29/05/45/forest-1867093_1280.jpg" crossorigin="anonymous">
+
+            <!-- 更多自然环境全景图片 -->
+            <img id="mountain1" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" crossorigin="anonymous">
+            <img id="forest1" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80" crossorigin="anonymous">
+            <img id="valley1" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" crossorigin="anonymous">
+            <img id="field1" src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2089&q=80" crossorigin="anonymous">
+
+            <!-- 本地备用Canvas（如果网络图片失败） -->
+            <canvas id="fallback1" width="2048" height="1024"></canvas>
+            <canvas id="fallback2" width="2048" height="1024"></canvas>
+            <canvas id="fallback3" width="2048" height="1024"></canvas>
+            <canvas id="fallback4" width="2048" height="1024"></canvas>
+        </a-assets>
+
+        <!-- 全景天空盒 -->
+        <a-sky id="panoramaSky" src="#panorama1" rotation="0 0 0"></a-sky>
+
+        <!-- 监测设备 -->
+        <a-entity id="monitoringDevices" visible="true">
+            <!-- 位移传感器 -->
+            <a-box position="-3 2 -5" width="0.5" height="0.5" depth="0.5" 
+                   color="#00ffff" 
+                   animation="property: rotation; to: 0 360 0; loop: true; dur: 4000"
+                   class="clickable"
+                   onclick="showDeviceInfo('displacement')"></a-box>
+            <a-text value="位移传感器" position="-3 3 -5" align="center" color="#00ffff" scale="0.8 0.8 0.8"></a-text>
+            
+            <!-- 雨量计 -->
+            <a-cylinder position="3 1.5 -4" radius="0.3" height="1" 
+                        color="#ffaa00"
+                        animation="property: position; to: 3 2 -4; dir: alternate; loop: true; dur: 2000"
+                        class="clickable"
+                        onclick="showDeviceInfo('rainfall')"></a-cylinder>
+            <a-text value="雨量计" position="3 2.8 -4" align="center" color="#ffaa00" scale="0.8 0.8 0.8"></a-text>
+        </a-entity>
+
+        <!-- 预警区域 -->
+        <a-entity id="warningAreas" visible="true">
+            <a-ring position="0 0.1 -8" radius-inner="6" radius-outer="8" 
+                    color="#ff4444" opacity="0.4"
+                    animation="property: material.opacity; to: 0.8; dir: alternate; loop: true; dur: 2000"></a-ring>
+            <a-text value="⚠️ 高风险区域 ⚠️" position="0 2 -8" align="center" 
+                    color="#ff4444" scale="1.2 1.2 1.2"
+                    animation="property: position; to: 0 3 -8; dir: alternate; loop: true; dur: 2500"></a-text>
+        </a-entity>
+
+        <!-- 疏散路线 -->
+        <a-entity id="evacuationRoutes" visible="false">
+            <a-cone position="2 1 -3" radius-bottom="0.3" radius-top="0" height="1" 
+                    rotation="0 0 -90" color="#00ff00"
+                    animation="property: position; to: 8 1 -3; loop: true; dur: 3000"></a-cone>
+            <a-cone position="-2 1 -3" radius-bottom="0.3" radius-top="0" height="1" 
+                    rotation="0 0 90" color="#00ff00"
+                    animation="property: position; to: -8 1 -3; loop: true; dur: 3000"></a-cone>
+        </a-entity>
+
+        <!-- 粒子效果系统 -->
+        <a-entity id="particleEffects">
+            <!-- 降雨效果 -->
+            <a-entity id="rainEffect" visible="false"
+                      particle-system="preset: rain; particleCount: 1000; maxAge: 3; 
+                                     positionSpread: 20 0 20; velocityValue: 0 -8 0; 
+                                     color: #87CEEB; size: 0.5; opacity: 0.8"
+                      position="0 10 0"></a-entity>
+            
+            <!-- 滑坡土石效果 -->
+            <a-entity id="landslideEffect" visible="false"
+                      particle-system="preset: dust; particleCount: 500; maxAge: 5; 
+                                     positionSpread: 3 1 3; velocityValue: -1 -3 -2; 
+                                     color: #8B4513; size: 1; opacity: 0.7"
+                      position="-5 5 -8"></a-entity>
+            
+            <!-- 泥石流效果 -->
+            <a-entity id="debrisFlowEffect" visible="false"
+                      particle-system="preset: dust; particleCount: 800; maxAge: 4; 
+                                     positionSpread: 2 1 2; velocityValue: 0 -4 -3; 
+                                     color: #654321; size: 1.5; opacity: 0.8"
+                      position="0 6 -10"></a-entity>
+            
+            <!-- 崩塌效果 -->
+            <a-entity id="collapseEffect" visible="false"
+                      particle-system="preset: dust; particleCount: 300; maxAge: 3; 
+                                     positionSpread: 1 1 1; velocityValue: 0 -5 0; 
+                                     color: #696969; size: 2; opacity: 0.9"
+                      position="5 8 -6"></a-entity>
+        </a-entity>
+
+        <!-- 相机 -->
+        <a-camera id="vrCamera" 
+                  look-controls="enabled: true" 
+                  wasd-controls="enabled: false"
+                  position="0 1.6 0">
+            <a-cursor color="#00ffff" 
+                      animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                      raycaster="objects: .clickable"></a-cursor>
+        </a-camera>
+
+        <!-- 光照 -->
+        <a-light type="ambient" color="#404040" intensity="0.6"></a-light>
+        <a-light type="directional" position="5 10 5" color="#ffffff" intensity="0.8"></a-light>
+    </a-scene>
+
+    <script src="js/vr-panorama-new.js"></script>
+</body>
+</html>

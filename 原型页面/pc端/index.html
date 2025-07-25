@@ -108,6 +108,30 @@
             transform: scaleX(1);
         }
 
+        /* 敬请期待卡片样式 */
+        .page-card.coming-soon {
+            opacity: 0.7;
+            position: relative;
+        }
+
+        .page-card.coming-soon:hover {
+            opacity: 0.8;
+        }
+
+        .coming-soon-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Roboto Mono', monospace;
+            box-shadow: 0 2px 8px rgba(255,170,0,0.3);
+        }
+
         .page-icon {
             font-size: 48px;
             margin-bottom: var(--spacing-lg);
@@ -278,19 +302,19 @@
                 </ul>
             </a>
 
-            <!-- 3D可视化 -->
-            <a href="pages/monitor/3d-view.html" class="page-card">
-                <span class="page-icon">🌐</span>
-                <h2 class="page-title">3D可视化场景</h2>
+            <!-- VR全景可视化 -->
+            <a href="pages/monitor/vr-panorama-new.html" class="page-card">
+                <span class="page-icon">🥽</span>
+                <h2 class="page-title">VR全景可视化</h2>
                 <p class="page-description">
-                    沉浸式3D地质环境展示，支持历史灾情回放、预警情景模拟和多角度场景观察。
+                    基于隐患点VR全景影像的沉浸式可视化，支持灾害模拟动画叠加和多维度交互体验。
                 </p>
                 <ul class="page-features">
-                    <li>3D地形模型</li>
-                    <li>灾情动画回放</li>
-                    <li>多视角观察</li>
-                    <li>时间轴控制</li>
-                    <li>交互式操作</li>
+                    <li>VR全景影像</li>
+                    <li>灾害模拟动画</li>
+                    <li>实时数据叠加</li>
+                    <li>交互式控制</li>
+                    <li>多隐患点切换</li>
                 </ul>
             </a>
 
@@ -327,7 +351,7 @@
             </a>
 
             <!-- 应急指挥 -->
-            <a href="pages/emergency/command.html" class="page-card">
+            <a href="#" onclick="showComingSoon('应急指挥')" class="page-card coming-soon">
                 <span class="page-icon">🚨</span>
                 <h2 class="page-title">应急指挥</h2>
                 <p class="page-description">
@@ -340,6 +364,7 @@
                     <li>救援进度跟踪</li>
                     <li>指挥决策支持</li>
                 </ul>
+                <div class="coming-soon-badge">敬请期待</div>
             </a>
 
             <!-- 系统设置 -->
@@ -409,7 +434,64 @@
 
         // 显示系统信息
         function showSystemInfo() {
-            alert('系统信息功能开发中...');
+            alert('地质灾害预警系统 v1.0.0\n\n基于PC端原型设计大纲开发\n支持Netlify部署和proxy-server代理\n\n技术栈：HTML5 + CSS3 + JavaScript + ECharts');
+        }
+
+        // 显示敬请期待提示
+        function showComingSoon(moduleName) {
+            showToast('info', `${moduleName}模块正在开发中，敬请期待！`);
+        }
+
+        // 显示提示消息
+        function showToast(type, message) {
+            // 创建toast元素
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+
+            // 添加样式
+            Object.assign(toast.style, {
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                color: '#fff',
+                fontWeight: '500',
+                zIndex: '3000',
+                opacity: '0',
+                transform: 'translateX(100%)',
+                transition: 'all 0.3s ease'
+            });
+
+            // 设置背景色
+            const colors = {
+                success: '#00ff88',
+                error: '#ff4444',
+                warning: '#ffaa00',
+                info: '#00ffff'
+            };
+            toast.style.background = colors[type] || colors.info;
+
+            // 添加到页面
+            document.body.appendChild(toast);
+
+            // 显示动画
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+
+            // 自动隐藏
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
         }
     </script>
 </body>

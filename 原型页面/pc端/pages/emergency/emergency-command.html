@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急指挥中心 - 地质灾害预警系统</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚨</text></svg>">
+    <link rel="stylesheet" href="../../common/css/reset.css">
+    <link rel="stylesheet" href="../../common/css/variables.css">
+    <link rel="stylesheet" href="css/emergency-command.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🚨</span>
+                    <span class="logo-text">应急指挥中心</span>
+                </div>
+                <div class="emergency-status">
+                    <span class="status-indicator active"></span>
+                    <span class="status-text">紧急状态</span>
+                    <span class="incident-id">事件编号: #2025-0125-001</span>
+                </div>
+            </div>
+
+            <nav class="header-nav">
+                <a href="../monitor/geological-disaster-dashboard.html" class="menu-item">
+                    <span class="menu-icon">◉</span>
+                    实时监控
+                </a>
+                <a href="../monitor/vr-panorama-new.html" class="menu-item">
+                    <span class="menu-icon">🥽</span>
+                    VR全景
+                </a>
+                <a href="../warning/warning-monitor.html" class="menu-item">
+                    <span class="menu-icon">△</span>
+                    预警管理
+                </a>
+                <a href="#" class="menu-item active">
+                    <span class="menu-icon">🚨</span>
+                    应急指挥
+                </a>
+                <a href="../system/system-settings.html" class="menu-item">
+                    <span class="menu-icon">◈</span>
+                    系统设置
+                </a>
+            </nav>
+
+            <div class="header-right">
+                <div class="emergency-time">
+                    <span class="time-label">事发时间:</span>
+                    <span class="time-value" id="incidentTime">2025-01-25 14:32:15</span>
+                </div>
+                <div class="elapsed-time">
+                    <span class="elapsed-label">已持续:</span>
+                    <span class="elapsed-value" id="elapsedTime">02:15:30</span>
+                </div>
+                <button class="emergency-btn" onclick="toggleEmergencyMode()">🔴 紧急模式</button>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <!-- 左侧无人机影像区域 -->
+            <div class="drone-section">
+                <div class="section-header">
+                    <h3>🚁 无人机实时影像</h3>
+                    <div class="drone-controls">
+                        <select id="droneSelect" onchange="switchDrone()">
+                            <option value="drone1">无人机-001 (主视角)</option>
+                            <option value="drone2">无人机-002 (侧视角)</option>
+                            <option value="drone3">无人机-003 (高空俯视)</option>
+                        </select>
+                        <button class="control-btn" onclick="toggleDroneRecord()">📹 录制</button>
+                        <button class="control-btn" onclick="captureDroneImage()">📷 截图</button>
+                    </div>
+                </div>
+                
+                <div class="drone-video-container">
+                    <div class="video-wrapper">
+                        <div class="drone-video" id="droneVideo">
+                            <!-- 模拟无人机影像 -->
+                            <div class="video-placeholder">
+                                <div class="video-overlay">
+                                    <div class="drone-info">
+                                        <div class="info-item">
+                                            <span class="label">高度:</span>
+                                            <span class="value" id="droneAltitude">150m</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">速度:</span>
+                                            <span class="value" id="droneSpeed">12km/h</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">电量:</span>
+                                            <span class="value" id="droneBattery">78%</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">信号:</span>
+                                            <span class="value" id="droneSignal">强</span>
+                                        </div>
+                                    </div>
+                                    <div class="crosshair"></div>
+                                </div>
+                                <canvas id="droneCanvas" width="800" height="450"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="drone-controls-panel">
+                        <div class="control-group">
+                            <label>云台控制</label>
+                            <div class="gimbal-controls">
+                                <button onclick="controlGimbal('up')">⬆️</button>
+                                <button onclick="controlGimbal('left')">⬅️</button>
+                                <button onclick="controlGimbal('center')">🎯</button>
+                                <button onclick="controlGimbal('right')">➡️</button>
+                                <button onclick="controlGimbal('down')">⬇️</button>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label>飞行控制</label>
+                            <div class="flight-controls">
+                                <button onclick="controlFlight('takeoff')">🛫 起飞</button>
+                                <button onclick="controlFlight('land')">🛬 降落</button>
+                                <button onclick="controlFlight('return')">🏠 返航</button>
+                                <button onclick="controlFlight('hover')">⏸️ 悬停</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧指挥调度区域 -->
+            <div class="command-section">
+                <!-- 救援人员实时位置 -->
+                <div class="personnel-panel">
+                    <div class="panel-header">
+                        <h3>👥 救援人员实时位置</h3>
+                        <div class="personnel-stats">
+                            <span class="stat-item">在线: <span id="onlineCount">15</span>人</span>
+                            <span class="stat-item">任务中: <span id="taskingCount">12</span>人</span>
+                        </div>
+                    </div>
+                    
+                    <div class="personnel-map">
+                        <div class="map-container" id="personnelMap">
+                            <!-- 救援人员位置地图 -->
+                            <canvas id="mapCanvas" width="400" height="300"></canvas>
+                            <div class="map-overlay">
+                                <div class="legend">
+                                    <div class="legend-item">
+                                        <span class="marker fire"></span>
+                                        <span>消防救援</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="marker medical"></span>
+                                        <span>医疗救护</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="marker police"></span>
+                                        <span>公安民警</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="marker expert"></span>
+                                        <span>地质专家</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 通讯面板 -->
+                <div class="communication-panel">
+                    <div class="panel-header">
+                        <h3>📞 应急通讯</h3>
+                        <div class="comm-controls">
+                            <button class="control-btn active" onclick="toggleAllCall()">📢 全员通话</button>
+                            <button class="control-btn" onclick="toggleGroupCall()">👥 分组通话</button>
+                        </div>
+                    </div>
+                    
+                    <div class="personnel-list" id="personnelList">
+                        <!-- 救援人员列表 -->
+                    </div>
+                    
+                    <div class="communication-controls">
+                        <div class="audio-controls">
+                            <button class="audio-btn" onclick="toggleMicrophone()">🎤</button>
+                            <button class="audio-btn" onclick="toggleSpeaker()">🔊</button>
+                            <div class="volume-control">
+                                <input type="range" id="volumeSlider" min="0" max="100" value="80">
+                            </div>
+                        </div>
+                        <div class="message-input">
+                            <input type="text" id="messageInput" placeholder="输入指令或消息...">
+                            <button onclick="sendMessage()">发送</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务规划面板 -->
+                <div class="task-panel">
+                    <div class="panel-header">
+                        <h3>📋 救援任务规划</h3>
+                        <button class="control-btn" onclick="createNewTask()">➕ 新建任务</button>
+                    </div>
+                    
+                    <div class="task-list" id="taskList">
+                        <!-- 任务列表 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部状态栏 -->
+        <div class="status-bar">
+            <div class="status-left">
+                <div class="incident-info">
+                    <span class="incident-type">秀岭村滑坡灾害</span>
+                    <span class="incident-level">Ⅱ级响应</span>
+                    <span class="affected-people">受困人员: 8人</span>
+                </div>
+            </div>
+            
+            <div class="status-center">
+                <div class="weather-info">
+                    <span class="weather-item">🌧️ 中雨</span>
+                    <span class="weather-item">🌡️ 18°C</span>
+                    <span class="weather-item">💨 东南风 3级</span>
+                    <span class="weather-item">👁️ 能见度 2km</span>
+                </div>
+            </div>
+            
+            <div class="status-right">
+                <div class="system-status">
+                    <span class="status-item">通讯: <span class="status-good">正常</span></span>
+                    <span class="status-item">网络: <span class="status-good">稳定</span></span>
+                    <span class="status-item">电力: <span class="status-warning">备用</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务创建模态框 -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>创建救援任务</h3>
+                <span class="close" onclick="closeTaskModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label>任务名称:</label>
+                        <input type="text" id="taskName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>任务类型:</label>
+                        <select id="taskType">
+                            <option value="search">搜索救援</option>
+                            <option value="medical">医疗救护</option>
+                            <option value="evacuation">人员疏散</option>
+                            <option value="assessment">现场评估</option>
+                            <option value="logistics">后勤保障</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>优先级:</label>
+                        <select id="taskPriority">
+                            <option value="urgent">紧急</option>
+                            <option value="high">高</option>
+                            <option value="medium">中</option>
+                            <option value="low">低</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>分配人员:</label>
+                        <select id="assignedPersonnel" multiple>
+                            <!-- 动态加载人员列表 -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>任务描述:</label>
+                        <textarea id="taskDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>预计完成时间:</label>
+                        <input type="datetime-local" id="taskDeadline">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTaskModal()">取消</button>
+                <button class="btn btn-primary" onclick="createTask()">创建任务</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/emergency-command.js"></script>
+</body>
+</html>

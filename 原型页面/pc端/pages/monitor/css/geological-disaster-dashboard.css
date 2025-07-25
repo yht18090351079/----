@@ -167,6 +167,10 @@ body::before {
     background: linear-gradient(135deg, rgba(0,30,60,0.2) 0%, rgba(0,15,40,0.3) 100%);
     backdrop-filter: blur(10px);
     color: #99ccff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .header-nav .menu-item::before {
