@@ -281,7 +281,7 @@
         <div class="system-logo">
             <div class="logo-icon">🌍</div>
             <h1 class="system-title">地质灾害预警系统</h1>
-            <p class="system-subtitle">Geological Disaster Warning System - PC端</p>
+            <p class="system-subtitle">专业级地质灾害预警与应急指挥平台 - PC端</p>
         </div>
 
         <!-- 页面导航 -->
@@ -291,14 +291,14 @@
                 <span class="page-icon">📊</span>
                 <h2 class="page-title">实时监控大屏</h2>
                 <p class="page-description">
-                    专业的大屏监控界面，实时展示全域地质灾害态势，支持多维度数据可视化和智能预警。
+                    专业监控大屏，集成Cesium 3D地球引擎，实时展示地质灾害态势，支持多维度数据可视化。
                 </p>
                 <ul class="page-features">
-                    <li>全域态势地图展示</li>
+                    <li>Cesium 3D地球引擎</li>
+                    <li>真实地形渲染</li>
                     <li>实时数据监控</li>
                     <li>智能预警推送</li>
-                    <li>设备状态监控</li>
-                    <li>科技感大屏界面</li>
+                    <li>专业大屏界面</li>
                 </ul>
             </a>
 
@@ -307,13 +307,13 @@
                 <span class="page-icon">🥽</span>
                 <h2 class="page-title">VR全景可视化</h2>
                 <p class="page-description">
-                    基于隐患点VR全景影像的沉浸式可视化，支持灾害模拟动画叠加和多维度交互体验。
+                    真实自然环境360°全景VR体验，支持灾害模拟动画叠加和沉浸式交互操作。
                 </p>
                 <ul class="page-features">
-                    <li>VR全景影像</li>
+                    <li>真实自然环境全景</li>
+                    <li>360°VR沉浸体验</li>
                     <li>灾害模拟动画</li>
                     <li>实时数据叠加</li>
-                    <li>交互式控制</li>
                     <li>多隐患点切换</li>
                 </ul>
             </a>
@@ -355,16 +355,15 @@
                 <span class="page-icon">🚨</span>
                 <h2 class="page-title">应急指挥</h2>
                 <p class="page-description">
-                    应急指挥调度平台，支持资源调配、人员协调和实时通信指挥。
+                    专业应急指挥中心，集成Cesium 3D地球、救援人员实时定位、通讯指挥和任务规划。
                 </p>
                 <ul class="page-features">
-                    <li>应急资源调配</li>
-                    <li>人员调度管理</li>
-                    <li>实时通信协调</li>
-                    <li>救援进度跟踪</li>
-                    <li>指挥决策支持</li>
+                    <li>Cesium 3D现场地球</li>
+                    <li>救援人员实时定位</li>
+                    <li>应急通讯指挥</li>
+                    <li>任务规划管理</li>
+                    <li>灾害现场可视化</li>
                 </ul>
-                <div class="coming-soon-badge">敬请期待</div>
             </a>
 
             <!-- 系统设置 -->
@@ -405,7 +404,7 @@
 
         <!-- 底部信息 -->
         <div class="footer-info">
-            <p>© 2024 地质灾害预警系统 | 版本 v1.0.0 | 最后更新: <span id="lastUpdate"></span></p>
+            <p>© 2024 地质灾害预警系统 | 版本 v2.0.0 | 最后更新: <span id="lastUpdate"></span></p>
             <p>支持浏览器: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+</p>
         </div>
     </div>
@@ -429,12 +428,12 @@
             updateTime();
             setInterval(updateTime, 1000);
 
-            console.log('🌍 地质灾害预警系统PC端已加载');
+            console.log('🌍 地质灾害预警系统 v2.0.0 PC端已加载 - 全功能版本');
         });
 
         // 显示系统信息
         function showSystemInfo() {
-            alert('地质灾害预警系统 v1.0.0\n\n基于PC端原型设计大纲开发\n支持Netlify部署和proxy-server代理\n\n技术栈：HTML5 + CSS3 + JavaScript + ECharts');
+            alert('地质灾害预警系统 v2.0.0\n\n✅ 完整功能模块：\n• Cesium 3D地球监控大屏\n• 真实环境VR全景可视化\n• 智能预警管理系统\n• 数据分析平台\n• 专业应急指挥中心\n• 系统配置管理\n\n🚀 技术栈：HTML5 + CSS3 + JavaScript + Cesium + A-Frame');
         }
 
         // 显示敬请期待提示
