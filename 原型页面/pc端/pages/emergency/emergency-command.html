@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="../../common/css/variables.css">
     <link rel="stylesheet" href="css/emergency-command.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Roboto+Mono:wght@300;400;500&family=Roboto:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- 引入CesiumJS CDN -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.131/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 </head>
 <body>
     <div class="page-container">
@@ -28,7 +32,7 @@
 
             <nav class="header-nav">
                 <a href="../monitor/geological-disaster-dashboard.html" class="menu-item">
-                    <span class="menu-icon">◉</span>
+                    <span class="menu-icon">📊</span>
                     实时监控
                 </a>
                 <a href="../monitor/vr-panorama-new.html" class="menu-item">
@@ -36,15 +40,19 @@
                     VR全景
                 </a>
                 <a href="../warning/warning-monitor.html" class="menu-item">
-                    <span class="menu-icon">△</span>
+                    <span class="menu-icon">⚠️</span>
                     预警管理
+                </a>
+                <a href="../data/data-analysis.html" class="menu-item">
+                    <span class="menu-icon">📈</span>
+                    数据分析
                 </a>
                 <a href="#" class="menu-item active">
                     <span class="menu-icon">🚨</span>
                     应急指挥
                 </a>
                 <a href="../system/system-settings.html" class="menu-item">
-                    <span class="menu-icon">◈</span>
+                    <span class="menu-icon">⚙️</span>
                     系统设置
                 </a>
             </nav>
@@ -67,12 +75,12 @@
             <!-- 左侧无人机影像区域 -->
             <div class="drone-section">
                 <div class="section-header">
-                    <h3>🚁 无人机实时影像</h3>
+                    <h3>🌍 现场3D地球</h3>
                     <div class="drone-controls">
                         <select id="droneSelect" onchange="switchDrone()">
-                            <option value="drone1">无人机-001 (主视角)</option>
-                            <option value="drone2">无人机-002 (侧视角)</option>
-                            <option value="drone3">无人机-003 (高空俯视)</option>
+                            <option value="drone1">主视角 (灾害现场)</option>
+                            <option value="drone2">侧视角 (周边环境)</option>
+                            <option value="drone3">高空俯视 (全局视图)</option>
                         </select>
                         <button class="control-btn" onclick="toggleDroneRecord()">📹 录制</button>
                         <button class="control-btn" onclick="captureDroneImage()">📷 截图</button>
@@ -82,53 +90,38 @@
                 <div class="drone-video-container">
                     <div class="video-wrapper">
                         <div class="drone-video" id="droneVideo">
-                            <!-- 模拟无人机影像 -->
-                            <div class="video-placeholder">
+                            <!-- Cesium 3D地球容器 -->
+                            <div id="cesiumContainer" class="cesium-container">
                                 <div class="video-overlay">
                                     <div class="drone-info">
                                         <div class="info-item">
+                                            <span class="label">视角:</span>
+                                            <span class="value" id="viewAngle">俯视45°</span>
+                                        </div>
+                                        <div class="info-item">
                                             <span class="label">高度:</span>
-                                            <span class="value" id="droneAltitude">150m</span>
+                                            <span class="value" id="cameraHeight">2000m</span>
                                         </div>
                                         <div class="info-item">
-                                            <span class="label">速度:</span>
-                                            <span class="value" id="droneSpeed">12km/h</span>
+                                            <span class="label">坐标:</span>
+                                            <span class="value" id="coordinates">30.27°N, 120.16°E</span>
                                         </div>
                                         <div class="info-item">
-                                            <span class="label">电量:</span>
-                                            <span class="value" id="droneBattery">78%</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="label">信号:</span>
-                                            <span class="value" id="droneSignal">强</span>
+                                            <span class="label">状态:</span>
+                                            <span class="value" id="systemStatus">在线</span>
                                         </div>
                                     </div>
                                     <div class="crosshair"></div>
                                 </div>
-                                <canvas id="droneCanvas" width="800" height="450"></canvas>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="drone-controls-panel">
-                        <div class="control-group">
-                            <label>云台控制</label>
-                            <div class="gimbal-controls">
-                                <button onclick="controlGimbal('up')">⬆️</button>
-                                <button onclick="controlGimbal('left')">⬅️</button>
-                                <button onclick="controlGimbal('center')">🎯</button>
-                                <button onclick="controlGimbal('right')">➡️</button>
-                                <button onclick="controlGimbal('down')">⬇️</button>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label>飞行控制</label>
-                            <div class="flight-controls">
-                                <button onclick="controlFlight('takeoff')">🛫 起飞</button>
-                                <button onclick="controlFlight('land')">🛬 降落</button>
-                                <button onclick="controlFlight('return')">🏠 返航</button>
-                                <button onclick="controlFlight('hover')">⏸️ 悬停</button>
-                            </div>
+                    <div class="map-quick-controls">
+                        <div class="quick-actions">
+                            <button onclick="resetToDisasterSite()" class="action-btn">🎯 回到现场</button>
+                            <button onclick="toggleTerrain()" class="action-btn">🏔️ 切换地形</button>
+                            <button onclick="toggleImagery()" class="action-btn">🗺️ 切换影像</button>
                         </div>
                     </div>
                 </div>
